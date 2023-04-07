@@ -5,8 +5,8 @@ OBJS = $(SRCS:.c=.o)
 TARGET = $(SRCS:.c=.exe)
 
 all: $(TARGET)
-	./tester/quicksort/windows-amd64.exe ./quicksort.exe
-	./tester/matrix-multiplication/windows-amd64.exe ./matrix-multiplication.exe
+#	./tester/quicksort/windows-amd64.exe ./quicksort.exe
+	./tester/matrix-multiplication/windows-amd64.exe ./a.exe
 
 $(TARGET) : $(OBJS)
 	$(CC) $< -o $@

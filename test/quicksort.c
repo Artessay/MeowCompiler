@@ -1,7 +1,3 @@
-void *malloc(unsigned long long _Size);
-
-void free(void *_Memory);
-
 int scanf(const char *__format, ...);
 
 int printf(const char *__format, ...);
@@ -34,9 +30,8 @@ void quickSort(int left, int right, int arr[]) {
 
 int main() {
     int n;
-    
     scanf("%d", &n);
-    // array = (int *)malloc(n*sizeof(int));
+
     for (int i = 0; i < n; ++i) {
         scanf("%d", array + i);
     }
@@ -47,6 +42,5 @@ int main() {
         printf("%d\n", array[i]);
     }
 
-    // free(array);
     return 0;
 }
