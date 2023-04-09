@@ -1,19 +1,17 @@
 CC = gcc
 
-SRCS = quicksort.c matrix-multiplication.c
+SRCS = quicksort.c matrix-multiplication.c auto-advisor.c
 OBJS = $(SRCS:.c=.o)
 TARGET = $(SRCS:.c=.exe)
 
 all: $(TARGET)
-#	./tester/quicksort/windows-amd64.exe ./quicksort.exe
-	./tester/matrix-multiplication/windows-amd64.exe ./a.exe
+	./tester/quicksort/windows-amd64.exe ./quicksort.exe
+	./tester/matrix-multiplication/windows-amd64.exe ./matrix-multiplication.exe
+	./tester/auto-advisor/windows-amd64.exe ./auto-advisor.exe
 
-$(TARGET) : $(OBJS)
+%.exe : %.c
 	$(CC) $< -o $@
 
-$(OBJS) : $(SRCS)
-	$(CC) -c $< -o $@
-
 clean:
-	del *.o
-	del *.exe
+	-rm -f *.o
+	-rm -f *.exe

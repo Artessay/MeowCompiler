@@ -1,4 +1,3 @@
-#define NULL ((void *)0)
 #define MaxN 25
 
 int scanf(const char *__format, ...);
