@@ -1,8 +1,10 @@
+%option noyywrap
 %{
 #include <stdio.h>
 #include <iostream>
 #include <string>
 #include "y.tab.h"
+#include "ast.h"
 char charConvert(char ch) {
     switch(ch) {
         case 'a': return '\a';
@@ -16,6 +18,11 @@ char charConvert(char ch) {
             return ch;
     }
 }
+extern "C"{
+    //int yywrap(void);
+	int yylex(void);
+}
+
 %}
 
 %%
@@ -62,8 +69,8 @@ char charConvert(char ch) {
 
 "("                         {return LPAREN;}
 ")"                         {return RPAREN;}
-"["                         {return LBRACK;}
-"]"                         {return RBRACK;}
+"["                         {/*cout << "[\n";*/ return LBRACK;}
+"]"                         {/*cout << "]\n";*/ return RBRACK;}
 "{"                         {return LBRACE;}
 "}"                         {return RBRACE;}
 
@@ -93,27 +100,35 @@ char charConvert(char ch) {
 "void"                      {return TYPE_VOID;}
 "string"                    {return TYPE_STRING;}
 
-"printf"                    {return PRINT;}
-"scanf"                     {return SCAN;}
 
-[a-zA-Z\_][a-zA-Z0-9\_]*    {yylval.sVal = string(yytext); return ID;}              //±äÁ¿Ãû¼°º¯ÊýÃû
-"-"?[0-9]+                  {yylval.iVal = atoi(yytext); return INT;}               //ÕûÊýÖµ
-"-"?[0-9]+\.[0-9]+          {yylval.dVal = atof(yytext); return DOUBLE;}            //¸¡µãÊýÖµ
-"\'"[^\\']"\'"              {yylval.cVal = yytext[1]; return CHAR;}                 //µ¥¸ö·Ç×ªÒå×Ö·ûÖµ
-"\'"\\."\'"                 {yylval.cVal = charConvert(yytext[2]); return CHAR;}    //µ¥¸ö×ªÒå×Ö·ûÖµ
-"\""(\\.|[^"\\])*"\""	    {                                                       //×Ö·û´®Öµ
-							yylval.sVal = new string();
+[a-zA-Z\_][a-zA-Z0-9\_]*    {/*yylval.sVal = string(yytext);*/ yylval.node = new Node(string(yytext), Declarator_); /*cout << "ID\n";*/ return ID;}              //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+"-"?[0-9]+                  {/*yylval.iVal = atoi(yytext);*/ yylval.node = new Node(atoi(yytext), INT_); return INT;}               //ï¿½ï¿½ï¿½ï¿½Öµ
+"-"?[0-9]+\.[0-9]+          {/*yylval.dVal = atof(yytext);*/ yylval.node = new Node(atof(yytext), DOUBLE_); return DOUBLE;}            //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+"\'"[^\\']"\'"              {/*yylval.cVal = yytext[1];*/ yylval.node = new Node(yytext[1],CHAR_); return CHAR;}                 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ö·ï¿½Öµ
+"\'"\\."\'"                 {/*yylval.cVal = charConvert(yytext[2]);*/ yylval.node = new Node(charConvert(yytext[2]),CHAR_); return CHAR;}    //ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½Ö·ï¿½Öµ
+"\""(\\.|[^"\\])*"\""	    {                                                       //ï¿½Ö·ï¿½ï¿½ï¿½Öµ
+							/*yylval.sVal = new string();
                             for (int i = 1; i < yyleng - 1; i++)
-                                if (yytext[i] == '\\'){                             //×ªÒå×Ö·û
+                                if (yytext[i] == '\\'){                             //×ªï¿½ï¿½ï¿½Ö·ï¿½
                                     i++;
                                     yylval.sVal->push_back(charConvert(yytext[i]));
-                                }else{                                              //·Ç×ªÒå×Ö·û
+                                }else{                                              //ï¿½ï¿½×ªï¿½ï¿½ï¿½Ö·ï¿½
                                     yylval.sVal->push_back(yytext[i]);
+                                }*/
+                            string sVal;
+                            for (int i = 1; i < yyleng - 1; i++)
+                                if (yytext[i] == '\\'){                             //×ªï¿½ï¿½ï¿½Ö·ï¿½
+                                    i++;
+                                    sVal.append(1, charConvert(yytext[i]));
+                                }else{                                              //ï¿½ï¿½×ªï¿½ï¿½ï¿½Ö·ï¿½
+                                    sVal.append(1, yytext[i]);
                                 }
+                            yylval.node = new Node(sVal,STRING_);
+                            //cout << "STRING\n";
                             return STRING;
 }
 
-"//"[^\n]*                  {}                                                      //ÐÐÄÚ×¢ÊÍ
-[ \t\n\r]                   {}                                                      //¿Õ¸ñÓë»»ÐÐ
+"//"[^\n]*                  {}                                                      //ï¿½ï¿½ï¿½ï¿½×¢ï¿½ï¿½
+[ \t\n\r]                   {}                                                      //ï¿½Õ¸ï¿½ï¿½ë»»ï¿½ï¿½
 .                           {}
 %%

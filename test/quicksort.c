@@ -1,8 +1,9 @@
-int scanf(const char *__format, ...);
-
-int printf(const char *__format, ...);
-
 #define MaxN 10000
+
+int scanf(char *__format, ...);
+
+int printf(char *__format, ...);
+
 int array[MaxN];
 
 void quickSort(int left, int right, int arr[]) {
@@ -10,10 +11,12 @@ void quickSort(int left, int right, int arr[]) {
     int pivot = arr[(left + right) / 2];
 
     while (i <= j) {
-        while (arr[i] < pivot)
+        while (arr[i] < pivot){
             ++i;
-        while (arr[j] > pivot)
+        }            
+        while (arr[j] > pivot){
             --j;
+        }  
         if (i <= j) {
             int temp = arr[i];
             arr[i] = arr[j];
@@ -22,10 +25,12 @@ void quickSort(int left, int right, int arr[]) {
         }
     }
 
-    if (left < j)
+    if (left < j){
         quickSort(left, j, arr);
-    if (i < right)
+    }
+    if (i < right){
         quickSort(i, right, arr);
+    }
 }
 
 int main() {
@@ -34,9 +39,9 @@ int main() {
 
     for (int i = 0; i < n; ++i) {
         scanf("%d", array + i);
-    }
-    
-    quickSort(0, n-1, array);
+    }   
+
+    quickSort(0, n - 1 , array);
 
     for (int i = 0; i < n; ++i) {
         printf("%d\n", array[i]);

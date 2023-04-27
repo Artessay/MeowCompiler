@@ -1,0 +1,69 @@
+不支持：
+const声明
+*(p++)
+
+//语法树构造规则:
+//1. 同一个list中的全部变量逐个放在父节点的children中
+//2. 形如 A->B 的生成式节点置空
+//3. 其余创建节点
+//4. Program 设为 root
+
+
+//1. root节点为Program_
+
+//PART1 -- Start, Define, Declaration
+
+Program -> Define_List Declaration_List | Declaration_List
+Define_List -> Define_List Define | Define
+Define -> '#' 'define' Declarator STRING
+Declaration_List -> Declaration_List Declaration | Declaration
+Declaration -> Var_Declaration | Fun_Declaration | Struct_Definition
+Basic_Type_Specifier -> TYPE_VOID | TYPE_INT | TYPE_CHAR | TYPE_CHAR
+Declarator -> '*' ID | ID
+
+//PART2 -- variable definition
+
+Struct_Definition -> STRUCT Declarator '{' Struct_Member '}' ';'
+Struct_Member -> Struct_Member Var_Declaration | Var_Declaration    
+Struct_Type_Specifier -> STRUCT Declarator 
+Type_Specifier -> Basic_Type_Specifier | Struct_Type_Specifier
+Var_Declaration -> Type_Specifier Var_List ';'
+Var_List ->  Var_List ',' Var_Init | Var_Init 
+Var_Init -> Var_Def | Var_Def '=' Initial_Exp
+Var_Def ->  Var_Def '[' INTNUM ']' | Declarator 
+Initial_Exp -> Expression | '{' Exp_List '}'
+Exp_List -> Exp_List ',' Expression | Expression 
+
+//PART3 -- function definition
+
+Params -> Params ',' Param | Param 
+Param -> Type_Specifier Declarator
+Fun_Prototype -> Type_Specifier Declarator '(' Params ')' | Type_Specifier Declarator '(' ')' 
+Fun_Declaration -> Fun_Prototype ';' | Fun_Prototype Block 
+
+//PART4 -- block definition
+
+Block -> '{' Block_Items '}'
+Block_Items ->  Block_Items Block_Item | Block_Item 
+Block_Item -> Var_Declaration | Statement
+
+//PART5 -- statement definition
+
+Statement -> Selection_Stmt | Iteration_Stmt | Return_Stmt | Exp_Stmt 
+Exp_Stmt -> Expression ';' | ';' 
+Selection_Stmt -> IF '(' Expression ')' Block | IF '(' Expression ')' Block ELSE Block
+Iteration_Stmt -> FOR '(' Expression ';' Expression ';' Expression ')' Block | FOR '(' Var_Declaration Expression ';' Expression ')' Block | WHILE （Expression） Block
+Return_Stmt -> RETURN ';' | RETURN Expression ';'
+
+//PART6 -- expression definition
+
+Expression -> Assign_Exp | Call_Exp | Binary_Exp | Uni_Exp | '(' Expression ')' | INTNUM | FLOATNUM | CHARNUM | STRING
+Assign_Exp -> Var_Exp '=' Expression
+Uni_Exp-> LUOP Exp | Exp RUOP
+LUOP -> '!' | '&' | '++' | '--'
+RUOP -> '++' | '--'
+Var_Exp -> Var_Exp '[' Expression ']' |  Var_Exp '.' Declarator | Declarator 
+Call_Exp -> Declarator '(' Arg_List ')' | Declarator '(' ')' 
+Arg_List ->  Arg_List ',' Expression | Expression
+Binary_Exp -> Expression BOP Expression
+BOP -> '+' | '-' | '*' | '\' | "<=" | "<" | ">" | ">=" | "==" | "!="
