@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <iostream>
 #include <string>
-#include "y.tab.h"
+
+#include "parser.hpp"
 #include "ast.h"
+
 char charConvert(char ch) {
     switch(ch) {
         case 'a': return '\a';
@@ -18,6 +20,7 @@ char charConvert(char ch) {
             return ch;
     }
 }
+
 extern "C"{
     //int yywrap(void);
 	int yylex(void);
@@ -25,7 +28,14 @@ extern "C"{
 
 %}
 
+/* 空白符和注释 */
+WhiteSpace    [ \t\n\r]*
+LineComment   "//"[^\n]*
+
 %%
+
+{LineComment}               { /* 忽略, 不做任何操作 */ }                                                      //����ע��
+{WhiteSpace}                { /* 忽略, 不做任何操作 */ }                                                      //�ո��뻻��
 
 "+"							{return ADD;}
 "-"							{return SUB;}
@@ -128,7 +138,5 @@ extern "C"{
                             return STRING;
 }
 
-"//"[^\n]*                  {}                                                      //����ע��
-[ \t\n\r]                   {}                                                      //�ո��뻻��
 .                           {}
 %%
