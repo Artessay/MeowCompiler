@@ -6,6 +6,7 @@
 #include <memory>
 using namespace std;
 
+// 定义节点类型
 enum node_type{
 	Program_,
 	Define_,
@@ -73,6 +74,7 @@ enum node_type{
 	Expression_AND_
 };
 
+// 定义值类型
 struct value{
 	int ivalue;
 	double dvalue;
@@ -154,8 +156,6 @@ public:
 			putchar(' ');
 		}
 		
-		// if (depth > 8)
-		// 	return;
 		cout << pprintNodeType(Type) << endl;
 
 		for (auto p : children) {
