@@ -38,7 +38,7 @@ extern "C"{
 //keyword
 %token <node>       IF ELSE WHILE FOR BREAK CONTINUE RETURN DEFINE CONST TYPE_INT TYPE_DOUBLE TYPE_CHAR TYPE_VOID TYPE_STRING
 //function
-%token <node>       PRINT SCAN
+// %token <node>       PRINT SCAN
 //ID
 %token <node>       ID
 //value
@@ -232,5 +232,5 @@ int yywrap(){
 // int main()
 // {
 //     yyparse();
-//    root->print(0);
+//     root->print(0);
 // }

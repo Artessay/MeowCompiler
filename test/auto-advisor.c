@@ -129,7 +129,7 @@ int main() {
 
         // grade
         char gradeChar = course[index];
-        int grade = 0;
+        int grade;
         // switch (gradeChar) {
         //     case 'A':
         //         grade = 4;
