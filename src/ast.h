@@ -19,9 +19,11 @@ enum node_type{
 	INT_,
 	Params_,
 	Param_,
+	Var_Declaration_,
 	Func_Prototype_,
 	Func_Declaration_,
 	Block_Items_,
+	Block_,
 	Selection_Stmt_,
 	For_Stmt_,
 	While_Stmt_,
@@ -154,8 +156,6 @@ public:
 			putchar(' ');
 		}
 		
-		if (depth > 8)
-			return;
 		cout << pprintNodeType(Type) << endl;
 
 		for (auto p : children) {
@@ -199,11 +199,17 @@ private:
 			case Param_:
 				return ("param");
 				break;
+			case Var_Declaration_:
+				return ("variable declaration");
+				break;
 			case Func_Prototype_:
 				return ("function prototype");
 				break;
 			case Func_Declaration_:
 				return ("function declaration");
+				break;
+			case Block_:
+				return ("block");
 				break;
 			case Block_Items_:
 				return ("block items");
@@ -230,127 +236,127 @@ private:
 				return ("STRING_");
 				break;
 			case ADDAS_:
-				return ("+");
+				return ("+=");
 				break;
 			case SUBAS_:
-				return ("-");
+				return ("-=");
 				break;
 			case MULAS_:
-				return ("*");
+				return ("*=");
 				break;
 			case DIVAS_:
-				return ("/");
+				return ("/=");
 				break;
 			case MODAS_:
-				return ("%");
+				return ("%=");
 				break;
 			case SHLAS_:
-				return ("<<");
+				return ("<<=");
 				break;
 			case SHRAS_:
-				return (">>");
+				return (">>=");
 				break;
 			case BANDAS_:
-				return ("&");
+				return ("&=");
 				break;
 			case BORAS_:
-				return ("|");
+				return ("|=");
 				break;
 			case BXORAS_:
-				return ("^");
+				return ("^=");
 				break;
 			case LUOP_:
-				return ("");
+				return ("left unary op");
 				break;
 			case RUOP_:
-				return ("");
+				return ("right unary op");
 				break;
 			case NOT_:
-				return ("");
+				return ("!");
 				break;
 			case DADD_:
-				return ("");
+				return ("++");
 				break;
 			case DSUB_:
-				return ("");
+				return ("--");
 				break;
 			case Array_Exp_:
-				return ("");
+				return ("array exp");
 				break;
 			case Var_Exp_:
-				return ("");
+				return ("var exp");
 				break;
 			case Call_Exp_:
-				return ("");
+				return ("call exp");
 				break;
 			case Arg_:
-				return ("");
+				return ("arg");
 				break;
 			case ADD_:
-				return ("");
+				return ("+");
 				break;
 			case SUB_:
-				return ("");
+				return ("-");
 				break;
 			case MUL_:
-				return ("");
+				return ("*");
 				break;
 			case DIV_:
-				return ("");
+				return ("/");
 				break;
 			case LE_:
-				return ("");
+				return ("<=");
 				break;
 			case LT_:
-				return ("");
+				return ("<");
 				break;
 			case GT_:
-				return ("");
+				return (">");
 				break;
 			case GE_:
-				return ("");
+				return (">=");
 				break;
 			case EQ_:
-				return ("");
+				return ("==");
 				break;
 			case NEQ_:
-				return ("");
+				return ("!=");
 				break;
 			case ASSIGN_:
-				return ("");
+				return ("=");
 				break;
 			case BREAK_:
-				return ("");
+				return ("break");
 				break;
 			case MOD_:
-				return ("");
+				return ("%");
 				break;
 			case If_Stmt_:
-				return ("");
+				return ("if");
 				break;
 			case IfElse_Stmt_:
-				return ("");
+				return ("if else");
 				break;
 			case IfElseif_Stmt_:
-				return ("");
+				return ("if elseif");
 				break;
 			case ElseIf_:
-				return ("");
+				return ("elseif");
 				break;
 			case IfElseifElse_Stmt_:
-				return ("");
+				return ("if elseif else");
 				break;
 			case TYPE_CHANGE_:
-				return ("");
+				return ("type change");
 				break;
 			case CONTINUE_:
-				return ("");
+				return ("continue");
 				break;
 			case Expression_OR_:
-				return ("");
+				return ("or");
 				break;
 			case Expression_AND_:
-				return ("");
+				return ("and");
 				break;
 		}
 	}
