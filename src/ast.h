@@ -147,6 +147,213 @@ public:
 	{
 		isconst = 1;
 	}
+
+	void print(int depth)
+	{
+		for (int i = 0; i < depth; ++i) {
+			putchar(' ');
+		}
+		
+		if (depth > 8)
+			return;
+		cout << pprintNodeType(Type) << endl;
+
+		for (auto p : children) {
+			p->print(depth+1);
+		}
+	}
+
+private:
+	string pprintNodeType(enum node_type type_) {
+		switch(type_) {
+			case Program_:
+				return ("Program");
+				break;
+			case Define_:
+				return ("Define");
+				break;
+			case TYPE_VOID_:
+				return ("void");
+				break;
+			case TYPE_INT_:
+				return ("int");
+				break;
+			case TYPE_CHAR_:
+				return ("char");
+				break;
+			case TYPE_STRING_:
+				return ("string");
+				break;
+			case TYPE_DOUBLE_:
+				return ("double");
+				break;
+			case Declarator_:
+				return ("Declarator");
+				break;
+			case INT_:
+				return ("INT_");
+				break;
+			case Params_:
+				return ("params");
+				break;
+			case Param_:
+				return ("param");
+				break;
+			case Func_Prototype_:
+				return ("function prototype");
+				break;
+			case Func_Declaration_:
+				return ("function declaration");
+				break;
+			case Block_Items_:
+				return ("block items");
+				break;
+			case Selection_Stmt_:
+				return ("selection");
+				break;
+			case For_Stmt_:
+				return ("for");
+				break;
+			case While_Stmt_:
+				return ("while");
+				break;
+			case Return_Stmt_:
+				return ("return");
+				break;
+			case DOUBLE_:
+				return ("DOUBLE_");
+				break;
+			case CHAR_:
+				return ("CHAR_");
+				break;
+			case STRING_:
+				return ("STRING_");
+				break;
+			case ADDAS_:
+				return ("+");
+				break;
+			case SUBAS_:
+				return ("-");
+				break;
+			case MULAS_:
+				return ("*");
+				break;
+			case DIVAS_:
+				return ("/");
+				break;
+			case MODAS_:
+				return ("%");
+				break;
+			case SHLAS_:
+				return ("<<");
+				break;
+			case SHRAS_:
+				return (">>");
+				break;
+			case BANDAS_:
+				return ("&");
+				break;
+			case BORAS_:
+				return ("|");
+				break;
+			case BXORAS_:
+				return ("^");
+				break;
+			case LUOP_:
+				return ("");
+				break;
+			case RUOP_:
+				return ("");
+				break;
+			case NOT_:
+				return ("");
+				break;
+			case DADD_:
+				return ("");
+				break;
+			case DSUB_:
+				return ("");
+				break;
+			case Array_Exp_:
+				return ("");
+				break;
+			case Var_Exp_:
+				return ("");
+				break;
+			case Call_Exp_:
+				return ("");
+				break;
+			case Arg_:
+				return ("");
+				break;
+			case ADD_:
+				return ("");
+				break;
+			case SUB_:
+				return ("");
+				break;
+			case MUL_:
+				return ("");
+				break;
+			case DIV_:
+				return ("");
+				break;
+			case LE_:
+				return ("");
+				break;
+			case LT_:
+				return ("");
+				break;
+			case GT_:
+				return ("");
+				break;
+			case GE_:
+				return ("");
+				break;
+			case EQ_:
+				return ("");
+				break;
+			case NEQ_:
+				return ("");
+				break;
+			case ASSIGN_:
+				return ("");
+				break;
+			case BREAK_:
+				return ("");
+				break;
+			case MOD_:
+				return ("");
+				break;
+			case If_Stmt_:
+				return ("");
+				break;
+			case IfElse_Stmt_:
+				return ("");
+				break;
+			case IfElseif_Stmt_:
+				return ("");
+				break;
+			case ElseIf_:
+				return ("");
+				break;
+			case IfElseifElse_Stmt_:
+				return ("");
+				break;
+			case TYPE_CHANGE_:
+				return ("");
+				break;
+			case CONTINUE_:
+				return ("");
+				break;
+			case Expression_OR_:
+				return ("");
+				break;
+			case Expression_AND_:
+				return ("");
+				break;
+		}
+	}
 };
 
 

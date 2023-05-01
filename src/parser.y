@@ -228,7 +228,7 @@ Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_
 int yywrap(){
     return 1;
 }
-int main()
-{
-    yyparse();
-}
+// int main()
+// {
+//     yyparse();
+// }
