@@ -80,13 +80,13 @@ Program : Define_List Declaration_List { $$ = root; $$->children.push_back($1); 
         | Declaration_List { $$ = root; $$->children.push_back($1); cout << "1-2" << endl; }
         ;
 Define_List : Define_List Define { $1->children.push_back($2); $$ = $1; cout << "2-1" << endl; }
-            | Define { $$->children.push_back($1); cout << "2-2" << endl; }
+            | Define { $$ = $1; cout << "2-2" << endl; }
             ;
 Define : POUND DEFINE Declarator STRING { $$ = new Node(Define_); $$->children.push_back($3); $$->children.push_back($4); cout << "3-1" << endl; }
        | POUND DEFINE Declarator INT { $$ = new Node(Define_); $$->children.push_back($3); $$->children.push_back($4); cout << "3-2" << endl; }
        ;
 Declaration_List : Declaration_List Declaration { $1->children.push_back($2); $$ = $1; cout << "4-1" << endl; }
-                 | Declaration { $$->children.push_back($1); cout << "4-2" << endl; }
+                 | Declaration { $$ = $1; cout << "4-2" << endl; }
                  ;
 Declaration : Var_Declaration { $$ = $1; cout << "5-1" << endl; }
             | Fun_Declaration { $$ = $1; cout << "5-2" << endl; }
@@ -105,10 +105,10 @@ Declarator : MUL ID { $$ = $2; $$->setPointer(); cout << "7-1" << endl; }
 
 Type_Specifier : Basic_Type_Specifier { $$ = $1; cout << "8-1" << endl; }
                ;
-Var_Declaration : Type_Specifier Var_List SEMICOLON { $$->children.push_back($1); $$->children.push_back($2); cout << "9-1" << endl; }
+Var_Declaration : Type_Specifier Var_List SEMICOLON { $$ = new Node(Var_Declaration_); $$->children.push_back($1); $$->children.push_back($2); cout << "9-1" << endl; }
                 ;
 Var_List : Var_List COMMA Var_Init { $1->children.push_back($3); $$ = $1; cout << "10-1" << endl; }
-         | Var_Init { $$->children.push_back($1); cout << "10-2" << endl; }
+         | Var_Init { $$ = $1; cout << "10-2" << endl; }
          ;
 Var_Init : Var_Def { $$ = $1; cout << "11-1" << endl; }
          | Var_Def ASSIGN Expression { $$ = $1; $$->children.push_back($3); cout << "11-2" << endl; }
@@ -132,10 +132,10 @@ Fun_Declaration : Fun_Prototype SEMICOLON { $$ = $1; cout << "16-1" << endl; }
                 | Fun_Prototype Block { $$ = new Node(Func_Declaration_); $$->children.push_back($1); $$->children.push_back($2); cout << "16-2" << endl; }
                 ;
 
-Block : LBRACE Block_Items RBRACE { $$ = $2; cout << "17-1" << endl; }
+Block : LBRACE Block_Items RBRACE { $$ = new Node(Block_); $$->children.push_back($2); cout << "17-1" << endl; }
       ;
-Block_Items : Block_Items Block_Item { $1->children.push_back($2); $$=$1; cout << "18-1" << endl; }
-            | Block_Item { $$=new Node(Block_Items_); $$->children.push_back($1); cout << "18-2" << endl; }
+Block_Items : Block_Items Block_Item { $1->children.push_back($2); $$ = $1; cout << "18-1" << endl; }
+            | Block_Item { $$ = $1; cout << "18-2" << endl; }
             ;
 Block_Item : Var_Declaration { $$ = $1; cout << "19-1" << endl; }
            | Statement { $$ = $1; cout << "19-2" << endl; }
@@ -211,16 +211,16 @@ Arg_List : Arg_List COMMA Expression { $1->children.push_back($3); $$=$1; cout <
          | Expression { $$=new Node(Arg_); $$->children.push_back($1); cout << "31-2" << endl; }
          ;
 Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-1" << endl; }
-           | Expression SUB Expression { $3 = new Node(SUB_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-2" << endl; }
-           | Expression MUL Expression { $3 = new Node(MUL_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-3" << endl; }
-           | Expression DIV Expression { $3 = new Node(DIV_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-           | Expression MOD Expression { $3 = new Node(MOD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-           | Expression LE Expression { $3 = new Node(LE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-5" << endl; }
-           | Expression LT Expression { $3 = new Node(LT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-6" << endl; }
-           | Expression GT Expression { $3 = new Node(GT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-7" << endl; }
-           | Expression GE Expression { $3 = new Node(GE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-8" << endl; }
-           | Expression EQ Expression { $3 = new Node(EQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-9" << endl; }
-           | Expression NEQ Expression { $3 = new Node(NEQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-10" << endl; }
+           | Expression SUB Expression { $2 = new Node(SUB_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-2" << endl; }
+           | Expression MUL Expression { $2 = new Node(MUL_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-3" << endl; }
+           | Expression DIV Expression { $2 = new Node(DIV_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
+           | Expression MOD Expression { $2 = new Node(MOD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
+           | Expression LE Expression { $2 = new Node(LE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-5" << endl; }
+           | Expression LT Expression { $2 = new Node(LT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-6" << endl; }
+           | Expression GT Expression { $2 = new Node(GT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-7" << endl; }
+           | Expression GE Expression { $2 = new Node(GE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-8" << endl; }
+           | Expression EQ Expression { $2 = new Node(EQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-9" << endl; }
+           | Expression NEQ Expression { $2 = new Node(NEQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-10" << endl; }
            ;
 
 %%
@@ -228,7 +228,9 @@ Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_
 int yywrap(){
     return 1;
 }
+
 // int main()
 // {
 //     yyparse();
+//    root->print(0);
 // }
