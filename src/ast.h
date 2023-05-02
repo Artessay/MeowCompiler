@@ -358,6 +358,8 @@ private:
 			case Expression_AND_:
 				return ("and");
 				break;
+			default:
+				return "[Error] Unrecognized Type";
 		}
 	}
 };
