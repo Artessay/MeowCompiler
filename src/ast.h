@@ -154,6 +154,7 @@ public:
 	{
 		for (int i = 0; i < depth; ++i) {
 			putchar(' ');
+			putchar(' ');
 		}
 		
 		cout << pprintNodeType(Type) << endl;

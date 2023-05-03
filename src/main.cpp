@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ast.h"
+#include "Walker.hpp"
 
 using namespace std;
 
@@ -19,11 +20,14 @@ int main(int argc, const char *argv[]) {
     yyparse();
     assert(root != nullptr);
     
-    cout << "[parse] success" << endl;
+    // @debug
+    // cout << "[parse] success" << endl;
+    // root->print(0);
+    // cout << "[print] success" << endl;
 
-    root->print(0);
-    
-    cout << "[print] success" << endl;
+    Walker *walker = new Walker(root);
+    walker->walkTop();
+    delete walker;
     
     return 0;
 }
