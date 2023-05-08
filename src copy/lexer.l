@@ -1,8 +1,8 @@
 %option noyywrap
 %{
 #include <stdio.h>
-// #include <iostream>
-// #include <string>
+#include <iostream>
+#include <string>
 
 #include "parser.hpp"
 #include "ast.h"

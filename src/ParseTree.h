@@ -1,5 +1,5 @@
-#ifndef _ABSTRACT_SYNTAX_H_
-#define _ABSTRACT_SYNTAX_H_
+#ifndef _PARSE_TREE_H_
+#define _PARSE_TREE_H_
 
 #include "symbol.h"
 
@@ -28,7 +28,9 @@ typedef struct A_fundec_ *A_fundec;
 
 typedef struct A_fundecList_ *A_fundecList;
 
-typedef struct A_top_clause_ *A_top_clause;
+typedef struct A_topClause_ *A_topClause;
+
+typedef struct A_topClauseList_ *A_topClauseList;
 
 struct A_var_ {
     enum {
@@ -109,7 +111,7 @@ struct A_fundec_ {
     A_stmt body;
 };
 
-struct A_top_clause_ {
+struct A_topClause_ {
     enum {
         Preprocess, FunctionDef, GlobalVarDef
     } kind;
@@ -125,6 +127,6 @@ struct A_top_clause_ {
     } u;
 };
 
-extern A_top_clause parsetree_root;
+extern A_topClauseList parsetree_root;
 
 #endif

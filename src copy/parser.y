@@ -1,14 +1,16 @@
 %{
 #include <string.h>
 #include <stdio.h>
+#include <iostream>
+#include <vector>
 #include "ast.h"
 //extern int yylex();
 Node* root = new Node(Program_);
 void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
-// extern "C"{
+extern "C"{
     //void yyerror(const char *s);
-    extern int yylex(void);
-// }
+	extern int yylex(void);
+}
         
 %}
 
