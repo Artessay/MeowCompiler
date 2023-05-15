@@ -73,9 +73,8 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 // Declaration List
 /* %type <decList> Declaration_List  */
 // Declaration
-%type <dec> Declaration 
-
-Basic_Type_Specifier
+%type <declaration> Declaration 
+/* 
 //variable definition
 %type Type_Specifier Var_Declaration Var_List Var_Init Var_Def
 //function definition
@@ -85,7 +84,7 @@ Basic_Type_Specifier
 //statement definition
 %type Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt ELSEIF_List
 //expression definition
-%type Expression Uni_Exp LUOP RUOP Var_Exp Call_Exp Arg_List Binary_Exp Expression_List
+%type Expression Uni_Exp LUOP RUOP Var_Exp Call_Exp Arg_List Binary_Exp Expression_List */
 
 //priority
 %right  ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
@@ -115,7 +114,17 @@ Top_Clause_List
 Top_Clause 
         : Declaration { $$ = A_Declaration($1); }
         ;
-Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
+Declaration 
+        : Var_Declaration { $$ = $1; cout << "5-1" << endl; }
+        | Fun_Declaration { $$ = $1; cout << "5-2" << endl; }
+        ;
+Var_Declaration
+        : {}
+        ;
+Fun_Declaration
+        : {}
+        ;
+/* Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
             | Define { printf("TODO --- Define_List : Define\n"); }
             ;
 Define : POUND DEFINE Declarator STRING { printf("TODO --- Define : POUND DEFINE Declarator STRING\n"); }
@@ -123,11 +132,8 @@ Define : POUND DEFINE Declarator STRING { printf("TODO --- Define : POUND DEFINE
        ;
 Declaration_List : Declaration_List Declaration { $1->children.push_back($2); $$ = $1; cout << "4-1" << endl; }
                  | Declaration { $$ = $1; cout << "4-2" << endl; }
-                 ;
-Declaration : Var_Declaration { $$ = $1; cout << "5-1" << endl; }
-            | Fun_Declaration { $$ = $1; cout << "5-2" << endl; }
-            ;
-Basic_Type_Specifier : TYPE_VOID { $$ = new Node(TYPE_VOID_); cout << "6-1" << endl; }
+                 ; */
+/* Basic_Type_Specifier : TYPE_VOID { $$ = new Node(TYPE_VOID_); cout << "6-1" << endl; }
                      | TYPE_INT { $$ = new Node(TYPE_INT_); cout << "6-2" << endl; }
                      | TYPE_CHAR { $$ = new Node(TYPE_CHAR_); cout << "6-3" << endl; }
                      | TYPE_STRING { $$ = new Node(TYPE_STRING_); cout << "6-4" << endl; }
@@ -257,7 +263,7 @@ Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_
            | Expression GE Expression { $2 = new Node(GE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-8" << endl; }
            | Expression EQ Expression { $2 = new Node(EQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-9" << endl; }
            | Expression NEQ Expression { $2 = new Node(NEQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-10" << endl; }
-           ;
+           ; */
 
 %%
 
