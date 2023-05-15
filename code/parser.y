@@ -1,85 +1,62 @@
 %{
 #include <string.h>
 #include <stdio.h>
-// #include "ast.h"
-
-#include "ParseTree.h"
-extern int yylex();
-
-// Node* root = new Node(Program_);
-
+#include <iostream>
+#include <vector>
+#include "ast.h"
+//extern int yylex();
+Node* root = new Node(Program_);
 void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
-
-// extern "C"{
+extern "C"{
     //void yyerror(const char *s);
-    //extern int yylex(void);
-// }
+	extern int yylex(void);
+}
         
 %}
 
 %union {
-    int pos;
-    int ival;
-    char *sval;
-    S_symbol sym;
-
-    A_var var;
-    A_exp exp;
-    A_dec dec;
-    A_stmt stmt;
-
-    A_decList decList;
-    
-    A_define define;
-    A_defineList defineList;
-    A_declaration declaration;
-    A_declarationList declarationList;
-
-    A_topClause topClause;
-    A_topClauseList topClauseList;
+    class Node* node;
+    //int iVal;
+    //double dVal;
+    //char cVal;
+    //string sVal;
 }
 
 //terminals
 //binary operator    +   -   *   /   %  <<  >>   &    |   ^    ~    !  &&  ||
-%token              ADD SUB MUL DIV MOD SHL SHR BAND BOR BXOR BNOT NOT AND OR
+%token <node>       ADD SUB MUL DIV MOD SHL SHR BAND BOR BXOR BNOT NOT AND OR
 //unary operator     ++   --
-%token              DADD DSUB
+%token <node>       DADD DSUB
 //assignment operator =     +=    -=    *=    /=    %=    <<=   >>=    &=    |=     ^=
-%token              ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
+%token <node>       ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
 //logic operator    !=  >  <  >= <= ==
-%token              NEQ GT LT GE LE EQ
+%token <node>       NEQ GT LT GE LE EQ
 //                     (      )      [     ]      {      }
-%token              LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
+%token <node>       LPAREN RPAREN LBRACK RBRACK LBRACE RBRACE
 //                    ,       ;       :    .   ->   \'     \"     #   NULL
-%token              COMMA SEMICOLON COLON DOT ARW SQUOTE DQUOTE POUND NIL
+%token <node>       COMMA SEMICOLON COLON DOT ARW SQUOTE DQUOTE POUND NIL
 //keyword
-%token              IF ELSE WHILE FOR BREAK CONTINUE RETURN DEFINE CONST TYPE_INT TYPE_DOUBLE TYPE_CHAR TYPE_VOID TYPE_STRING
+%token <node>       IF ELSE WHILE FOR BREAK CONTINUE RETURN DEFINE CONST TYPE_INT TYPE_DOUBLE TYPE_CHAR TYPE_VOID TYPE_STRING
 //function
 // %token <node>       PRINT SCAN
 //ID
-%token              ID
+%token <node>       ID
 //value
-%token              INT DOUBLE CHAR STRING
+%token <node>       INT DOUBLE CHAR STRING
 
 //non-terminals
 //Start, Define, Declaration
-%type <topClauseList> Program TOP_CLAUSE 
-// Define
-%type Define_List Define Declarator
-// Declaration List
-%type <decList> Declaration_List 
-// Declaration
-%type <dec> Declaration Basic_Type_Specifier
+%type <node> Program Define_List Declaration_List Define Declarator Declaration Basic_Type_Specifier
 //variable definition
-%type Type_Specifier Var_Declaration Var_List Var_Init Var_Def
+%type <node> Type_Specifier Var_Declaration Var_List Var_Init Var_Def
 //function definition
-%type Params Param Fun_Prototype Fun_Declaration
+%type <node> Params Param Fun_Prototype Fun_Declaration
 //block definition
-%type Block Block_Items Block_Item
+%type <node> Block Block_Items Block_Item
 //statement definition
-%type Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt ELSEIF_List
+%type <node> Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt ELSEIF_List
 //expression definition
-%type Expression Uni_Exp LUOP RUOP Var_Exp Call_Exp Arg_List Binary_Exp Expression_List
+%type <node> Expression Uni_Exp LUOP RUOP Var_Exp Call_Exp Arg_List Binary_Exp Expression_List
 
 //priority
 %right  ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
@@ -99,16 +76,14 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 %%
 
-Program : TOP_CLAUSE { A_root = $1; $$ = A_root; }
+Program : Define_List Declaration_List { $$ = root; $$->children.push_back($1); $$->children.push_back($2); cout << "1-1" << endl; }
+        | Declaration_List { $$ = root; $$->children.push_back($1); cout << "1-2" << endl; }
         ;
-TOP_CLAUSE : Define_List { printf("TODO --- TOP_CLAUSE : Define_List\n"); }
-           | Declaration_List { $$ = root; $$->children.push_back($1); cout << "1-2" << endl; }
-           ;
-Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
-            | Define { printf("TODO --- Define_List : Define\n"); }
+Define_List : Define_List Define { $1->children.push_back($2); $$ = $1; cout << "2-1" << endl; }
+            | Define { $$ = $1; cout << "2-2" << endl; }
             ;
-Define : POUND DEFINE Declarator STRING { printf("TODO --- Define : POUND DEFINE Declarator STRING\n"); }
-       | POUND DEFINE Declarator INT { printf("TODO --- Define_List : POUND DEFINE Declarator INT\n"); }
+Define : POUND DEFINE Declarator STRING { $$ = new Node(Define_); $$->children.push_back($3); $$->children.push_back($4); cout << "3-1" << endl; }
+       | POUND DEFINE Declarator INT { $$ = new Node(Define_); $$->children.push_back($3); $$->children.push_back($4); cout << "3-2" << endl; }
        ;
 Declaration_List : Declaration_List Declaration { $1->children.push_back($2); $$ = $1; cout << "4-1" << endl; }
                  | Declaration { $$ = $1; cout << "4-2" << endl; }

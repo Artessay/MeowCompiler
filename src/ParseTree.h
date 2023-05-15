@@ -24,9 +24,17 @@ typedef struct A_field_ *A_field;
 
 typedef struct A_fieldList_ *A_fieldList;
 
-typedef struct A_fundec_ *A_fundec;
+typedef struct A_funcDeclare_ *A_funcDeclare;
 
-typedef struct A_fundecList_ *A_fundecList;
+// typedef struct A_funcDecList_ *A_funcDecList;
+
+typedef struct A_funcImplment_ *A_funcImplment;
+
+// typedef struct A_funcImplmentList_ *A_funcImplmentList;
+
+typedef struct A_define_ *A_define;
+
+typedef struct A_defineList_ *A_defineList;
 
 typedef struct A_topClause_ *A_topClause;
 
@@ -103,30 +111,46 @@ struct A_exp_ {
     } u;
 };
 
-struct A_fundec_ {
+struct A_funcDeclare_ {
     A_pos pos;
     S_symbol name;
     A_fieldList params;
     S_symbol result;
-    A_stmt body;
+};
+
+struct A_funcImplment_ {
+    A_pos pos;
+    A_funcDeclare declare;
+};
+
+struct A_define_ {
+    A_pos pos;
+    S_symbol name;
+    A_fieldList params;
+    S_symbol result;
+    A_exp body;
+};
+
+struct A_defineList_ {
+    A_define value;
+    A_define next;
 };
 
 struct A_topClause_ {
     enum {
-        Preprocess, FunctionDef, GlobalVarDef
+        Preprocess, FunctionDeclare, FunctionDefine, GlobalVarDefine
     } kind;
     A_pos pos;
     union {
-        A_fundecList function;
-        struct {
-            S_symbol var;
-            S_symbol typ;
-            A_exp init;
-            // @todo 
-        } variable;
+        ;
     } u;
 };
 
-extern A_topClauseList parsetree_root;
+struct A_topClauseList_ {
+    A_topClause value;
+    A_topClause next;
+};
+
+extern A_topClauseList A_root;
 
 #endif
