@@ -23,22 +23,20 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
     char *sval;
     S_symbol sym;
 
-    A_topClauseList topClauseList;
-    A_topClause topClause;
-
-    A_declaration declaration;
-    A_declarationList declarationList;
-
     A_var var;
     A_exp exp;
+    A_dec dec;
     A_stmt stmt;
 
-    
+    A_decList decList;
     
     A_define define;
     A_defineList defineList;
+    A_declaration declaration;
+    A_declarationList declarationList;
 
-    
+    A_topClause topClause;
+    A_topClauseList topClauseList;
 }
 
 //terminals
@@ -65,17 +63,13 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 //non-terminals
 //Start, Define, Declaration
-%type <topClauseList> Program Top_Clause_List
-
-%type <topClause> Top_Clause
+%type <topClauseList> Program TOP_CLAUSE 
 // Define
-/* %type Define_List Define Declarator */
+%type Define_List Define Declarator
 // Declaration List
-/* %type <decList> Declaration_List  */
+%type <decList> Declaration_List 
 // Declaration
-%type <dec> Declaration 
-
-Basic_Type_Specifier
+%type <dec> Declaration Basic_Type_Specifier
 //variable definition
 %type Type_Specifier Var_Declaration Var_List Var_Init Var_Def
 //function definition
@@ -105,16 +99,11 @@ Basic_Type_Specifier
 
 %%
 
-Program 
-        : Top_Clause_List { A_root = $1; $$ = A_root; }
+Program : TOP_CLAUSE { A_root = $1; $$ = A_root; }
         ;
-Top_Clause_List
-        : Top_Clause Top_Clause_List { $$ = A_TopClauseList($1, $2); }
-        | Top_Clause { $$ = A_TopClauseList($1, NULL); }
-        ;
-Top_Clause 
-        : Declaration { $$ = A_Declaration($1); }
-        ;
+TOP_CLAUSE : Define_List { printf("TODO --- TOP_CLAUSE : Define_List\n"); }
+           | Declaration_List { $$ = root; $$->children.push_back($1); cout << "1-2" << endl; }
+           ;
 Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
             | Define { printf("TODO --- Define_List : Define\n"); }
             ;

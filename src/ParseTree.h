@@ -10,35 +10,76 @@ typedef enum {
 	A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp
 } A_oper;
 
+typedef struct A_topClause_ *A_topClause;
+
+typedef struct A_topClauseList_ *A_topClauseList;
+
+typedef struct A_declaration_ *A_declaration;
+
+typedef struct A_declarationList_ *A_declarationList;
+
+    typedef struct A_funcDeclare_ *A_funcDeclare;
+
+    typedef struct A_varDeclare_ *A_varDeclare;
+
 typedef struct A_var_ *A_var;
+
+    typedef struct A_basicType_ *A_basicType;
+
+    typedef struct A_pointType_ *A_pointType;
+
+    typedef struct A_arrayType_ *A_arrayType;
 
 typedef struct A_exp_ *A_exp;
 
+typedef struct A_expList_ *A_expList;
+
 typedef struct A_stmt_ *A_stmt;
 
-typedef struct A_decList_ *A_decList;
-
-typedef struct A_expList_ *A_expList;
+typedef struct A_stmtList_ *A_stmtList;
 
 typedef struct A_field_ *A_field;
 
 typedef struct A_fieldList_ *A_fieldList;
 
-typedef struct A_funcDeclare_ *A_funcDeclare;
-
-// typedef struct A_funcDecList_ *A_funcDecList;
-
-typedef struct A_funcImplment_ *A_funcImplment;
-
-// typedef struct A_funcImplmentList_ *A_funcImplmentList;
+// typedef struct A_funcImplment_ *A_funcImplment;
 
 typedef struct A_define_ *A_define;
 
 typedef struct A_defineList_ *A_defineList;
 
-typedef struct A_topClause_ *A_topClause;
+struct A_topClauseList_ {
+    A_topClause value;
+    A_topClauseList next;
+};
 
-typedef struct A_topClauseList_ *A_topClauseList;
+struct A_topClause_ {
+    enum {
+        Preprocess, Declaration
+    } kind;
+    A_pos pos;
+    union {
+        A_declaration declare;
+    } u;
+};
+
+struct A_declaration_ {
+    enum {
+        FunctionDeclare, GlobalVarDefine
+    } kind;
+    A_pos pos;
+    union {
+        A_funcDeclare function;
+        
+    } u;
+};
+
+struct A_funcDeclare_ {
+    A_pos pos;
+    S_symbol name;
+    A_fieldList params;
+    S_symbol result;
+};
 
 struct A_var_ {
     enum {
@@ -111,13 +152,6 @@ struct A_exp_ {
     } u;
 };
 
-struct A_funcDeclare_ {
-    A_pos pos;
-    S_symbol name;
-    A_fieldList params;
-    S_symbol result;
-};
-
 struct A_funcImplment_ {
     A_pos pos;
     A_funcDeclare declare;
@@ -134,21 +168,6 @@ struct A_define_ {
 struct A_defineList_ {
     A_define value;
     A_define next;
-};
-
-struct A_topClause_ {
-    enum {
-        Preprocess, FunctionDeclare, FunctionDefine, GlobalVarDefine
-    } kind;
-    A_pos pos;
-    union {
-        ;
-    } u;
-};
-
-struct A_topClauseList_ {
-    A_topClause value;
-    A_topClause next;
 };
 
 extern A_topClauseList A_root;
