@@ -112,12 +112,11 @@ Top_Clause_List
         | Top_Clause { $$ = A_TopClauseList($1, NULL); }
         ;
 Top_Clause 
-        : Declaration { $$ = A_Declaration($1); }
+        : Var_Declaration { $$ = $1; }
+        | Fun_Declaration { $$ = $1; }
+        ;
         ;
 Declaration 
-        : Var_Declaration { $$ = $1; cout << "5-1" << endl; }
-        | Fun_Declaration { $$ = $1; cout << "5-2" << endl; }
-        ;
 Var_Declaration
         : {}
         ;

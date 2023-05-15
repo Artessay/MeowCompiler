@@ -55,21 +55,21 @@ struct A_topClauseList_ {
 
 struct A_topClause_ {
     enum {
-        Preprocess, Declaration
+        Preprocess, FunctionDeclare, GlobalVarDefine
     } kind;
     A_pos pos;
     union {
-        A_declaration declare;
+        A_funcDeclare function;
     } u;
 };
 
 struct A_declaration_ {
     enum {
-        FunctionDeclare, GlobalVarDefine
+        
     } kind;
     A_pos pos;
     union {
-        A_funcDeclare function;
+        
         
     } u;
 };
