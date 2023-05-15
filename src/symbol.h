@@ -9,4 +9,6 @@ struct S_symbol_ {
 
 S_symbol S_Symbol(char *name);
 
+char *S_name(S_symbol symbol);
+
 #endif

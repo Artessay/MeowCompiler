@@ -1,7 +1,7 @@
 #ifndef _BUCKET_H_
 #define _BUCKET_H_
 
-#define BUCKET_SIZE 1023
+#define BUCKET_SIZE 1289
 
 struct bucket {
     char *key;
