@@ -71,6 +71,7 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 %type <fieldList> Params
 
 
+// terminals
 
 %type <sym> IDENTITY
 

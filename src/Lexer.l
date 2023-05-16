@@ -1,30 +1,40 @@
-%option noyywrap
 %{
-#include <stdio.h>
-// #include <iostream>
-// #include <string>
+    #include <stdio.h>
+    // #include <iostream>
+    // #include <string>
 
-#include "parser.hpp"
-#include "ast.h"
+    #include "parser.h"
 
-char charConvert(char ch) {
-    switch(ch) {
-        case 'a': return '\a';
-        case 'b': return '\b';
-        case 'f': return '\f';
-        case 'n': return '\n';
-        case 'r': return '\r';
-        case 't': return '\t';
-        case 'v': return '\v';
-        default:
-            return ch;
+    #include "ErrorMessage.h"
+    #include "ParseTree.h"
+
+    char charConvert(char ch) {
+        switch(ch) {
+            case 'a': return '\a';
+            case 'b': return '\b';
+            case 'f': return '\f';
+            case 'n': return '\n';
+            case 'r': return '\r';
+            case 't': return '\t';
+            case 'v': return '\v';
+            default:
+                return ch;
+        }
     }
-}
+    
+    int yylex(void);
 
-extern "C"{
-    //int yywrap(void);
-	int yylex(void);
-}
+    int charPos=1;
+
+    int yywrap(void) {
+        charPos = 1;
+        return 1;
+    }
+
+    void adjust() {
+        EM_setTokenPos(charPos);
+        charPos += yyleng;
+    }
 
 %}
 
@@ -79,8 +89,8 @@ LineComment   "//"[^\n]*
 
 "("                         {return LPAREN;}
 ")"                         {return RPAREN;}
-"["                         {/*cout << "[\n";*/ return LBRACK;}
-"]"                         {/*cout << "]\n";*/ return RBRACK;}
+"["                         {return LBRACK;}
+"]"                         {return RBRACK;}
 "{"                         {return LBRACE;}
 "}"                         {return RBRACE;}
 
@@ -111,11 +121,11 @@ LineComment   "//"[^\n]*
 "string"                    {return TYPE_STRING;}
 
 
-[a-zA-Z\_][a-zA-Z0-9\_]*    { yylval.sVal = yytext; return ID;}
-"-"?[0-9]+                  {/*yylval.iVal = atoi(yytext);*/ yylval.node = new Node(atoi(yytext), INT_); return INT;}               //����ֵ
-"-"?[0-9]+\.[0-9]+          {/*yylval.dVal = atof(yytext);*/ yylval.node = new Node(atof(yytext), DOUBLE_); return DOUBLE;}            //������ֵ
-"\'"[^\\']"\'"              {/*yylval.cVal = yytext[1];*/ yylval.node = new Node(yytext[1],CHAR_); return CHAR;}                 //������ת���ַ�ֵ
-"\'"\\."\'"                 {/*yylval.cVal = charConvert(yytext[2]);*/ yylval.node = new Node(charConvert(yytext[2]),CHAR_); return CHAR;}    //����ת���ַ�ֵ
+[a-zA-Z\_][a-zA-Z0-9\_]*    { yylval.sVal = yytext; return ID; }
+"-"?[0-9]+                  { yylval.iVal = atoi(yytext); return INT; } 
+"-"?[0-9]+\.[0-9]+          { yylval.dVal = atof(yytext); return DOUBLE; }
+"\'"[^\\']"\'"              { yylval.cVal = yytext[1]; return CHAR; }
+"\'"\\."\'"                 { yylval.cVal = charConvert(yytext[2]); return CHAR; }
 "\""(\\.|[^"\\])*"\""	    {                                                       //�ַ���ֵ
 							/*yylval.sVal = new string();
                             for (int i = 1; i < yyleng - 1; i++)
