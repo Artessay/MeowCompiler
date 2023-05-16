@@ -1,19 +1,11 @@
 %{
-#include <string.h>
 #include <stdio.h>
-// #include "ast.h"
+#include <string.h>
 
 #include "ParseTree.h"
 extern int yylex();
 
-// Node* root = new Node(Program_);
-
 void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
-
-// extern "C"{
-    //void yyerror(const char *s);
-    //extern int yylex(void);
-// }
         
 %}
 
@@ -25,20 +17,17 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
     A_topClauseList topClauseList;
     A_topClause topClause;
-
-    A_declaration declaration;
-    A_declarationList declarationList;
-
-    A_var var;
-    A_exp exp;
-    A_stmt stmt;
-
     
-    
-    A_define define;
-    A_defineList defineList;
+    A_funcDeclare funcDeclare;
+    A_varDeclare varDeclare;
 
-    
+    A_varType varType;
+    A_basicType basicType;
+    A_pointType pointType;
+    A_arrayType arrayType;
+
+    A_field field;
+    A_fieldList fieldList;
 }
 
 //terminals
@@ -68,12 +57,29 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 %type <topClauseList> Program Top_Clause_List
 
 %type <topClause> Top_Clause
+
+%type <funcDeclare> Fun_Declaration
+
+%type <varDeclare> Var_Declaration
+
+%type <varType> Type_Specifier 
+
+%type <basicType> Basic_Type_Specifier
+
+%type <field> Param
+
+%type <fieldList> Params
+
+
+
+%type <sym> IDENTITY
+
 // Define
 /* %type Define_List Define Declarator */
 // Declaration List
 /* %type <decList> Declaration_List  */
 // Declaration
-%type <declaration> Declaration 
+/* %type <declaration> Declaration  */
 /* 
 //variable definition
 %type Type_Specifier Var_Declaration Var_List Var_Init Var_Def
@@ -115,13 +121,56 @@ Top_Clause
         : Var_Declaration { $$ = $1; }
         | Fun_Declaration { $$ = $1; }
         ;
-        ;
-Declaration 
+
 Var_Declaration
         : {}
         ;
+
 Fun_Declaration
-        : {}
+        : Fun_Prototype SEMICOLON { $$ = $1; }
+        | Fun_Prototype Block { ; }
+        ;
+Fun_Prototype 
+        : Type_Specifier IDENTITY LPAREN Params RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); $$->children.push_back($4); cout << "15-1" << endl; }
+        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); $$->children.push_back($4); cout << "15-2" << endl; }
+        | Type_Specifier IDENTITY LPAREN RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); cout << "15-3" << endl; }
+        ;
+Params 
+        : Param COMMA Params { $$ = A_FieldList($1, $3); }
+        | Param { $$ = $1 }
+        ;
+Param 
+        : Type_Specifier IDENTITY { $$ = A_Field(7, $1, $2); }
+        /* | Type_Specifier ID LBRACK RBRACK { $$ = new Node(Param_); $$->children.push_back($1); $2->setPointer(); $$->children.push_back($2); cout << "14-2" << endl; } */
+        ;
+IDENTITY
+        : ID { $$ = $$=S_Symbol($1); printf("Identity: %s\n", $1); }
+        ;
+
+Type_Specifier 
+        : Basic_Type_Specifier { $$ = A_VarTypeBasic(7, $1); }
+        ;
+Basic_Type_Specifier 
+        : TYPE_VOID   { $$ = A_BasicType(A_voidType); }
+        | TYPE_INT    { $$ = A_BasicType(A_intType); }
+        | TYPE_CHAR   { $$ = A_BasicType(A_charType); }
+        | TYPE_STRING { $$ = A_BasicType(A_stringType); }
+        | TYPE_DOUBLE { $$ = A_BasicType(A_doubleType); }
+        ;
+Block 
+        : LBRACE Statements RBRACE { $$ = new Node(Block_); $$->children.push_back($2); }
+        ;
+Statements
+        : Statement Statements { $$ = A_StmtList($1, $2); }
+        | Statement { $$ = A_StmtList($1, NULL); }
+        ;
+Statement 
+        : Selection_Stmt { $$ = $1; cout << "20-1" << endl; }
+        | Iteration_Stmt { $$ = $1; cout << "20-2" << endl; }
+        | Return_Stmt { $$ = $1; cout << "20-3" << endl; }
+        | Exp_Stmt { $$ = $1; cout << "20-4" << endl; }
+        | BREAK SEMICOLON { $$ = new Node(BREAK_); cout << "20-5" << endl; }
+        | CONTINUE SEMICOLON { $$ = new Node(CONTINUE_); cout << "20-6" << endl; }
         ;
 /* Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
             | Define { printf("TODO --- Define_List : Define\n"); }

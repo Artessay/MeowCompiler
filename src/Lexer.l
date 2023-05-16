@@ -111,7 +111,7 @@ LineComment   "//"[^\n]*
 "string"                    {return TYPE_STRING;}
 
 
-[a-zA-Z\_][a-zA-Z0-9\_]*    {/*yylval.sVal = string(yytext);*/ yylval.node = new Node(string(yytext), Declarator_); /*cout << "ID\n";*/ return ID;}              //��������������
+[a-zA-Z\_][a-zA-Z0-9\_]*    { yylval.sVal = yytext; return ID;}
 "-"?[0-9]+                  {/*yylval.iVal = atoi(yytext);*/ yylval.node = new Node(atoi(yytext), INT_); return INT;}               //����ֵ
 "-"?[0-9]+\.[0-9]+          {/*yylval.dVal = atof(yytext);*/ yylval.node = new Node(atof(yytext), DOUBLE_); return DOUBLE;}            //������ֵ
 "\'"[^\\']"\'"              {/*yylval.cVal = yytext[1];*/ yylval.node = new Node(yytext[1],CHAR_); return CHAR;}                 //������ת���ַ�ֵ

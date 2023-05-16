@@ -24,6 +24,8 @@ typedef struct A_declarationList_ *A_declarationList;
 
 typedef struct A_var_ *A_var;
 
+    typedef struct A_varType_ *A_varType;
+
     typedef struct A_basicType_ *A_basicType;
 
     typedef struct A_pointType_ *A_pointType;
@@ -42,7 +44,7 @@ typedef struct A_field_ *A_field;
 
 typedef struct A_fieldList_ *A_fieldList;
 
-// typedef struct A_funcImplment_ *A_funcImplment;
+typedef struct A_funcImplment_ *A_funcImplment;
 
 typedef struct A_define_ *A_define;
 
@@ -55,30 +57,29 @@ struct A_topClauseList_ {
 
 struct A_topClause_ {
     enum {
-        Preprocess, FunctionDeclare, GlobalVarDefine
+        A_Preprocess, A_FunctionDeclare, A_GlobalVarDefine
     } kind;
     A_pos pos;
     union {
         A_funcDeclare function;
-    } u;
-};
-
-struct A_declaration_ {
-    enum {
-        
-    } kind;
-    A_pos pos;
-    union {
-        
-        
+        A_varDeclare globalVar;
     } u;
 };
 
 struct A_funcDeclare_ {
     A_pos pos;
+
+    A_varType returnType;
     S_symbol name;
     A_fieldList params;
-    S_symbol result;
+    A_funcImplment body;
+};
+
+struct A_varDeclare_ {
+    A_pos pos;
+    S_symbol name;
+    S_symbol type;
+    A_exp init;
 };
 
 struct A_var_ {
@@ -99,76 +100,120 @@ struct A_var_ {
     } u;
 };
 
-struct A_exp_ {
+struct A_varType_ {
     enum {
-        A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
-        A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
-        A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
+        A_basic, A_point, A_array
     } kind;
     A_pos pos;
     union {
-        A_var var;
-        /* nil; - needs only the pos */
-        int intt;
-        char *stringg;
-        struct {
-            S_symbol func;
-            A_expList args;
-        } call;
-        struct {
-            A_oper oper;
-            A_exp left;
-            A_exp right;
-        } op;
-        // struct {
-        //     S_symbol type;
-        //     A_efieldList fields;
-        // } record;
-        A_expList seq;
-        struct {
-            A_var var;
-            A_exp exp;
-        } assign;
-        struct {
-            A_exp test, then, elsee;
-        } iff;
-        struct {
-            A_exp test, body;
-        } whilee;
-        struct {
-            S_symbol var;
-            A_exp lo, hi, body;
-            // bool escape;
-        } forr;
-        /* breakk; - need only the pos */
-        struct {
-            A_decList decs;
-            A_exp body;
-        } let;
-        struct {
-            S_symbol type;
-            A_exp size, init;
-        } array;
+        A_basicType basic;
+        A_pointType point;
+        A_arrayType array;
     } u;
 };
 
-struct A_funcImplment_ {
+struct A_basicType_ {
+    enum A_BasicType_ {
+        A_intType, A_doubleType, A_charType, A_stringType, A_voidType
+    } kind;
     A_pos pos;
-    A_funcDeclare declare;
 };
 
-struct A_define_ {
-    A_pos pos;
-    S_symbol name;
-    A_fieldList params;
-    S_symbol result;
-    A_exp body;
+struct A_field_ {
+	A_pos pos;
+
+    A_varType typ;
+	S_symbol name;
+	// bool escape;
 };
 
-struct A_defineList_ {
-    A_define value;
-    A_define next;
+struct A_fieldList_ {
+	A_field value;
+	A_fieldList next;
 };
+
+
+// struct A_declaration_ {
+//     enum {
+        
+//     } kind;
+//     A_pos pos;
+//     union {
+        
+        
+//     } u;
+// };
+
+// struct A_exp_ {
+//     enum {
+//         A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
+//         A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
+//         A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
+//     } kind;
+//     A_pos pos;
+//     union {
+//         A_var var;
+//         /* nil; - needs only the pos */
+//         int intt;
+//         char *stringg;
+//         struct {
+//             S_symbol func;
+//             A_expList args;
+//         } call;
+//         struct {
+//             A_oper oper;
+//             A_exp left;
+//             A_exp right;
+//         } op;
+//         // struct {
+//         //     S_symbol type;
+//         //     A_efieldList fields;
+//         // } record;
+//         A_expList seq;
+//         struct {
+//             A_var var;
+//             A_exp exp;
+//         } assign;
+//         struct {
+//             A_exp test, then, elsee;
+//         } iff;
+//         struct {
+//             A_exp test, body;
+//         } whilee;
+//         struct {
+//             S_symbol var;
+//             A_exp lo, hi, body;
+//             // bool escape;
+//         } forr;
+//         /* breakk; - need only the pos */
+//         struct {
+//             A_decList decs;
+//             A_exp body;
+//         } let;
+//         struct {
+//             S_symbol type;
+//             A_exp size, init;
+//         } array;
+//     } u;
+// };
+
+// struct A_funcImplment_ {
+//     A_pos pos;
+//     A_funcDeclare declare;
+// };
+
+// struct A_define_ {
+//     A_pos pos;
+//     S_symbol name;
+//     A_fieldList params;
+//     S_symbol result;
+//     A_exp body;
+// };
+
+// struct A_defineList_ {
+//     A_define value;
+//     A_define next;
+// };
 
 extern A_topClauseList A_root;
 
