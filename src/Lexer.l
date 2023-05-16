@@ -1,12 +1,16 @@
 %{
     #include <stdio.h>
-    // #include <iostream>
-    // #include <string>
+    #include <stdlib.h>
+    #include <string.h>
 
     #include "parser.h"
 
     #include "ErrorMessage.h"
     #include "ParseTree.h"
+
+    // #define BUFFER_SIZE 1024
+    
+    // char lexer_buffer[BUFFER_SIZE];
 
     char charConvert(char ch) {
         switch(ch) {
@@ -126,27 +130,19 @@ LineComment   "//"[^\n]*
 "-"?[0-9]+\.[0-9]+          { yylval.dVal = atof(yytext); return DOUBLE; }
 "\'"[^\\']"\'"              { yylval.cVal = yytext[1]; return CHAR; }
 "\'"\\."\'"                 { yylval.cVal = charConvert(yytext[2]); return CHAR; }
-"\""(\\.|[^"\\])*"\""	    {                                                       //�ַ���ֵ
-							/*yylval.sVal = new string();
-                            for (int i = 1; i < yyleng - 1; i++)
-                                if (yytext[i] == '\\'){                             //ת���ַ�
-                                    i++;
-                                    yylval.sVal->push_back(charConvert(yytext[i]));
-                                }else{                                              //��ת���ַ�
-                                    yylval.sVal->push_back(yytext[i]);
-                                }*/
-                            string sVal;
-                            for (int i = 1; i < yyleng - 1; i++)
-                                if (yytext[i] == '\\'){                             //ת���ַ�
-                                    i++;
-                                    sVal.append(1, charConvert(yytext[i]));
-                                }else{                                              //��ת���ַ�
-                                    sVal.append(1, yytext[i]);
+"\""(\\.|[^"\\])*"\""	    {
+                                yylval.sVal = malloc(yyleng);
+                                for (int i = 1, index = 0; i < yyleng - 1; i++) {
+                                    if (yytext[i] == '\\') {
+                                        i++;
+                                        yylval.sVal[index++] = charConvert(yytext[i]);
+                                    } else {
+                                        yylval.sVal[index++] = yytext[i];
+                                    }
                                 }
-                            yylval.node = new Node(sVal,STRING_);
-                            //cout << "STRING\n";
-                            return STRING;
-}
+                                yylval.sVal[index] = 0;
+                                return STRING;
+                            }
 
 .                           {}
 %%

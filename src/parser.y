@@ -21,6 +21,8 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
     A_funcDeclare funcDeclare;
     A_varDeclare varDeclare;
 
+    A_funcImplment block;
+
     A_varType varType;
     A_basicType basicType;
     A_pointType pointType;
@@ -28,6 +30,9 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
     A_field field;
     A_fieldList fieldList;
+
+    A_stmt stmt;
+    A_stmtList stmtList;
 }
 
 //terminals
@@ -70,6 +75,11 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 %type <fieldList> Params
 
+%type <block> Block
+
+%type <stmt> Statement
+
+%type <stmtList> Statements
 
 // terminals
 
@@ -128,17 +138,15 @@ Var_Declaration
         ;
 
 Fun_Declaration
-        : Fun_Prototype SEMICOLON { $$ = $1; }
-        | Fun_Prototype Block { ; }
-        ;
-Fun_Prototype 
-        : Type_Specifier IDENTITY LPAREN Params RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); $$->children.push_back($4); cout << "15-1" << endl; }
-        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); $$->children.push_back($4); cout << "15-2" << endl; }
-        | Type_Specifier IDENTITY LPAREN RPAREN { $$ = new Node(Func_Prototype_); $$->children.push_back($1); $$->children.push_back($2); cout << "15-3" << endl; }
+        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = $1; }
+        | Type_Specifier IDENTITY LPAREN Params RPAREN Block { ; }
+        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT  RPAREN SEMICOLON { $$ = NULL; printf("TODO\n"); }
+        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = NULL; printf("TODO\n"); }
         ;
 Params 
         : Param COMMA Params { $$ = A_FieldList($1, $3); }
-        | Param { $$ = $1 }
+        | Param { $$ = A_FieldList($1, NULL); }
+        | /* empty */ { $$ = A_FieldList(NULL, NULL); }
         ;
 Param 
         : Type_Specifier IDENTITY { $$ = A_Field(7, $1, $2); }
@@ -164,15 +172,17 @@ Block
 Statements
         : Statement Statements { $$ = A_StmtList($1, $2); }
         | Statement { $$ = A_StmtList($1, NULL); }
+        | /* empty */ { $$ = A_StmtList(NULL, NULL); }
         ;
 Statement 
-        : Selection_Stmt { $$ = $1; cout << "20-1" << endl; }
+        ;
+        /* : Selection_Stmt { $$ = $1; cout << "20-1" << endl; }
         | Iteration_Stmt { $$ = $1; cout << "20-2" << endl; }
         | Return_Stmt { $$ = $1; cout << "20-3" << endl; }
         | Exp_Stmt { $$ = $1; cout << "20-4" << endl; }
         | BREAK SEMICOLON { $$ = new Node(BREAK_); cout << "20-5" << endl; }
         | CONTINUE SEMICOLON { $$ = new Node(CONTINUE_); cout << "20-6" << endl; }
-        ;
+        ; */
 /* Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
             | Define { printf("TODO --- Define_List : Define\n"); }
             ;
