@@ -11,8 +11,13 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 %union {
     int pos;
-    int ival;
-    char *sval;
+
+    int    iVal;
+    double dVal;
+    char   cVal;
+    char * sVal;
+    
+    
     S_symbol sym;
 
     A_topClauseList topClauseList;
@@ -53,7 +58,7 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 //function
 // %token <node>       PRINT SCAN
 //ID
-%token              ID
+%token<sVal>        ID
 //value
 %token              INT DOUBLE CHAR STRING
 
@@ -77,7 +82,7 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 %type <block> Block
 
-%type <stmt> Statement
+/* %type <stmt> Statement */
 
 %type <stmtList> Statements
 
@@ -153,7 +158,7 @@ Param
         /* | Type_Specifier ID LBRACK RBRACK { $$ = new Node(Param_); $$->children.push_back($1); $2->setPointer(); $$->children.push_back($2); cout << "14-2" << endl; } */
         ;
 IDENTITY
-        : ID { $$ = $$=S_Symbol($1); printf("Identity: %s\n", $1); }
+        : ID { $$ = S_Symbol($1); printf("Identity: %s\n", $1); }
         ;
 
 Type_Specifier 
@@ -170,12 +175,14 @@ Block
         : LBRACE Statements RBRACE { $$ = new Node(Block_); $$->children.push_back($2); }
         ;
 Statements
+        : /* empty */ { $$ = A_StmtList(NULL, NULL); }
+/*         
         : Statement Statements { $$ = A_StmtList($1, $2); }
         | Statement { $$ = A_StmtList($1, NULL); }
-        | /* empty */ { $$ = A_StmtList(NULL, NULL); }
+        | /* empty  { $$ = A_StmtList(NULL, NULL); }
         ;
 Statement 
-        ;
+        ; */
         /* : Selection_Stmt { $$ = $1; cout << "20-1" << endl; }
         | Iteration_Stmt { $$ = $1; cout << "20-2" << endl; }
         | Return_Stmt { $$ = $1; cout << "20-3" << endl; }
