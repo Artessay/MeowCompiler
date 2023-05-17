@@ -112,10 +112,12 @@ struct A_varType_ {
     } u;
 };
 
+enum A_BasicType_ {
+    A_intType, A_doubleType, A_charType, A_stringType, A_voidType
+};
+
 struct A_basicType_ {
-    enum A_BasicType_ {
-        A_intType, A_doubleType, A_charType, A_stringType, A_voidType
-    } kind;
+    enum A_BasicType_ kind;
     A_pos pos;
 };
 
@@ -132,6 +134,41 @@ struct A_fieldList_ {
 	A_fieldList next;
 };
 
+struct A_stmt_ {
+    enum {
+        A_expStmt, A_compoundStmt, A_ifStmt, A_whileStmt, A_forStmt, A_breakStmt, A_continueStmt, A_returnStmt
+    } kind;
+    A_pos pos;
+    union {
+        A_exp exp;
+        struct {
+            A_stmtList stmts;
+        } compound;
+        struct {
+            A_exp test;
+            A_stmt then;
+            A_stmt elsee;
+        } iff;
+        struct {
+            A_exp test;
+            A_stmt body;
+        } whilee;
+        struct {
+            A_exp test;
+            A_stmt body;
+        } forr;
+        /* breakk; - need only the pos */
+        /* continuee; - need only the pos */
+        struct {
+            A_exp exp;
+        } returnn;
+    } u;
+};
+
+struct A_stmtList_ {
+    A_stmt value;
+    A_stmtList next;
+};
 
 // struct A_declaration_ {
 //     enum {

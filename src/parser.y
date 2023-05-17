@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "ParseTree.h"
+#include "parser.h"
+
 extern int yylex();
 
 void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
@@ -17,27 +19,26 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
     char   cVal;
     char * sVal;
     
+    struct S_symbol_ *sym;
+
+    struct A_topClauseList *topClauseList;
+    struct A_topClause *topClause;
     
-    S_symbol sym;
+    struct A_funcDeclare *funcDeclare;
+    struct A_varDeclare *varDeclare;
 
-    A_topClauseList topClauseList;
-    A_topClause topClause;
-    
-    A_funcDeclare funcDeclare;
-    A_varDeclare varDeclare;
+    struct A_funcImplment *block;
 
-    A_funcImplment block;
+    struct A_varType *varType;
+    struct A_basicType *basicType;
+    struct A_pointType *pointType;
+    struct A_arrayType *arrayType;
 
-    A_varType varType;
-    A_basicType basicType;
-    A_pointType pointType;
-    A_arrayType arrayType;
+    struct A_field *field;
+    struct A_fieldList *fieldList;
 
-    A_field field;
-    A_fieldList fieldList;
-
-    A_stmt stmt;
-    A_stmtList stmtList;
+    struct A_stmt *stmt;
+    struct A_stmtList *stmtList;
 }
 
 //terminals
@@ -60,7 +61,10 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 //ID
 %token<sVal>        ID
 //value
-%token              INT DOUBLE CHAR STRING
+%token<iVal>        INT 
+%token<dVal>        DOUBLE 
+%token<cVal>        CHAR 
+%token<sVal>        STRING
 
 //non-terminals
 //Start, Define, Declaration
@@ -172,10 +176,11 @@ Basic_Type_Specifier
         | TYPE_DOUBLE { $$ = A_BasicType(A_doubleType); }
         ;
 Block 
-        : LBRACE Statements RBRACE { $$ = new Node(Block_); $$->children.push_back($2); }
+        : LBRACE Statements RBRACE { $$ = $2; }
         ;
 Statements
         : /* empty */ { $$ = A_StmtList(NULL, NULL); }
+        ;
 /*         
         : Statement Statements { $$ = A_StmtList($1, $2); }
         | Statement { $$ = A_StmtList($1, NULL); }
@@ -333,9 +338,9 @@ Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_
 
 %%
 
-int yywrap(){
+/* int yywrap(){
     return 1;
-}
+} */
 
 // int main()
 // {

@@ -132,7 +132,9 @@ LineComment   "//"[^\n]*
 "\'"\\."\'"                 { yylval.cVal = charConvert(yytext[2]); return CHAR; }
 "\""(\\.|[^"\\])*"\""	    {
                                 yylval.sVal = malloc(yyleng);
-                                for (int i = 1, index = 0; i < yyleng - 1; i++) {
+
+                                int index = 0;
+                                for (int i = 1; i < yyleng - 1; i++) {
                                     if (yytext[i] == '\\') {
                                         i++;
                                         yylval.sVal[index++] = charConvert(yytext[i]);
@@ -141,6 +143,7 @@ LineComment   "//"[^\n]*
                                     }
                                 }
                                 yylval.sVal[index] = 0;
+                                
                                 return STRING;
                             }
 

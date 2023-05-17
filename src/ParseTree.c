@@ -49,6 +49,13 @@ A_fieldList A_FieldList(A_field value, A_fieldList next) {
 	return p;
 }
 
+A_stmtList A_StmtList(A_stmt value, A_stmtList next) {
+	A_stmtList p = (A_stmtList)checked_malloc(sizeof(*p));
+	p->value = value;
+	p->next = next;
+	return p;
+}
+
 // A_var A_SimpleVar(A_pos pos, S_symbol sym) {
 // 	A_var p = checked_malloc(sizeof(*p));
 // 	p->kind = A_simpleVar;

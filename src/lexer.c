@@ -1209,7 +1209,9 @@ YY_RULE_SETUP
 #line 133 "lexer.l"
 {
                                 yylval.sVal = malloc(yyleng);
-                                for (int i = 1, index = 0; i < yyleng - 1; i++) {
+
+                                int index = 0;
+                                for (int i = 1; i < yyleng - 1; i++) {
                                     if (yytext[i] == '\\') {
                                         i++;
                                         yylval.sVal[index++] = charConvert(yytext[i]);
@@ -1218,20 +1220,21 @@ YY_RULE_SETUP
                                     }
                                 }
                                 yylval.sVal[index] = 0;
+                                
                                 return STRING;
                             }
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 147 "lexer.l"
+#line 150 "lexer.l"
 {}
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 148 "lexer.l"
+#line 151 "lexer.l"
 ECHO;
 	YY_BREAK
-#line 1234 "lexer.c"
+#line 1237 "lexer.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2236,6 +2239,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 148 "lexer.l"
+#line 151 "lexer.l"
 
 

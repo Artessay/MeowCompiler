@@ -1,4 +1,7 @@
 *.output
+lexer.c
+parser.h
+parser.c
 lexer.cpp
 parser.hpp
 parser.cpp

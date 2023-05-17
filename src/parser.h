@@ -190,7 +190,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2058 of yacc.c  */
-#line 12 "parser.y"
+#line 14 "parser.y"
 
     int pos;
 
@@ -199,31 +199,30 @@ typedef union YYSTYPE
     char   cVal;
     char * sVal;
     
+    struct S_symbol_ *sym;
+
+    struct A_topClauseList *topClauseList;
+    struct A_topClause *topClause;
     
-    S_symbol sym;
+    struct A_funcDeclare *funcDeclare;
+    struct A_varDeclare *varDeclare;
 
-    A_topClauseList topClauseList;
-    A_topClause topClause;
-    
-    A_funcDeclare funcDeclare;
-    A_varDeclare varDeclare;
+    struct A_funcImplment *block;
 
-    A_funcImplment block;
+    struct A_varType *varType;
+    struct A_basicType *basicType;
+    struct A_pointType *pointType;
+    struct A_arrayType *arrayType;
 
-    A_varType varType;
-    A_basicType basicType;
-    A_pointType pointType;
-    A_arrayType arrayType;
+    struct A_field *field;
+    struct A_fieldList *fieldList;
 
-    A_field field;
-    A_fieldList fieldList;
-
-    A_stmt stmt;
-    A_stmtList stmtList;
+    struct A_stmt *stmt;
+    struct A_stmtList *stmtList;
 
 
 /* Line 2058 of yacc.c  */
-#line 227 "parser.h"
+#line 226 "parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

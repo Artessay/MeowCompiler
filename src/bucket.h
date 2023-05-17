@@ -11,6 +11,6 @@ struct bucket {
 
 struct bucket *table[BUCKET_SIZE];
 
-
+unsigned int hash(char *s);
 
 #endif

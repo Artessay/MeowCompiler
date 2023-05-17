@@ -69,13 +69,15 @@
 #include <string.h>
 
 #include "ParseTree.h"
+#include "parser.h"
+
 extern int yylex();
 
 void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
         
 
 /* Line 371 of yacc.c  */
-#line 79 "parser.c"
+#line 81 "parser.c"
 
 # ifndef YY_NULL
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -255,7 +257,7 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 387 of yacc.c  */
-#line 12 "parser.y"
+#line 14 "parser.y"
 
     int pos;
 
@@ -264,31 +266,30 @@ typedef union YYSTYPE
     char   cVal;
     char * sVal;
     
+    struct S_symbol_ *sym;
+
+    struct A_topClauseList *topClauseList;
+    struct A_topClause *topClause;
     
-    S_symbol sym;
+    struct A_funcDeclare *funcDeclare;
+    struct A_varDeclare *varDeclare;
 
-    A_topClauseList topClauseList;
-    A_topClause topClause;
-    
-    A_funcDeclare funcDeclare;
-    A_varDeclare varDeclare;
+    struct A_funcImplment *block;
 
-    A_funcImplment block;
+    struct A_varType *varType;
+    struct A_basicType *basicType;
+    struct A_pointType *pointType;
+    struct A_arrayType *arrayType;
 
-    A_varType varType;
-    A_basicType basicType;
-    A_pointType pointType;
-    A_arrayType arrayType;
+    struct A_field *field;
+    struct A_fieldList *fieldList;
 
-    A_field field;
-    A_fieldList fieldList;
-
-    A_stmt stmt;
-    A_stmtList stmtList;
+    struct A_stmt *stmt;
+    struct A_stmtList *stmtList;
 
 
 /* Line 387 of yacc.c  */
-#line 292 "parser.c"
+#line 293 "parser.c"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
@@ -316,7 +317,7 @@ int yyparse ();
 /* Copy the second part of user declarations.  */
 
 /* Line 390 of yacc.c  */
-#line 320 "parser.c"
+#line 321 "parser.c"
 
 #ifdef short
 # undef short
@@ -618,9 +619,9 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,   130,   130,   133,   134,   137,   138,   142,   146,   147,
-     148,   149,   152,   153,   154,   157,   161,   165,   168,   169,
-     170,   171,   172,   175,   178
+       0,   134,   134,   137,   138,   141,   142,   146,   150,   151,
+     152,   153,   156,   157,   158,   161,   165,   169,   172,   173,
+     174,   175,   176,   179,   182
 };
 #endif
 
@@ -1544,145 +1545,145 @@ yyreduce:
     {
         case 2:
 /* Line 1792 of yacc.c  */
-#line 130 "parser.y"
+#line 134 "parser.y"
     { A_root = (yyvsp[(1) - (1)].topClauseList); (yyval.topClauseList) = A_root; }
     break;
 
   case 3:
 /* Line 1792 of yacc.c  */
-#line 133 "parser.y"
+#line 137 "parser.y"
     { (yyval.topClauseList) = A_TopClauseList((yyvsp[(1) - (2)].topClause), (yyvsp[(2) - (2)].topClauseList)); }
     break;
 
   case 4:
 /* Line 1792 of yacc.c  */
-#line 134 "parser.y"
+#line 138 "parser.y"
     { (yyval.topClauseList) = A_TopClauseList((yyvsp[(1) - (1)].topClause), NULL); }
     break;
 
   case 5:
 /* Line 1792 of yacc.c  */
-#line 137 "parser.y"
+#line 141 "parser.y"
     { (yyval.topClause) = (yyvsp[(1) - (1)].varDeclare); }
     break;
 
   case 6:
 /* Line 1792 of yacc.c  */
-#line 138 "parser.y"
+#line 142 "parser.y"
     { (yyval.topClause) = (yyvsp[(1) - (1)].funcDeclare); }
     break;
 
   case 7:
 /* Line 1792 of yacc.c  */
-#line 142 "parser.y"
+#line 146 "parser.y"
     {}
     break;
 
   case 8:
 /* Line 1792 of yacc.c  */
-#line 146 "parser.y"
+#line 150 "parser.y"
     { (yyval.funcDeclare) = (yyvsp[(1) - (6)].varType); }
     break;
 
   case 9:
 /* Line 1792 of yacc.c  */
-#line 147 "parser.y"
+#line 151 "parser.y"
     { ; }
     break;
 
   case 10:
 /* Line 1792 of yacc.c  */
-#line 148 "parser.y"
+#line 152 "parser.y"
     { (yyval.funcDeclare) = NULL; printf("TODO\n"); }
     break;
 
   case 11:
 /* Line 1792 of yacc.c  */
-#line 149 "parser.y"
+#line 153 "parser.y"
     { (yyval.funcDeclare) = NULL; printf("TODO\n"); }
     break;
 
   case 12:
 /* Line 1792 of yacc.c  */
-#line 152 "parser.y"
+#line 156 "parser.y"
     { (yyval.fieldList) = A_FieldList((yyvsp[(1) - (3)].field), (yyvsp[(3) - (3)].fieldList)); }
     break;
 
   case 13:
 /* Line 1792 of yacc.c  */
-#line 153 "parser.y"
+#line 157 "parser.y"
     { (yyval.fieldList) = A_FieldList((yyvsp[(1) - (1)].field), NULL); }
     break;
 
   case 14:
 /* Line 1792 of yacc.c  */
-#line 154 "parser.y"
+#line 158 "parser.y"
     { (yyval.fieldList) = A_FieldList(NULL, NULL); }
     break;
 
   case 15:
 /* Line 1792 of yacc.c  */
-#line 157 "parser.y"
+#line 161 "parser.y"
     { (yyval.field) = A_Field(7, (yyvsp[(1) - (2)].varType), (yyvsp[(2) - (2)].sym)); }
     break;
 
   case 16:
 /* Line 1792 of yacc.c  */
-#line 161 "parser.y"
+#line 165 "parser.y"
     { (yyval.sym) = S_Symbol((yyvsp[(1) - (1)].sVal)); printf("Identity: %s\n", (yyvsp[(1) - (1)].sVal)); }
     break;
 
   case 17:
 /* Line 1792 of yacc.c  */
-#line 165 "parser.y"
+#line 169 "parser.y"
     { (yyval.varType) = A_VarTypeBasic(7, (yyvsp[(1) - (1)].basicType)); }
     break;
 
   case 18:
 /* Line 1792 of yacc.c  */
-#line 168 "parser.y"
+#line 172 "parser.y"
     { (yyval.basicType) = A_BasicType(A_voidType); }
     break;
 
   case 19:
 /* Line 1792 of yacc.c  */
-#line 169 "parser.y"
+#line 173 "parser.y"
     { (yyval.basicType) = A_BasicType(A_intType); }
     break;
 
   case 20:
 /* Line 1792 of yacc.c  */
-#line 170 "parser.y"
+#line 174 "parser.y"
     { (yyval.basicType) = A_BasicType(A_charType); }
     break;
 
   case 21:
 /* Line 1792 of yacc.c  */
-#line 171 "parser.y"
+#line 175 "parser.y"
     { (yyval.basicType) = A_BasicType(A_stringType); }
     break;
 
   case 22:
 /* Line 1792 of yacc.c  */
-#line 172 "parser.y"
+#line 176 "parser.y"
     { (yyval.basicType) = A_BasicType(A_doubleType); }
     break;
 
   case 23:
 /* Line 1792 of yacc.c  */
-#line 175 "parser.y"
-    { (yyval.block) = new Node(Block_); (yyval.block)->children.push_back((yyvsp[(2) - (3)].stmtList)); }
+#line 179 "parser.y"
+    { (yyval.block) = (yyvsp[(2) - (3)].stmtList); }
     break;
 
   case 24:
 /* Line 1792 of yacc.c  */
-#line 178 "parser.y"
+#line 182 "parser.y"
     { (yyval.stmtList) = A_StmtList(NULL, NULL); }
     break;
 
 
 /* Line 1792 of yacc.c  */
-#line 1686 "parser.c"
+#line 1687 "parser.c"
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1914,12 +1915,12 @@ yyreturn:
 
 
 /* Line 2055 of yacc.c  */
-#line 334 "parser.y"
+#line 339 "parser.y"
 
 
-int yywrap(){
+/* int yywrap(){
     return 1;
-}
+} */
 
 // int main()
 // {
