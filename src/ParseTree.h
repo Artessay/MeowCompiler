@@ -55,6 +55,7 @@ struct A_topClauseList_ {
     A_topClauseList next;
 };
 
+
 struct A_topClause_ {
     enum {
         A_Preprocess, A_FunctionDeclare, A_GlobalVarDefine
@@ -73,6 +74,8 @@ struct A_funcDeclare_ {
     S_symbol name;
     A_fieldList params;
     A_funcImplment body;
+
+    char escape;
 };
 
 struct A_varDeclare_ {
@@ -251,6 +254,20 @@ struct A_stmtList_ {
 //     A_define value;
 //     A_define next;
 // };
+
+A_topClauseList A_TopClauseList(A_topClause value, A_topClauseList next);
+
+A_topClause A_FuncDeclare(A_funcDeclare function);
+
+A_varType A_VarTypeBasic(A_pos pos, A_basicType type);
+
+A_basicType A_BasicType(enum A_BasicType_ type);
+
+A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
+
+A_fieldList A_FieldList(A_field value, A_fieldList next);
+
+A_stmtList A_StmtList(A_stmt value, A_stmtList next);
 
 extern A_topClauseList A_root;
 

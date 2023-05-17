@@ -21,24 +21,24 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
     
     struct S_symbol_ *sym;
 
-    struct A_topClauseList *topClauseList;
-    struct A_topClause *topClause;
+    struct A_topClauseList_ *topClauseList;
+    struct A_topClause_ *topClause;
     
-    struct A_funcDeclare *funcDeclare;
-    struct A_varDeclare *varDeclare;
+    struct A_funcDeclare_ *funcDeclare;
+    struct A_varDeclare_ *varDeclare;
 
-    struct A_funcImplment *block;
+    struct A_funcImplment_ *block;
 
-    struct A_varType *varType;
-    struct A_basicType *basicType;
-    struct A_pointType *pointType;
-    struct A_arrayType *arrayType;
+    struct A_varType_ *varType;
+    struct A_basicType_ *basicType;
+    struct A_pointType_ *pointType;
+    struct A_arrayType_ *arrayType;
 
-    struct A_field *field;
-    struct A_fieldList *fieldList;
+    struct A_field_ *field;
+    struct A_fieldList_ *fieldList;
 
-    struct A_stmt *stmt;
-    struct A_stmtList *stmtList;
+    struct A_stmt_ *stmt;
+    struct A_stmtList_ *stmtList;
 }
 
 //terminals
@@ -139,7 +139,7 @@ Top_Clause_List
         ;
 Top_Clause 
         : Var_Declaration { $$ = $1; }
-        | Fun_Declaration { $$ = $1; }
+        | Fun_Declaration { $$ = A_FuncDeclare($1); }
         ;
 
 Var_Declaration
@@ -147,7 +147,7 @@ Var_Declaration
         ;
 
 Fun_Declaration
-        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = $1; }
+        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = NULL; }
         | Type_Specifier IDENTITY LPAREN Params RPAREN Block { ; }
         | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT  RPAREN SEMICOLON { $$ = NULL; printf("TODO\n"); }
         | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = NULL; printf("TODO\n"); }

@@ -268,24 +268,24 @@ typedef union YYSTYPE
     
     struct S_symbol_ *sym;
 
-    struct A_topClauseList *topClauseList;
-    struct A_topClause *topClause;
+    struct A_topClauseList_ *topClauseList;
+    struct A_topClause_ *topClause;
     
-    struct A_funcDeclare *funcDeclare;
-    struct A_varDeclare *varDeclare;
+    struct A_funcDeclare_ *funcDeclare;
+    struct A_varDeclare_ *varDeclare;
 
-    struct A_funcImplment *block;
+    struct A_funcImplment_ *block;
 
-    struct A_varType *varType;
-    struct A_basicType *basicType;
-    struct A_pointType *pointType;
-    struct A_arrayType *arrayType;
+    struct A_varType_ *varType;
+    struct A_basicType_ *basicType;
+    struct A_pointType_ *pointType;
+    struct A_arrayType_ *arrayType;
 
-    struct A_field *field;
-    struct A_fieldList *fieldList;
+    struct A_field_ *field;
+    struct A_fieldList_ *fieldList;
 
-    struct A_stmt *stmt;
-    struct A_stmtList *stmtList;
+    struct A_stmt_ *stmt;
+    struct A_stmtList_ *stmtList;
 
 
 /* Line 387 of yacc.c  */

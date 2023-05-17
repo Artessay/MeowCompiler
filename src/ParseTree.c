@@ -20,6 +20,19 @@ A_topClause A_FuncDeclare(A_funcDeclare function) {
 	return p;
 }
 
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_funcImplment body) {
+	A_funcDeclare p = (A_funcDeclare)checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->returnType = retTyp;
+	p->name = name;
+	p->params = params;
+	p->body = body;
+
+	p->escape = body == NULL ? 0 : 1;
+
+	return p;
+}
+
 A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
 	A_varType p = checked_malloc(sizeof(*p));
 	p->pos = pos;
