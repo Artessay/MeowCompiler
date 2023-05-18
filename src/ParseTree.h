@@ -81,7 +81,7 @@ struct A_funcDeclare_ {
 struct A_varDeclare_ {
     A_pos pos;
     S_symbol name;
-    S_symbol type;
+    A_varType typ;
     A_exp init;
 };
 
@@ -240,22 +240,18 @@ struct A_exp_ {
     } u;
 };
 
-// struct A_define_ {
-//     A_pos pos;
-//     S_symbol name;
-//     A_fieldList params;
-//     S_symbol result;
-//     A_exp body;
-// };
-
-// struct A_defineList_ {
-//     A_define value;
-//     A_define next;
-// };
+struct A_expList_ {
+    A_exp value;
+    A_expList next;
+};
 
 A_topClauseList A_TopClauseList(A_topClause value, A_topClauseList next);
 
 A_topClause A_FuncDeclare(A_funcDeclare function);
+
+A_topClause A_VarDeclare(A_varDeclare globalVariable);
+
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_funcImplment body);
 
 // stmt
 
