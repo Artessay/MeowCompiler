@@ -33,35 +33,6 @@ A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fi
 	return p;
 }
 
-A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
-	A_varType p = checked_malloc(sizeof(*p));
-	p->pos = pos;
-	p->kind = A_basic;
-	p->u.basic = type;
-	return p;
-}
-
-A_basicType A_BasicType(enum A_BasicType_ type) {
-	A_basicType p = checked_malloc(sizeof(*p));
-	p->kind = type;
-	return p;
-}
-
-A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
-	A_field p = checked_malloc(sizeof(*p));
-	p->pos = pos;
-	p->name = name;
-	p->typ = typ;
-	return p;
-}
-
-A_fieldList A_FieldList(A_field value, A_fieldList next) {
-	A_fieldList p = checked_malloc(sizeof(*p));
-	p->value = value;
-	p->next = next;
-	return p;
-}
-
 A_stmtList A_StmtList(A_stmt value, A_stmtList next) {
 	A_stmtList p = (A_stmtList)checked_malloc(sizeof(*p));
 	p->value = value;
@@ -84,6 +55,8 @@ A_stmt A_ReturnStmt(A_pos pos, A_exp exp) {
 	p->u.returnn.exp = exp;
 	return p;
 }
+
+// === exp ===
 
 A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp) {
 	A_exp p = checked_malloc(sizeof(*p));
@@ -145,6 +118,47 @@ A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 	p->pos = pos;
 	p->u.call.func = func;
 	p->u.call.args = args;
+	return p;
+}
+
+A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right) {
+	A_exp p = checked_malloc(sizeof(*p));
+	p->kind = A_opExp;
+	p->pos = pos;
+	p->u.op.oper = oper;
+	p->u.op.left = left;
+	p->u.op.right = right;
+	return p;
+}
+
+// === var ===
+
+A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
+	A_varType p = checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->kind = A_basic;
+	p->u.basic = type;
+	return p;
+}
+
+A_basicType A_BasicType(enum A_BasicType_ type) {
+	A_basicType p = checked_malloc(sizeof(*p));
+	p->kind = type;
+	return p;
+}
+
+A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
+	A_field p = checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->name = name;
+	p->typ = typ;
+	return p;
+}
+
+A_fieldList A_FieldList(A_field value, A_fieldList next) {
+	A_fieldList p = checked_malloc(sizeof(*p));
+	p->value = value;
+	p->next = next;
 	return p;
 }
 

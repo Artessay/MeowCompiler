@@ -259,21 +259,26 @@ RUOP : DADD { $$ = new Node(DADD_); cout << "28-1" << endl; }
 Call_Exp : Declarator LPAREN Arg_List RPAREN { $$=new Node(Call_Exp_); $$->children.push_back($1); $$->children.push_back($3); cout << "30-1" << endl; }
          | Declarator LPAREN RPAREN { $$=new Node(Call_Exp_); $$->children.push_back($1); cout << "30-2" << endl; }
          ; */
-/* Var_Exp : Var_Exp LBRACK Expression RBRACK { $$ = new Node(Array_Exp_); $$->children.push_back($1); $$->children.push_back($3); cout << "29-1" << endl; }
-        | Declarator { $$ = new Node(Var_Exp_); $$->children.push_back($1); cout << "29-2" << endl; }
-        ; */
+
+/* lvalue */
+Var_Exp 
+        : IDENTITY LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, A_SimpleVar($1), $3); }
+        | IDENTITY { $$ = A_SimpleVar(7, $1); }
+        | Var_Exp LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
+        /* | Var_Exp DOT IDENTITY {} */
+        ;
 Binary_Exp 
-        : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-1" << endl; }
-        | Expression SUB Expression { $2 = new Node(SUB_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-2" << endl; }
-        | Expression MUL Expression { $2 = new Node(MUL_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-3" << endl; }
-        | Expression DIV Expression { $2 = new Node(DIV_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-        | Expression MOD Expression { $2 = new Node(MOD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-        | Expression LE Expression { $2 = new Node(LE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-5" << endl; }
-        | Expression LT Expression { $2 = new Node(LT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-6" << endl; }
-        | Expression GT Expression { $2 = new Node(GT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-7" << endl; }
-        | Expression GE Expression { $2 = new Node(GE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-8" << endl; }
-        | Expression EQ Expression { $2 = new Node(EQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-9" << endl; }
-        | Expression NEQ Expression { $2 = new Node(NEQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-10" << endl; }
+        : Expression ADD Expression { $$ = A_OpExp(7, A_plusOp,   $1, $3); }
+        | Expression SUB Expression { $$ = A_OpExp(7, A_minusOp,  $1, $3); }
+        | Expression MUL Expression { $$ = A_OpExp(7, A_timesOp,  $1, $3); }
+        | Expression DIV Expression { $$ = A_OpExp(7, A_divideOp, $1, $3); }
+        | Expression MOD Expression { $$ = A_OpExp(7, A_modOp,    $1, $3); }
+        | Expression EQ  Expression { $$ = A_OpExp(7, A_eqOp,     $1, $3); }
+        | Expression NEQ Expression { $$ = A_OpExp(7, A_neqOp,    $1, $3); }
+        | Expression LT  Expression { $$ = A_OpExp(7, A_ltOp,     $1, $3); }
+        | Expression LE  Expression { $$ = A_OpExp(7, A_leOp,     $1, $3); }
+        | Expression GT  Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
+        | Expression GE  Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
         ;
 /* Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
             | Define { printf("TODO --- Define_List : Define\n"); }

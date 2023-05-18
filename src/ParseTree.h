@@ -6,7 +6,7 @@
 typedef int A_pos;
 
 typedef enum {
-    A_plusOp, A_minusOp, A_timesOp, A_divideOp,
+    A_plusOp, A_minusOp, A_timesOp, A_divideOp, A_modOp,
 	A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp
 } A_oper;
 
@@ -189,7 +189,8 @@ struct A_exp_ {
         A_varExp, 
         A_nilExp, A_intExp, A_charExp, A_doubleExp, A_stringExp, 
         A_callExp,
-        A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
+        A_opExp, 
+        A_recordExp, A_seqExp, A_assignExp, A_ifExp,
         A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
     } kind;
     A_pos pos;
@@ -256,19 +257,15 @@ A_topClauseList A_TopClauseList(A_topClause value, A_topClauseList next);
 
 A_topClause A_FuncDeclare(A_funcDeclare function);
 
-A_varType A_VarTypeBasic(A_pos pos, A_basicType type);
-
-A_basicType A_BasicType(enum A_BasicType_ type);
-
-A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
-
-A_fieldList A_FieldList(A_field value, A_fieldList next);
+// stmt
 
 A_stmtList A_StmtList(A_stmt value, A_stmtList next);
 
 A_stmt A_ExprStmt(A_pos pos, A_exp exp);
 
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp);
+
+// exp
 
 A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp);
 
@@ -283,6 +280,18 @@ A_exp A_DoubleExp(A_pos pos, double d);
 A_exp A_StringExp(A_pos pos, char *s);
 
 A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args);
+
+A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right);
+
+// var
+
+A_varType A_VarTypeBasic(A_pos pos, A_basicType type);
+
+A_basicType A_BasicType(enum A_BasicType_ type);
+
+A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
+
+A_fieldList A_FieldList(A_field value, A_fieldList next);
 
 A_var A_SimpleVar(A_pos pos, S_symbol sym);
 
