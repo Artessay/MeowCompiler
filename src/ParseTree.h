@@ -44,8 +44,6 @@ typedef struct A_field_ *A_field;
 
 typedef struct A_fieldList_ *A_fieldList;
 
-typedef struct A_funcImplment_ *A_funcImplment;
-
 typedef struct A_define_ *A_define;
 
 typedef struct A_defineList_ *A_defineList;
@@ -73,7 +71,7 @@ struct A_funcDeclare_ {
     A_varType returnType;
     S_symbol name;
     A_fieldList params;
-    A_funcImplment body;
+    A_stmtList body;
 
     char escape;
 };
@@ -139,11 +137,17 @@ struct A_fieldList_ {
 
 struct A_stmt_ {
     enum {
-        A_expStmt, A_compoundStmt, A_ifStmt, A_whileStmt, A_forStmt, A_breakStmt, A_continueStmt, A_returnStmt
+        A_expStmt, 
+        A_varDecStmt,
+        A_compoundStmt, 
+        A_ifStmt, 
+        A_whileStmt, A_forStmt, A_breakStmt, A_continueStmt, 
+        A_returnStmt
     } kind;
     A_pos pos;
     union {
         A_exp exp;
+        A_varDeclare varDec;
         struct {
             A_stmtList stmts;
         } compound;
@@ -251,7 +255,7 @@ A_topClause A_FuncDeclare(A_funcDeclare function);
 
 A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_funcImplment body);
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body);
 
 // stmt
 
@@ -259,9 +263,15 @@ A_stmtList A_StmtList(A_stmt value, A_stmtList next);
 
 A_stmt A_ExprStmt(A_pos pos, A_exp exp);
 
+A_stmt A_VarDecStmt(A_varDeclare varDec);
+
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp);
 
 // exp
+
+A_expList A_ExpList(A_exp value, A_expList next);
+
+A_exp A_VarExp(A_pos pos, A_var var);
 
 A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp);
 

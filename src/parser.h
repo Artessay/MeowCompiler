@@ -206,9 +206,8 @@ typedef union YYSTYPE
     
     struct A_funcDeclare_ *funcDeclare;
     struct A_varDeclare_ *varDeclare;
-
-    struct A_funcImplment_ *block;
-
+    
+    struct A_var_ *var;
     struct A_varType_ *varType;
     struct A_basicType_ *basicType;
     struct A_pointType_ *pointType;
@@ -224,7 +223,7 @@ typedef union YYSTYPE
 
 
 /* Line 2058 of yacc.c  */
-#line 228 "parser.h"
+#line 227 "parser.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

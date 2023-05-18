@@ -28,7 +28,7 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable) {
 	return p;
 }
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_funcImplment body) {
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body) {
 	A_funcDeclare p = (A_funcDeclare)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->returnType = retTyp;
@@ -64,6 +64,14 @@ A_stmt A_ExprStmt(A_pos pos, A_exp exp) {
 	return p;
 }
 
+A_stmt A_VarDecStmt(A_varDeclare varDec) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_varDecStmt;
+	p->pos = varDec->pos;
+	p->u.varDec = varDec;
+	return p;
+}
+
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp) {
 	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
 	p->kind = A_returnStmt;
@@ -78,6 +86,14 @@ A_expList A_ExpList(A_exp value, A_expList next) {
 	A_expList p = checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
+	return p;
+}
+
+A_exp A_VarExp(A_pos pos, A_var var) {
+	A_exp p = checked_malloc(sizeof(*p));
+	p->kind = A_varExp;
+	p->pos = pos;
+	p->u.var = var;
 	return p;
 }
 

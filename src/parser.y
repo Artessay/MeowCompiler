@@ -26,9 +26,8 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
     
     struct A_funcDeclare_ *funcDeclare;
     struct A_varDeclare_ *varDeclare;
-
-    struct A_funcImplment_ *block;
-
+    
+    struct A_var_ *var;
     struct A_varType_ *varType;
     struct A_basicType_ *basicType;
     struct A_pointType_ *pointType;
@@ -86,16 +85,18 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 
 %type <fieldList> Params
 
-%type <block> Block
+/* %type <block> Block */
 
-%type <exp> Expression Binary_Exp Var_Exp Call_Exp
+%type <var>  L_Value;
+
+%type <exp> Expression Binary_Exp Call_Exp
 
 %type <expList> Expression_List Nonempty_Exp_List
 
 %type <stmt> Statement Exp_Stmt Return_Stmt
 /* Selection_Stmt Iteration_Stmt */
 
-%type <stmtList> Statements
+%type <stmtList> Block Statements
 
 // terminals
 
@@ -117,7 +118,7 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 //statement definition
 %type Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt ELSEIF_List
 //expression definition
-%type Expression Uni_Exp LUOP RUOP Var_Exp Call_Exp Arg_List Binary_Exp Expression_List */
+%type Expression Uni_Exp LUOP RUOP L_Value Call_Exp Arg_List Binary_Exp Expression_List */
 
 //priority
 %right  ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
@@ -150,7 +151,7 @@ Top_Clause
         ;
 
 Var_Declaration
-        : Type_Specifier Var_List SEMICOLON { $$ = NULL; printf("TODO\n"); }
+        : Type_Specifier Var_List SEMICOLON { $$ = NULL; printf("\n"); }
         ;
 Var_List : Var_List COMMA Var_Init {  }
          | Var_Init {  }
@@ -165,8 +166,8 @@ Var_Def : Var_Def LBRACK INT RBRACK {  }
 Fun_Declaration
         : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL); }
         | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6); }
-        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT  RPAREN SEMICOLON { $$ = NULL; printf("TODO\n"); }
-        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = NULL; printf("TODO\n"); }
+        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT  RPAREN SEMICOLON { $$ = NULL; printf("TODO: Function ...\n"); }
+        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = NULL; printf("TODO: Function ...\n"); }
         ;
 Params 
         : Param COMMA Params { $$ = A_FieldList($1, $3); }
@@ -205,7 +206,7 @@ Statement
         | Return_Stmt { $$ = $1; }
         /* | BREAK SEMICOLON { $$ = new Node(BREAK_); cout << "20-5" << endl; } */
         /* | CONTINUE SEMICOLON { $$ = new Node(CONTINUE_); cout << "20-6" << endl; } */
-        | Var_Declaration { $$ = $1; }
+        | Var_Declaration { $$ = A_VarDecStmt($1); }
         ;
 
 Exp_Stmt 
@@ -230,18 +231,18 @@ Return_Stmt
         ;
 
 Expression 
-        : Var_Exp ASSIGN Expression { $$ = A_AssignExp(7, $1, $3); }
-        /* | Var_Exp ADDAS Expression { $$ = new Node(ADDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-2" << endl; }
-        | Var_Exp SUBAS Expression { $$ = new Node(SUBAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-3" << endl; }
-        | Var_Exp MULAS Expression { $$ = new Node(MULAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-4" << endl; }
-        | Var_Exp DIVAS Expression { $$ = new Node(DIVAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-5" << endl; }
-        | Var_Exp MODAS Expression { $$ = new Node(MODAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-6" << endl; }
-        | Var_Exp SHLAS Expression { $$ = new Node(SHLAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-7" << endl; }
-        | Var_Exp SHRAS Expression { $$ = new Node(SHRAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-8" << endl; }
-        | Var_Exp BANDAS Expression { $$ = new Node(BANDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-9" << endl; }
-        | Var_Exp BORAS Expression { $$ = new Node(BORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-10" << endl; }
-        | Var_Exp BXORAS Expression { $$ = new Node(BXORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-11" << endl; } */
-        | Var_Exp { $$ = $1; }
+        : L_Value ASSIGN Expression { $$ = A_AssignExp(7, $1, $3); }
+        /* | L_Value ADDAS Expression { $$ = new Node(ADDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-2" << endl; }
+        | L_Value SUBAS Expression { $$ = new Node(SUBAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-3" << endl; }
+        | L_Value MULAS Expression { $$ = new Node(MULAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-4" << endl; }
+        | L_Value DIVAS Expression { $$ = new Node(DIVAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-5" << endl; }
+        | L_Value MODAS Expression { $$ = new Node(MODAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-6" << endl; }
+        | L_Value SHLAS Expression { $$ = new Node(SHLAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-7" << endl; }
+        | L_Value SHRAS Expression { $$ = new Node(SHRAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-8" << endl; }
+        | L_Value BANDAS Expression { $$ = new Node(BANDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-9" << endl; }
+        | L_Value BORAS Expression { $$ = new Node(BORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-10" << endl; }
+        | L_Value BXORAS Expression { $$ = new Node(BXORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-11" << endl; } */
+        | L_Value { $$ = A_VarExp(7, $1); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
         /* | Uni_Exp { $$ = $1; cout << "25-15" << endl; } */
@@ -274,12 +275,11 @@ Call_Exp
         : IDENTITY LPAREN Expression_List RPAREN { $$ = A_CallExp(7, $1, $3); }
         ;
 
-/* lvalue */
-Var_Exp 
+L_Value
         : IDENTITY LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, A_SimpleVar(7, $1), $3); }
         | IDENTITY { $$ = A_SimpleVar(7, $1); }
-        | Var_Exp LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
-        /* | Var_Exp DOT IDENTITY {} */
+        | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
+        /* | L_Value DOT IDENTITY {} */
         ;
 Binary_Exp 
         : Expression ADD Expression { $$ = A_OpExp(7, A_plusOp,   $1, $3); }
@@ -294,12 +294,8 @@ Binary_Exp
         | Expression GT  Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
         | Expression GE  Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
         ;
-/* Define_List : Define_List Define { printf("TODO --- Define_List : Define_List Define\n"); }
-            | Define { printf("TODO --- Define_List : Define\n"); }
-            ;
-Define : POUND DEFINE Declarator STRING { printf("TODO --- Define : POUND DEFINE Declarator STRING\n"); }
-       | POUND DEFINE Declarator INT { printf("TODO --- Define_List : POUND DEFINE Declarator INT\n"); }
-       ;
+/* 
+
 Declaration_List : Declaration_List Declaration { $1->children.push_back($2); $$ = $1; cout << "4-1" << endl; }
                  | Declaration { $$ = $1; cout << "4-2" << endl; }
                  ; */
@@ -389,33 +385,9 @@ LUOP : NOT { $$ = new Node(NOT_); cout << "27-1" << endl; }
 RUOP : DADD { $$ = new Node(DADD_); cout << "28-1" << endl; }
      | DSUB { $$ = new Node(DSUB_); cout << "28-2" << endl; }
      ;
-Var_Exp : Var_Exp LBRACK Expression RBRACK { $$ = new Node(Array_Exp_); $$->children.push_back($1); $$->children.push_back($3); cout << "29-1" << endl; }
-        | Declarator { $$ = new Node(Var_Exp_); $$->children.push_back($1); cout << "29-2" << endl; }
-        ;
-Call_Exp : Declarator LPAREN Arg_List RPAREN { $$=new Node(Call_Exp_); $$->children.push_back($1); $$->children.push_back($3); cout << "30-1" << endl; }
-         | Declarator LPAREN RPAREN { $$=new Node(Call_Exp_); $$->children.push_back($1); cout << "30-2" << endl; }
-         ;
-Arg_List : Arg_List COMMA Expression { $1->children.push_back($3); $$=$1; cout << "31-1" << endl; }
-         | Expression { $$=new Node(Arg_); $$->children.push_back($1); cout << "31-2" << endl; }
-         ;
-Binary_Exp : Expression ADD Expression { $2 = new Node(ADD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-1" << endl; }
-           | Expression SUB Expression { $2 = new Node(SUB_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-2" << endl; }
-           | Expression MUL Expression { $2 = new Node(MUL_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-3" << endl; }
-           | Expression DIV Expression { $2 = new Node(DIV_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-           | Expression MOD Expression { $2 = new Node(MOD_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-4" << endl; }
-           | Expression LE Expression { $2 = new Node(LE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-5" << endl; }
-           | Expression LT Expression { $2 = new Node(LT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-6" << endl; }
-           | Expression GT Expression { $2 = new Node(GT_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-7" << endl; }
-           | Expression GE Expression { $2 = new Node(GE_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-8" << endl; }
-           | Expression EQ Expression { $2 = new Node(EQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-9" << endl; }
-           | Expression NEQ Expression { $2 = new Node(NEQ_); $2->children.push_back($1); $2->children.push_back($3); $$ = $2; cout << "32-10" << endl; }
-           ; */
+*/
 
 %%
-
-/* int yywrap(){
-    return 1;
-} */
 
 // int main()
 // {
