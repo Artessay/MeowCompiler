@@ -1,13 +1,14 @@
-CC 		= gcc
+# CC 		= gcc
+CC 		= g++
 LEX 	= flex
 YACC 	= bison
 
 SRC		= main.c \
 		  ErrorMessage.c ParseTree.c symbol.c table.c utility.c
 
-LEXER_CPP = lexer.c
-PARSER_CPP = parser.c
-PARSER_HPP = parser.h
+LEXER_CPP = lexer.cpp
+PARSER_CPP = parser.cpp
+PARSER_HPP = parser.hpp
 
 TARGET = test.exe
 TEST_FILE = test.c
