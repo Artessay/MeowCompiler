@@ -257,6 +257,8 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
 A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body);
 
+A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name);
+
 // stmt
 
 A_stmtList A_StmtList(A_stmt value, A_stmtList next);
