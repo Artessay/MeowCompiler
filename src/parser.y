@@ -151,17 +151,18 @@ Top_Clause
         ;
 
 Var_Declaration
-        : Type_Specifier Var_List SEMICOLON { $$ = NULL; printf("\n"); }
+        : Type_Specifier IDENTITY SEMICOLON { $$ = A_VarDeclaration(7, $1, $2); }
+        /* : Type_Specifier Var_List SEMICOLON { $$ = A_VarDeclaration(7, $1, ); } */
         ;
-Var_List : Var_List COMMA Var_Init {  }
-         | Var_Init {  }
+/* Var_List : Var_List COMMA Var_Init {  }
+         | Var_Init {  } */
          ;
-Var_Init : Var_Def {  }
+/* Var_Init : Var_Def {  }
          | Var_Def ASSIGN Expression {  }
          ;
 Var_Def : Var_Def LBRACK INT RBRACK {  }
-        | IDENTITY {  }
-        ;
+        | IDENTITY {  } 
+        ; */
 
 Fun_Declaration
         : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL); }
@@ -197,7 +198,7 @@ Block
         ;
 Statements  
         : Statement Statements { $$ = A_StmtList($1, $2); puts("Statement"); }
-        | /* empty */  { $$ = NULL; puts("empty statement"); }
+        | /* empty */  { $$ = NULL; /* puts("empty statement"); */ }
         ;
 Statement 
         : Exp_Stmt { $$ = $1; }

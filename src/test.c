@@ -3,10 +3,9 @@
 // }
 
 int main() {
-
     int n;
     n = 1 + 2;
     // n = 3 * 4 - add(1, 2);
 
-    return 0;
+    return n;
 }
