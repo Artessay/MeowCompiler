@@ -53,12 +53,11 @@ struct A_topClauseList_ {
     A_topClauseList next;
 };
 
-typedef enum {
-    A_Preprocess, A_FunctionDeclare, A_GlobalVarDefine
-} A_topClauseKind;
 
 struct A_topClause_ {
-    A_topClauseKind kind;
+    enum {
+        A_Preprocess, A_FunctionDeclare, A_GlobalVarDefine
+    } kind;
     A_pos pos;
     union {
         A_funcDeclare function;
