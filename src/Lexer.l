@@ -1,31 +1,55 @@
-%option noyywrap
 %{
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include "y.tab.h"
-#include "ast.h"
-char charConvert(char ch) {
-    switch(ch) {
-        case 'a': return '\a';
-        case 'b': return '\b';
-        case 'f': return '\f';
-        case 'n': return '\n';
-        case 'r': return '\r';
-        case 't': return '\t';
-        case 'v': return '\v';
-        default:
-            return ch;
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+
+    #include "parser.h"
+
+    #include "ErrorMessage.h"
+    #include "ParseTree.h"
+
+    // #define BUFFER_SIZE 1024
+    
+    // char lexer_buffer[BUFFER_SIZE];
+
+    char charConvert(char ch) {
+        switch(ch) {
+            case 'a': return '\a';
+            case 'b': return '\b';
+            case 'f': return '\f';
+            case 'n': return '\n';
+            case 'r': return '\r';
+            case 't': return '\t';
+            case 'v': return '\v';
+            default:
+                return ch;
+        }
     }
-}
-extern "C"{
-    //int yywrap(void);
-	int yylex(void);
-}
+    
+    int yylex(void);
+
+    int charPos=1;
+
+    int yywrap(void) {
+        charPos = 1;
+        return 1;
+    }
+
+    void adjust() {
+        EM_setTokenPos(charPos);
+        charPos += yyleng;
+    }
 
 %}
 
+/* 空白符和注释 */
+WhiteSpace    [ \t\n\r]*
+LineComment   "//"[^\n]*
+
 %%
+
+{LineComment}               { /* 忽略, 不做任何操作 */ }                                                      //����ע��
+{WhiteSpace}                { /* 忽略, 不做任何操作 */ }                                                      //�ո��뻻��
 
 "+"							{return ADD;}
 "-"							{return SUB;}
@@ -69,8 +93,8 @@ extern "C"{
 
 "("                         {return LPAREN;}
 ")"                         {return RPAREN;}
-"["                         {/*cout << "[\n";*/ return LBRACK;}
-"]"                         {/*cout << "]\n";*/ return RBRACK;}
+"["                         {return LBRACK;}
+"]"                         {return RBRACK;}
 "{"                         {return LBRACE;}
 "}"                         {return RBRACE;}
 
@@ -101,34 +125,27 @@ extern "C"{
 "string"                    {return TYPE_STRING;}
 
 
-[a-zA-Z\_][a-zA-Z0-9\_]*    {/*yylval.sVal = string(yytext);*/ yylval.node = new Node(string(yytext), Declarator_); /*cout << "ID\n";*/ return ID;}              //��������������
-"-"?[0-9]+                  {/*yylval.iVal = atoi(yytext);*/ yylval.node = new Node(atoi(yytext), INT_); return INT;}               //����ֵ
-"-"?[0-9]+\.[0-9]+          {/*yylval.dVal = atof(yytext);*/ yylval.node = new Node(atof(yytext), DOUBLE_); return DOUBLE;}            //������ֵ
-"\'"[^\\']"\'"              {/*yylval.cVal = yytext[1];*/ yylval.node = new Node(yytext[1],CHAR_); return CHAR;}                 //������ת���ַ�ֵ
-"\'"\\."\'"                 {/*yylval.cVal = charConvert(yytext[2]);*/ yylval.node = new Node(charConvert(yytext[2]),CHAR_); return CHAR;}    //����ת���ַ�ֵ
-"\""(\\.|[^"\\])*"\""	    {                                                       //�ַ���ֵ
-							/*yylval.sVal = new string();
-                            for (int i = 1; i < yyleng - 1; i++)
-                                if (yytext[i] == '\\'){                             //ת���ַ�
-                                    i++;
-                                    yylval.sVal->push_back(charConvert(yytext[i]));
-                                }else{                                              //��ת���ַ�
-                                    yylval.sVal->push_back(yytext[i]);
-                                }*/
-                            string sVal;
-                            for (int i = 1; i < yyleng - 1; i++)
-                                if (yytext[i] == '\\'){                             //ת���ַ�
-                                    i++;
-                                    sVal.append(1, charConvert(yytext[i]));
-                                }else{                                              //��ת���ַ�
-                                    sVal.append(1, yytext[i]);
-                                }
-                            yylval.node = new Node(sVal,STRING_);
-                            //cout << "STRING\n";
-                            return STRING;
-}
+[a-zA-Z\_][a-zA-Z0-9\_]*    { yylval.sVal = yytext; return ID; }
+"-"?[0-9]+                  { yylval.iVal = atoi(yytext); return INT; } 
+"-"?[0-9]+\.[0-9]+          { yylval.dVal = atof(yytext); return DOUBLE; }
+"\'"[^\\']"\'"              { yylval.cVal = yytext[1]; return CHAR; }
+"\'"\\."\'"                 { yylval.cVal = charConvert(yytext[2]); return CHAR; }
+"\""(\\.|[^"\\])*"\""	    {
+                                yylval.sVal = malloc(yyleng);
 
-"//"[^\n]*                  {}                                                      //����ע��
-[ \t\n\r]                   {}                                                      //�ո��뻻��
+                                int index = 0;
+                                for (int i = 1; i < yyleng - 1; i++) {
+                                    if (yytext[i] == '\\') {
+                                        i++;
+                                        yylval.sVal[index++] = charConvert(yytext[i]);
+                                    } else {
+                                        yylval.sVal[index++] = yytext[i];
+                                    }
+                                }
+                                yylval.sVal[index] = 0;
+                                
+                                return STRING;
+                            }
+
 .                           {}
 %%

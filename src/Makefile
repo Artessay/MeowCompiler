@@ -1,15 +1,29 @@
-CC 		= g++
+CC 		= gcc
 LEX 	= flex
 YACC 	= bison
 
+SRC		= main.c \
+		  ErrorMessage.c ParseTree.c symbol.c table.c utility.c
+
+LEXER_CPP = lexer.c
+PARSER_CPP = parser.c
+PARSER_HPP = parser.h
+
+TARGET = test.exe
+TEST_FILE = test.c
+
 all:
-	bison --yacc -dv parser.y
-	flex Lexer.l
-	g++ -o test y.tab.c lex.yy.c
+	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
+	$(LEX) -o $(LEXER_CPP) lexer.l
+	$(CC) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
+	./$(TARGET) $(TEST_FILE)
+
+run:
+	./$(TARGET) $(TEST_FILE)
 
 clean:
 	-rm -f *.exe
-	-rm lex.yy.c 
-	-rm y.tab.h 
-	-rm y.tab.c 
-	-rm y.output
+	-rm $(LEXER_CPP)
+	-rm $(PARSER_HPP)
+	-rm $(PARSER_CPP)
+	-rm parser.output
