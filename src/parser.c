@@ -1765,7 +1765,7 @@ yyreduce:
   case 25:
 /* Line 1792 of yacc.c  */
 #line 201 "parser.y"
-    { (yyval.stmtList) = NULL; puts("empty statement"); }
+    { (yyval.stmtList) = NULL; /* puts("empty statement"); */ }
     break;
 
   case 26:
