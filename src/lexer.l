@@ -5,18 +5,19 @@
 
     #ifdef __cplusplus
     extern "C" {
-    #endif
 
         #include "parser.hpp"
 
         int yylex(void);
         int yywrap(void);
 
-    #ifdef __cplusplus
     }
     #else
 
         #include "parser.h"
+
+        int yylex(void);
+        int yywrap(void);
 
     #endif
 
