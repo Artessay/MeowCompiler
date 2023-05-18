@@ -24,8 +24,11 @@ int main() {
     // 创建基本块
     LLVMBasicBlockRef entryBlock = LLVMAppendBasicBlock(mainFunction, "entry");
 
-    // 进入基本块
-    LLVMPositionBuilderAtEnd(LLVMCreateBuilder(), entryBlock);
+    // 创建LLVMBuilderRef对象
+    LLVMBuilderRef builder = LLVMCreateBuilder();
+
+    // 进入基本块并设置指令插入点
+    LLVMPositionBuilderAtEnd(builder, entryBlock);
 
     // 创建字符串常量
     LLVMValueRef helloStr = LLVMBuildGlobalStringPtr(LLVMGetGlobalContext(), "Hello, LLVM IR!\n", "hello");
@@ -33,10 +36,10 @@ int main() {
     // 调用printf函数
     LLVMValueRef printfFunction = LLVMGetNamedFunction(module, "printf");
     LLVMValueRef args[] = {helloStr};
-    LLVMBuildCall(LLVMCreateBuilder(), printfFunction, args, 1, "");
+    LLVMBuildCall(builder, printfFunction, args, 1, "");
 
     // 返回0
-    LLVMBuildRet(LLVMCreateBuilder(), LLVMConstInt(LLVMInt32TypeInContext(context), 0, 0));
+    LLVMBuildRet(builder, LLVMConstInt(LLVMInt32TypeInContext(context), 0, 0));
 
     // 打印模块内容
     LLVMDumpModule(module);
