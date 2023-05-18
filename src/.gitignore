@@ -1,3 +1,5 @@
+*.ll
+*.s
 *.output
 lexer.c
 parser.h

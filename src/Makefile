@@ -11,6 +11,8 @@ PARSER_HPP = parser.h
 
 TARGET = test.exe
 TEST_FILE = test.c
+TEST_IR = $(TEST_FILE:.c=.ll)
+TEST_AS = $(TEST_FILE:.c=.s)
 
 all:
 	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
@@ -20,6 +22,11 @@ all:
 
 run:
 	./$(TARGET) $(TEST_FILE)
+
+show:
+	clang -S -emit-llvm -o $(TEST_IR) -O0 $(TEST_FILE)
+	llc $(TEST_IR) -o $(TEST_AS)
+	clang $(TEST_AS)
 
 clean:
 	-rm -f *.exe

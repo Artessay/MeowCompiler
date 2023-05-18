@@ -6,14 +6,14 @@
 A_topClauseList A_root = NULL;
 
 A_topClauseList A_TopClauseList(A_topClause value, A_topClauseList next) {
-	A_topClauseList p = checked_malloc(sizeof(*p));
+	A_topClauseList p = (A_topClauseList)checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
 	return p;
 }
 
 A_topClause A_FuncDeclare(A_funcDeclare function) {
-	A_topClause p = checked_malloc(sizeof(*p));
+	A_topClause p = (A_topClause)checked_malloc(sizeof(*p));
 	p->kind = A_FunctionDeclare;
 	p->pos = function->pos;
 	p->u.function = function;
@@ -21,7 +21,7 @@ A_topClause A_FuncDeclare(A_funcDeclare function) {
 }
 
 A_topClause A_VarDeclare(A_varDeclare globalVariable) {
-	A_topClause p = checked_malloc(sizeof(*p));
+	A_topClause p = (A_topClause)checked_malloc(sizeof(*p));
 	p->kind = A_GlobalVarDefine;
 	p->pos = globalVariable->pos;
 	p->u.globalVar = globalVariable;
@@ -83,14 +83,14 @@ A_stmt A_ReturnStmt(A_pos pos, A_exp exp) {
 // === exp ===
 
 A_expList A_ExpList(A_exp value, A_expList next) {
-	A_expList p = checked_malloc(sizeof(*p));
+	A_expList p = (A_expList)checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
 	return p;
 }
 
 A_exp A_VarExp(A_pos pos, A_var var) {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_varExp;
 	p->pos = pos;
 	p->u.var = var;
@@ -98,7 +98,7 @@ A_exp A_VarExp(A_pos pos, A_var var) {
 }
 
 A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp) {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_assignExp;
 	p->pos = pos;
 	p->u.assign.var = var;
@@ -108,7 +108,7 @@ A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp) {
 
 A_exp A_NilExp(A_pos pos)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_nilExp;
 	p->pos = pos;
 	return p;
@@ -116,7 +116,7 @@ A_exp A_NilExp(A_pos pos)
 
 A_exp A_IntExp(A_pos pos, int i)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_intExp;
 	p->pos = pos;
 	p->u.intt = i;
@@ -125,7 +125,7 @@ A_exp A_IntExp(A_pos pos, int i)
 
 A_exp A_CharExp(A_pos pos, char c)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_charExp;
 	p->pos = pos;
 	p->u.charr = c;
@@ -134,7 +134,7 @@ A_exp A_CharExp(A_pos pos, char c)
 
 A_exp A_DoubleExp(A_pos pos, double d)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_doubleExp;
 	p->pos = pos;
 	p->u.doublee = d;
@@ -143,7 +143,7 @@ A_exp A_DoubleExp(A_pos pos, double d)
 
 A_exp A_StringExp(A_pos pos, char *s)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_stringExp;
 	p->pos = pos;
 	p->u.stringg = s;
@@ -152,7 +152,7 @@ A_exp A_StringExp(A_pos pos, char *s)
 
 A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_callExp;
 	p->pos = pos;
 	p->u.call.func = func;
@@ -161,7 +161,7 @@ A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 }
 
 A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right) {
-	A_exp p = checked_malloc(sizeof(*p));
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_opExp;
 	p->pos = pos;
 	p->u.op.oper = oper;
@@ -173,7 +173,7 @@ A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right) {
 // === var ===
 
 A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
-	A_varType p = checked_malloc(sizeof(*p));
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->kind = A_basic;
 	p->u.basic = type;
@@ -181,13 +181,13 @@ A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
 }
 
 A_basicType A_BasicType(enum A_BasicType_ type) {
-	A_basicType p = checked_malloc(sizeof(*p));
+	A_basicType p = (A_basicType)checked_malloc(sizeof(*p));
 	p->kind = type;
 	return p;
 }
 
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
-	A_field p = checked_malloc(sizeof(*p));
+	A_field p = (A_field)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->name = name;
 	p->typ = typ;
@@ -195,14 +195,14 @@ A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
 }
 
 A_fieldList A_FieldList(A_field value, A_fieldList next) {
-	A_fieldList p = checked_malloc(sizeof(*p));
+	A_fieldList p = (A_fieldList)checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
 	return p;
 }
 
 A_var A_SimpleVar(A_pos pos, S_symbol sym) {
-	A_var p = checked_malloc(sizeof(*p));
+	A_var p = (A_var)checked_malloc(sizeof(*p));
 	p->kind = A_simpleVar;
 	p->pos = pos;
 	p->u.simple = sym;
@@ -210,7 +210,7 @@ A_var A_SimpleVar(A_pos pos, S_symbol sym) {
 }
 
 A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym) {
-	A_var p = checked_malloc(sizeof(*p));
+	A_var p = (A_var)checked_malloc(sizeof(*p));
 	p->kind = A_fieldVar;
 	p->pos = pos;
 	p->u.field.var = var;
@@ -219,7 +219,7 @@ A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym) {
 }
 
 A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp) {
-	A_var p = checked_malloc(sizeof(*p));
+	A_var p = (A_var)checked_malloc(sizeof(*p));
 	p->kind = A_subscriptVar;
 	p->pos = pos;
 	p->u.subscript.var = var;

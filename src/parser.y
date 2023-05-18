@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "ParseTree.h"
-#include "parser.h"
+// #include "parser.h"
 
 extern int yylex();
 
@@ -167,8 +167,6 @@ Var_Def : Var_Def LBRACK INT RBRACK {  }
 Fun_Declaration
         : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL); }
         | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6); }
-        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT  RPAREN SEMICOLON { $$ = NULL; printf("TODO: Function ...\n"); }
-        | Type_Specifier IDENTITY LPAREN Params COMMA DOT DOT DOT RPAREN { $$ = NULL; printf("TODO: Function ...\n"); }
         ;
 Params 
         : Param COMMA Params { $$ = A_FieldList($1, $3); }
@@ -177,7 +175,8 @@ Params
         ;
 Param 
         : Type_Specifier IDENTITY { $$ = A_Field(7, $1, $2); }
-        /* | Type_Specifier ID LBRACK RBRACK { $$ = new Node(Param_); $$->children.push_back($1); $2->setPointer(); $$->children.push_back($2); cout << "14-2" << endl; } */
+        /* | Type_Specifier ID LBRACK RBRACK {  } */
+        | DOT DOT DOT  { $$ = NULL; printf("TODO: Function ...\n"); }
         ;
 IDENTITY
         : ID { $$ = S_Symbol($1); printf("Identity: %s\n", $1); }
@@ -277,8 +276,7 @@ Call_Exp
         ;
 
 L_Value
-        : IDENTITY LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, A_SimpleVar(7, $1), $3); }
-        | IDENTITY { $$ = A_SimpleVar(7, $1); }
+        : IDENTITY { $$ = A_SimpleVar(7, $1); }
         | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         /* | L_Value DOT IDENTITY {} */
         ;

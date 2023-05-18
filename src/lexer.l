@@ -3,7 +3,24 @@
     #include <stdlib.h>
     #include <string.h>
 
-    #include "parser.h"
+    #ifdef __cplusplus
+    extern "C" {
+    #endif
+
+        #include "parser.hpp"
+
+        int yylex(void);
+        int yywrap(void);
+
+    #ifdef __cplusplus
+    }
+    #else
+
+        #include "parser.h"
+
+    #endif
+
+    
 
     #include "ErrorMessage.h"
     #include "ParseTree.h"
@@ -25,8 +42,6 @@
                 return ch;
         }
     }
-    
-    int yylex(void);
 
     int charPos=1;
 
