@@ -15,7 +15,7 @@ all: $(TARGET)
 	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
 	$(LEX) -o lexer.cpp lexer.l
 	$(CC) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
-	./$(TARGET) < $(TEST_FILE)
+	./$(TARGET) $(TEST_FILE)
 
 run:
 	./$(TARGET) < $(TEST_FILE)

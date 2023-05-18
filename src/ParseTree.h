@@ -184,63 +184,60 @@ struct A_stmtList_ {
 //     } u;
 // };
 
-// struct A_exp_ {
-//     enum {
-//         A_varExp, A_nilExp, A_intExp, A_stringExp, A_callExp,
-//         A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
-//         A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
-//     } kind;
-//     A_pos pos;
-//     union {
-//         A_var var;
-//         /* nil; - needs only the pos */
-//         int intt;
-//         char *stringg;
-//         struct {
-//             S_symbol func;
-//             A_expList args;
-//         } call;
-//         struct {
-//             A_oper oper;
-//             A_exp left;
-//             A_exp right;
-//         } op;
-//         // struct {
-//         //     S_symbol type;
-//         //     A_efieldList fields;
-//         // } record;
-//         A_expList seq;
-//         struct {
-//             A_var var;
-//             A_exp exp;
-//         } assign;
-//         struct {
-//             A_exp test, then, elsee;
-//         } iff;
-//         struct {
-//             A_exp test, body;
-//         } whilee;
-//         struct {
-//             S_symbol var;
-//             A_exp lo, hi, body;
-//             // bool escape;
-//         } forr;
-//         /* breakk; - need only the pos */
-//         struct {
-//             A_decList decs;
-//             A_exp body;
-//         } let;
-//         struct {
-//             S_symbol type;
-//             A_exp size, init;
-//         } array;
-//     } u;
-// };
+struct A_exp_ {
+    enum {
+        A_varExp, 
+        A_nilExp, A_intExp, A_charExp, A_doubleExp, A_stringExp, 
+        A_callExp,
+        A_opExp, A_recordExp, A_seqExp, A_assignExp, A_ifExp,
+        A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
+    } kind;
+    A_pos pos;
+    union {
+        A_var var;
+        
+        /* nil; - needs only the pos */
+        int intt;
+        char charr;
+        double doublee;
+        char *stringg;
 
-// struct A_funcImplment_ {
-//     A_pos pos;
-//     A_funcDeclare declare;
-// };
+        struct {
+            S_symbol func;
+            A_expList args;
+        } call;
+        struct {
+            A_oper oper;
+            A_exp left;
+            A_exp right;
+        } op;
+        // struct {
+        //     S_symbol type;
+        //     A_efieldList fields;
+        // } record;
+        A_expList seq;
+        struct {
+            A_var var;
+            A_exp exp;
+        } assign;
+        struct {
+            A_exp test, then, elsee;
+        } iff;
+        struct {
+            A_exp test, body;
+        } whilee;
+        struct {
+            S_symbol var;
+            A_exp lo, hi, body;
+            // bool escape;
+        } forr;
+        /* breakk; - need only the pos */
+        struct {
+            S_symbol type;
+            A_exp size, init;
+        } array;
+    } u;
+};
 
 // struct A_define_ {
 //     A_pos pos;
@@ -268,6 +265,30 @@ A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
 A_fieldList A_FieldList(A_field value, A_fieldList next);
 
 A_stmtList A_StmtList(A_stmt value, A_stmtList next);
+
+A_stmt A_ExprStmt(A_pos pos, A_exp exp);
+
+A_stmt A_ReturnStmt(A_pos pos, A_exp exp);
+
+A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp);
+
+A_exp A_NilExp(A_pos pos);
+
+A_exp A_IntExp(A_pos pos, int i);
+
+A_exp A_CharExp(A_pos pos, char c);
+
+A_exp A_DoubleExp(A_pos pos, double d);
+
+A_exp A_StringExp(A_pos pos, char *s);
+
+A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args);
+
+A_var A_SimpleVar(A_pos pos, S_symbol sym);
+
+A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym);
+
+A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
 
 extern A_topClauseList A_root;
 
