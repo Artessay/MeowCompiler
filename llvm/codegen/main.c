@@ -34,10 +34,10 @@ int main() {
     LLVMValueRef helloStr = LLVMBuildGlobalStringPtr(builder, "Hello, LLVM IR!\n", "hello");
 
     // 调用printf函数
-    LLVMValueRef printfFunction = LLVMGetNamedFunction(module, "printf");
-    LLVMValueRef args[] = {helloStr};
-    LLVMTypeRef printfFunctionType = LLVMFunctionType(LLVMInt32TypeInContext(context), NULL, 0, 0);
-    LLVMBuildCall2(builder, printfFunctionType, printfFunction, args, 1, "");
+    // LLVMValueRef printfFunction = LLVMGetNamedFunction(module, "printf");
+    // LLVMValueRef args[] = {helloStr};
+    // LLVMTypeRef printfFunctionType = ;
+    // LLVMBuildCall2(builder, printfFunctionType, printfFunction, args, 1, "");
 
     // 返回0
     LLVMBuildRet(builder, LLVMConstInt(LLVMInt32TypeInContext(context), 0, 0));
@@ -46,7 +46,7 @@ int main() {
     LLVMDumpModule(module);
 
     // 打印到文件
-    // printf("print %d\n", LLVMPrintModuleToFile(module, "main.ll", NULL));
+    LLVMPrintModuleToFile(module, "main.ll", NULL);
 
     // 创建执行引擎
     LLVMExecutionEngineRef engine;
