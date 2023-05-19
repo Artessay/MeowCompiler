@@ -1,11 +1,14 @@
 #include "semantic.h"
+#include "utility.h"
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 
-void SEM_transProgram(A_topClauseList program, char *module_name, char *output_filename) {
+void SEM_transProgram(A_topClauseList program, char *module_name) {
     // initial LLVM
     LLVMInitializeCore(LLVMGetGlobalPassRegistry());
     LLVMInitializeNativeTarget();
@@ -40,7 +43,13 @@ void SEM_transProgram(A_topClauseList program, char *module_name, char *output_f
     // print module content
     LLVMDumpModule(module);
 
+    // output to file
+    char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
+    strcpy(output_filename, module_name);
+    strcat(output_filename, ".ll");
+
     LLVMPrintModuleToFile(module, output_filename, NULL);
+    free(output_filename);
 
     // dispose LLVM context
     LLVMContextDispose(context);

@@ -13,7 +13,6 @@ extern int yyparse();
 int main(int argc, const char *argv[]) {
     char module_name[MAX_FILE_NAME];
     char source_filename[MAX_FILE_NAME];
-    char output_filename[MAX_FILE_NAME];
 
     // argument process
     if (argc >= 2) {
@@ -31,10 +30,6 @@ int main(int argc, const char *argv[]) {
     // module name
     strncpy(module_name, source_filename, (rc - source_filename));
     module_name[(rc - source_filename)] = '\0';
-    
-    // output name
-    strcpy(output_filename, module_name);
-    strcat(output_filename, ".ll");
 
     // parsing
     yyin = fopen(source_filename, "r");
@@ -42,7 +37,7 @@ int main(int argc, const char *argv[]) {
     
     puts("[front end] start parsing");
     yyparse();
-    puts("[front end] end parsing");
+    puts("[front end] end parsing\n");
 
     // puts(module_name);
     // puts(source_filename);
@@ -52,8 +47,8 @@ int main(int argc, const char *argv[]) {
     assert(root != NULL);
 
     puts("[front end] start translate to IR");
-    SEM_transProgram(root, module_name, output_filename);
-    puts("[front end] end translate to IR");
+    SEM_transProgram(root, module_name);
+    puts("[front end] end translate to IR\n");
     
     return 0;
 }
