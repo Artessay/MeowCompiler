@@ -500,9 +500,5 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
     assert(variable != NULL);
 
-    puts("LLVM build store");
-    // LLVMValueRef ret = LLVMBuildStore(env->builder, value, variable);
-    // puts("LLVM build store done");
-    // return ret;
     return LLVMBuildStore(env->builder, value, variable);
 }
