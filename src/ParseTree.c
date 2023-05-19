@@ -59,7 +59,7 @@ A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fi
 	p->body = body;
 
 	p->isVarArg = isVarArg;
-	p->escape = body == NULL ? 0 : 1;
+	p->isImplment = body == NULL ? 0 : 1;
 
 	A_resetVarArgFlag();
 

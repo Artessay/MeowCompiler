@@ -145,6 +145,10 @@ static void transFunctionDeclare(A_funcDeclare root) {
     
     LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType), param_types, param_count, root->isVarArg);
     LLVMValueRef function = LLVMAddFunction(module, func_name, ret_type);
+
+    if (root->isImplment) {
+        ;
+    }
 }
 
 static void transGlobalVarDefine(A_varDeclare root) {

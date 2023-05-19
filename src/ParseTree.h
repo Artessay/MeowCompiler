@@ -76,7 +76,7 @@ struct A_funcDeclare_ {
     A_stmtList body;
 
     int isVarArg;
-    char escape;
+    char isImplment;
 };
 
 struct A_varDeclare_ {
