@@ -66,11 +66,12 @@ A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fi
 	return p;
 }
 
-A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name) {
+A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name, A_exp initVal) {
 	A_varDeclare p = (A_varDeclare)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->typ = typ;
 	p->name = name;
+	p->init = initVal;
 	return p;
 }
 

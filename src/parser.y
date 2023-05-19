@@ -153,7 +153,8 @@ Top_Clause
         ;
 
 Var_Declaration
-        : Type_Specifier IDENTITY SEMICOLON { $$ = A_VarDeclaration(7, $1, $2); }
+        : Type_Specifier IDENTITY SEMICOLON { $$ = A_VarDeclaration(7, $1, $2, NULL); }
+        | Type_Specifier IDENTITY ASSIGN Expression SEMICOLON { $$ = A_VarDeclaration(7, $1, $2, $4); }
         /* : Type_Specifier Var_List SEMICOLON { $$ = A_VarDeclaration(7, $1, ); } */
         ;
 /* Var_List : Var_List COMMA Var_Init {  }

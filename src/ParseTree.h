@@ -178,7 +178,8 @@ struct A_exp_ {
         A_nilExp, A_intExp, A_charExp, A_doubleExp, A_stringExp, 
         A_callExp,
         A_opExp, 
-        A_recordExp, A_seqExp, A_assignExp, A_ifExp,
+        A_assignExp,
+        A_recordExp, A_seqExp, A_ifExp,
         A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
     } kind;
     
@@ -244,7 +245,7 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
 A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg);
 
-A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name);
+A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name, A_exp initVal);
 
 // stmt
 
