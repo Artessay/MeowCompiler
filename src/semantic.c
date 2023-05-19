@@ -9,15 +9,28 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/Target.h>
 
+typedef struct SEM_context_ *SEM_context;
 
-static LLVMContextRef context = NULL;
-static LLVMModuleRef module = NULL;
-static LLVMBuilderRef builder = NULL;
+struct SEM_context_ {
+    LLVMContextRef context;
+    LLVMModuleRef module;
+    LLVMBuilderRef builder;
+};
 
-static void transProgram(A_topClauseList root);
-static void transTopClause(A_topClause root);
-static void transFunctionDeclare(A_funcDeclare root);
-static void transGlobalVarDefine(A_varDeclare root);
+SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder) {
+    SEM_context p = (SEM_context)checked_malloc(sizeof(*p));
+    p->module = module;
+    p->context = context;
+    p->builder = builder;
+    return p;
+};
+
+static void transProgram(A_topClauseList root, SEM_context env);
+static void transTopClause(A_topClause root, SEM_context env);
+static void transFunctionDeclare(A_funcDeclare root, SEM_context env);
+static void transGlobalVarDefine(A_varDeclare root, SEM_context env);
+static void transStatementList(A_stmtList root, SEM_context env);
+static void transStatement(A_stmt root, SEM_context env);
 
 void SEM_transProgram(A_topClauseList program, char *module_name) {
     // initial LLVM
@@ -26,18 +39,17 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     LLVMInitializeNativeAsmPrinter();
 
     // create LLVM context
-    context = LLVMContextCreate();
-    // LLVMContextRef context = LLVMContextCreate();
+    LLVMContextRef context = LLVMContextCreate();
 
     // create module
-    module = LLVMModuleCreateWithNameInContext(module_name, context);
-    // LLVMModuleRef module = LLVMModuleCreateWithNameInContext(module_name, context);
+    LLVMModuleRef module = LLVMModuleCreateWithNameInContext(module_name, context);
         
     // create LLVMBuilderRef Object
-    builder = LLVMCreateBuilder();
-    // LLVMBuilderRef builder = LLVMCreateBuilder();
+    LLVMBuilderRef builder = LLVMCreateBuilder();
 
-    transProgram(program);
+    SEM_context env = SEM_Context(module, context, builder);
+
+    transProgram(program, env);
 
     // // 创建主函数类型
     // LLVMTypeRef mainFunctionType = LLVMFunctionType(LLVMInt32TypeInContext(context), NULL, 0, 0);
@@ -71,10 +83,10 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     LLVMContextDispose(context);
 }
 
-static LLVMTypeRef transType(A_varType typ) {
+static LLVMTypeRef transType(A_varType typ, SEM_context env) {
     switch (typ->kind) {
         case A_basic:
-            switch (typ->u.basic->kind) {
+            switch (typ->u.basic) {
                 case A_intType:
                     return LLVMInt32Type();
                     
@@ -102,27 +114,27 @@ static LLVMTypeRef transType(A_varType typ) {
     return NULL;
 }
 
-static void transProgram(A_topClauseList root) {
+static void transProgram(A_topClauseList root, SEM_context env) {
     for (A_topClauseList p = root; p != NULL; p = p->next) {
-        transTopClause(p->value);
+        transTopClause(p->value, env);
     }
 }
 
-static void transTopClause(A_topClause root) {
+static void transTopClause(A_topClause root, SEM_context env) {
     switch (root->kind) {
         case A_Preprocess:
             puts("TODO: preprocess");
             break;
         case A_FunctionDeclare:
-            transFunctionDeclare(root->u.function);
+            transFunctionDeclare(root->u.function, env);
             break;
         case A_GlobalVarDefine:
-            transGlobalVarDefine(root->u.globalVar);
+            transGlobalVarDefine(root->u.globalVar, env);
             break;
     }
 }
 
-static void transFunctionDeclare(A_funcDeclare root) {
+static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     unsigned int param_count = 0;
     LLVMTypeRef param_types[MAX_FUNCTION_PARAMS];
 
@@ -134,8 +146,13 @@ static void transFunctionDeclare(A_funcDeclare root) {
             break;
         }
 
-        param_types[param_count] = transType(field->typ);
+        param_types[param_count] = transType(field->typ, env);
         ++param_count;
+
+        if (param_count == MAX_FUNCTION_PARAMS) {
+            puts("[error] parameters exceeds maximum");
+            return;
+        }
     }
 
     char *func_name = S_name(root->name);
@@ -143,18 +160,33 @@ static void transFunctionDeclare(A_funcDeclare root) {
     // puts(func_name);
     // puts("");
     
-    LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType), param_types, param_count, root->isVarArg);
-    LLVMValueRef function = LLVMAddFunction(module, func_name, ret_type);
+    LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType, env), param_types, param_count, root->isVarArg);
+    LLVMValueRef function = LLVMAddFunction(env->module, func_name, ret_type);
 
     if (root->isImplment) {
-        ;
+        // create function basic block
+        LLVMBasicBlockRef functionEntryBlock = LLVMAppendBasicBlock(function, "entry");
+
+        // create function LLVMBuilderRef 
+        LLVMBuilderRef functionBuilder = LLVMCreateBuilder();
+
+        // entry function basic block and set instruction insert point
+        LLVMPositionBuilderAtEnd(functionBuilder, functionEntryBlock);
+
+        // LLVMContextRef functionContext = LLVMContextCreate();
+        // SEM_context functionEnv = SEM_Context(env->module, functionContext, functionBuilder);
+        SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder);
+
+        transStatementList(root->body, functionEnv);
+
+        free(functionEnv);
     }
 }
 
-static void transGlobalVarDefine(A_varDeclare root) {
+static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
     switch (root->typ->kind) {
         case A_basic:
-            switch (root->typ->u.basic->kind) {
+            switch (root->typ->u.basic) {
                 case A_intType:
                     break;
                 case A_doubleType:
@@ -171,5 +203,170 @@ static void transGlobalVarDefine(A_varDeclare root) {
             break;
         case A_array:
             break;
+    }
+}
+
+static void transVarDefine(A_varDeclare root, SEM_context env) {
+    LLVMTypeRef varType = transType(root->typ, env);
+    LLVMValueRef localVar = LLVMBuildAlloca(env->builder, varType, S_name(root->name));
+
+}
+
+static void transStatementList(A_stmtList root, SEM_context env) {
+    if (root == NULL) {
+        return;
+    }
+
+    A_stmt statement = root->value;
+    transStatementList(root->next, env);
+}
+
+static void transStatement(A_stmt root, SEM_context env) {
+    if (root == NULL) {
+        return;
+    }
+
+    LLVMValueRef exp = NULL;
+
+    switch (root->kind) {
+        case A_expStmt:
+            transExpression(root->u.exp, env);
+            break;
+        case A_varDecStmt:
+            transVarDefine(root->u.varDec, env);
+            break;
+        case A_returnStmt:
+            exp = transExpression(root->u.returnn.exp, env);
+            LLVMBuildRet(env->builder, exp);
+            break;
+        default:
+            puts("[error] unimplemented statement");
+            break;
+    }
+}
+
+static LLVMValueRef transExpression(A_exp root, SEM_context env) {
+    assert(root != NULL);
+
+    LLVMTypeRef exprType = transType(root->typ, env);
+
+    switch (root->kind) {
+        case A_varExp:
+            ;
+        case A_nilExp:
+            return LLVMConstNull(exprType);
+        case A_intExp:
+            return LLVMConstInt(LLVMInt32Type(), root->u.intt, 1);
+        case A_charExp:
+            return LLVMConstInt(LLVMInt8Type(), root->u.charr, 1);
+        case A_doubleExp:
+            return LLVMConstReal(LLVMDoubleType(), root->u.doublee);
+        case A_callExp:
+            return transCallExpression(root, env);
+        case A_opExp:
+            return transBinaryExpression(root, env);
+    }
+}
+
+static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
+    assert(root->kind == A_callExp);
+
+    char *func_name = S_name(root->u.call.func);
+    LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
+
+    if (function == NULL) {
+        puts("[error] function not found");
+        return NULL;
+    }
+
+    unsigned int arg_count = 0;
+    LLVMValueRef args[MAX_FUNCTION_PARAMS];
+    for (A_expList p = root->u.call.args; p != NULL; p = p->next) {
+        args[arg_count] = transExpression(p->value, env);
+        ++arg_count;
+
+        if (arg_count == MAX_FUNCTION_PARAMS) {
+            puts("[error] parameters exceeds maximum");
+            return NULL;
+        }
+    }
+
+    return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
+}
+
+static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
+    assert( root->kind ==A_opExp );
+
+    LLVMValueRef lhs = transExpression(root->u.op.left, env);
+    LLVMValueRef rhs = transExpression(root->u.op.right, env);
+
+    LLVMTypeRef lhsType = LLVMTypeOf(lhs);
+    LLVMTypeRef rhsType = LLVMTypeOf(rhs);
+
+    switch (root->u.op.oper) {
+        case A_plusOp:
+            return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+
+        case A_minusOp:
+            return LLVMBuildSub(env->builder, lhs, rhs, "temperate");
+            
+        case A_timesOp:
+            return LLVMBuildMul(env->builder, lhs, rhs, "temperate");
+            
+        case A_divideOp:
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType) {
+                return LLVMBuildFDiv(env->builder, lhs, rhs, "fDiv");
+            } else {
+                return LLVMBuildSDiv(env->builder, lhs, rhs, "sDiv");
+            }            
+            
+        case A_modOp:
+            return LLVMBuildSRem(env->builder, lhs, rhs, "temperate");
+            
+        case A_shlOp: 
+            return LLVMBuildShl(env->builder, lhs, rhs, "temperate");
+            
+        case A_shrOp:
+            /* warning: always logic shift right */
+            return LLVMBuildLShr(env->builder, lhs, rhs, "temperate");
+            
+        case A_bAndOp: 
+            puts("[warning] binary and is not stable");
+            return LLVMBuildAnd(env->builder, lhs, rhs, "temperate");
+            
+        case A_bOrOp: 
+            puts("[warning] binary or is not stable");
+            return LLVMBuildOr(env->builder, lhs, rhs, "temperate");
+            
+        case A_bXorOp:
+            return LLVMBuildXor(env->builder, lhs, rhs, "temperate");
+            
+        case A_andOp: 
+            return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        case A_orOp:
+            return LLVMBuildOr(env->builder, lhs, rhs, "temperate");
+            
+        // case A_eqOp: 
+        //     return LLVMBuildICmp(env->builder, lhs, rhs, "temperate");
+            
+        // case A_neqOp: 
+        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        // case A_ltOp: 
+        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        // case A_leOp: 
+        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        // case A_gtOp: 
+        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        // case A_geOp:
+        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            
+        default:
+            puts("[error] unrecognized binary op");
+            return NULL;
     }
 }

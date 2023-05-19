@@ -17,12 +17,13 @@ int main(int argc, const char *argv[]) {
     if (argc >= 2) {
         strncpy(source_filename, argv[1], MAX_FILE_NAME);
     } else {
-        strncpy(source_filename, "test.c", MAX_FILE_NAME);
+        puts("[error] no input files");
+        return -1;
     }
 
     char *rc = strrchr(source_filename, '.');
     if (rc == NULL) {
-        puts("unrecognized file");
+        puts("[error] unrecognized file");
         return -1;
     }
 
@@ -32,7 +33,7 @@ int main(int argc, const char *argv[]) {
 
     // parsing
     yyin = fopen(source_filename, "r");
-    // assert(yyin != nullptr);
+    assert(yyin != NULL);
     
     puts("[front end] start parsing");
     yyparse();

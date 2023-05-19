@@ -118,6 +118,7 @@ A_exp A_VarExp(A_pos pos, A_var var) {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_varExp;
 	p->pos = pos;
+	p->typ = var->typ;
 	p->u.var = var;
 	return p;
 }
@@ -126,9 +127,16 @@ A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp) {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_assignExp;
 	p->pos = pos;
+	p->typ = var->typ;
 	p->u.assign.var = var;
 	p->u.assign.exp = exp;
 	return p;
+}
+
+A_varType A_NilTyp() {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->kind = A_basic;
+	p->u.basic = A_voidType;
 }
 
 A_exp A_NilExp(A_pos pos)
@@ -136,6 +144,7 @@ A_exp A_NilExp(A_pos pos)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_nilExp;
 	p->pos = pos;
+	p->typ = A_NilTyp();
 	return p;
 }
 
@@ -197,7 +206,7 @@ A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right) {
 
 // === var ===
 
-A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
+A_varType A_VarTypeBasic(A_pos pos, enum A_BasicType_ type) {
 	A_varType p = (A_varType)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->kind = A_basic;
@@ -205,11 +214,11 @@ A_varType A_VarTypeBasic(A_pos pos, A_basicType type) {
 	return p;
 }
 
-A_basicType A_BasicType(enum A_BasicType_ type) {
-	A_basicType p = (A_basicType)checked_malloc(sizeof(*p));
-	p->kind = type;
-	return p;
-}
+// A_basicType A_BasicType(enum A_BasicType_ type) {
+// 	A_basicType p = (A_basicType)checked_malloc(sizeof(*p));
+// 	p->kind = type;
+// 	return p;
+// }
 
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
 	A_field p = (A_field)checked_malloc(sizeof(*p));

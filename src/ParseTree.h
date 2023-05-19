@@ -28,7 +28,7 @@ typedef struct A_var_ *A_var;
 
     typedef struct A_varType_ *A_varType;
 
-    typedef struct A_basicType_ *A_basicType;
+    // typedef struct A_basicType_ *A_basicType;
 
     typedef struct A_pointType_ *A_pointType;
 
@@ -91,6 +91,7 @@ struct A_var_ {
         A_simpleVar, A_fieldVar, A_subscriptVar
     } kind;
     A_pos pos;
+    A_varType typ;
     union {
         S_symbol simple;
         struct {
@@ -104,25 +105,20 @@ struct A_var_ {
     } u;
 };
 
+enum A_BasicType_ {
+    A_intType, A_doubleType, A_charType, A_stringType, A_voidType
+};
+
 struct A_varType_ {
     enum {
         A_basic, A_point, A_array
     } kind;
     A_pos pos;
     union {
-        A_basicType basic;
+        enum A_BasicType_ basic;
         A_pointType point;
         A_arrayType array;
     } u;
-};
-
-enum A_BasicType_ {
-    A_intType, A_doubleType, A_charType, A_stringType, A_voidType
-};
-
-struct A_basicType_ {
-    enum A_BasicType_ kind;
-    A_pos pos;
 };
 
 struct A_field_ {
@@ -142,7 +138,6 @@ struct A_stmt_ {
     enum {
         A_expStmt, 
         A_varDecStmt,
-        A_compoundStmt, 
         A_ifStmt, 
         A_whileStmt, A_forStmt, A_breakStmt, A_continueStmt, 
         A_returnStmt
@@ -151,9 +146,6 @@ struct A_stmt_ {
     union {
         A_exp exp;
         A_varDeclare varDec;
-        struct {
-            A_stmtList stmts;
-        } compound;
         struct {
             A_exp test;
             A_stmt then;
@@ -200,7 +192,10 @@ struct A_exp_ {
         A_recordExp, A_seqExp, A_assignExp, A_ifExp,
         A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
     } kind;
+    
     A_pos pos;
+    A_varType typ;
+
     union {
         A_var var;
         
@@ -296,9 +291,9 @@ A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right);
 
 // var
 
-A_varType A_VarTypeBasic(A_pos pos, A_basicType type);
+A_varType A_VarTypeBasic(A_pos pos, enum A_BasicType_ type);
 
-A_basicType A_BasicType(enum A_BasicType_ type);
+// A_basicType A_BasicType(enum A_BasicType_ type);
 
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
 
