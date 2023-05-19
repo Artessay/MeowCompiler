@@ -3,6 +3,6 @@
 
 #include "ParseTree.h"
 
-void SEM_transProgram(A_topClause program);
+void SEM_transProgram(A_topClauseList program, char *module_name, char *output_filename);
 
 #endif

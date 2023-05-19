@@ -11,7 +11,7 @@ LEXER_CPP = lexer.c
 PARSER_CPP = parser.c
 PARSER_HPP = parser.h
 
-TARGET = test.exe
+TARGET = meow
 TEST_FILE = test.c
 TEST_IR = $(TEST_FILE:.c=.ll)
 TEST_AS = $(TEST_FILE:.c=.s)

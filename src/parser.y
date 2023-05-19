@@ -7,7 +7,7 @@
 
 extern int yylex();
 
-void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
+void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
         
 %}
 
@@ -193,10 +193,10 @@ Basic_Type_Specifier
         | TYPE_DOUBLE { $$ = A_BasicType(A_doubleType); }
         ;
 Block 
-        : LBRACE Statements RBRACE { $$ = $2; puts("Block"); }
+        : LBRACE Statements RBRACE { $$ = $2; /* puts("Block"); */ }
         ;
 Statements  
-        : Statement Statements { $$ = A_StmtList($1, $2); puts("Statement"); }
+        : Statement Statements { $$ = A_StmtList($1, $2); /* puts("Statement"); */ }
         | /* empty */  { $$ = NULL; /* puts("empty statement"); */ }
         ;
 Statement 
