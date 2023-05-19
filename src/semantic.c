@@ -386,8 +386,8 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
 
     char *func_name = S_name(root->u.call.func);
     LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
-    LLVMTypeRef functionType = LLVMGetCalledFunctionType(function);
-    LLVMTypeRef returnType = LLVMGetReturnType(functionType);
+    LLVMTypeRef functionType = LLVMGetElementType(LLVMTypeOf(function));
+    // LLVMDumpType(functionType);
 
     if (function == NULL) {
         puts("[error] function not found");
@@ -406,10 +406,9 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
             return NULL;
         }
     }
-    // LLVMDumpValue(function);
 
-    return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
-    // return LLVMBuildCall2(env->builder, returnType, function, args, arg_count, "callVal");
+    // return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
+    return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
 }
 
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
