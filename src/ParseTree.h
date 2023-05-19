@@ -7,6 +7,8 @@ typedef int A_pos;
 
 typedef enum {
     A_plusOp, A_minusOp, A_timesOp, A_divideOp, A_modOp,
+    A_shlOp, A_shrOp, A_bAndOp, A_bOrOp, A_bXorOp, A_bNotOp,
+    A_notOp, A_andOp, A_orOp, 
 	A_eqOp, A_neqOp, A_ltOp, A_leOp, A_gtOp, A_geOp
 } A_oper;
 
@@ -307,6 +309,10 @@ A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym);
 
 A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
 
-extern A_topClauseList A_root;
+void A_setParseTreeRoot(A_topClauseList root);
+
+A_topClauseList A_getParseTreeRoot();
+
+// extern A_topClauseList A_root;
 
 #endif

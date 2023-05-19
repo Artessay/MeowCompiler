@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "semantic.h"
+#include "ParseTree.h"
 
 extern FILE *yyin;
 extern int yyparse();
@@ -45,6 +46,8 @@ int main(int argc, const char *argv[]) {
     // puts(module_name);
     // puts(source_filename);
     // puts(output_filename);
+
+    A_topClauseList root = A_getParseTreeRoot();
     
     return 0;
 }

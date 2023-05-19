@@ -5,6 +5,14 @@
 
 A_topClauseList A_root = NULL;
 
+void A_setParseTreeRoot(A_topClauseList root) {
+	A_root = root;
+}
+
+A_topClauseList A_getParseTreeRoot() {
+	return A_root;
+}
+
 A_topClauseList A_TopClauseList(A_topClause value, A_topClauseList next) {
 	A_topClauseList p = (A_topClauseList)checked_malloc(sizeof(*p));
 	p->value = value;

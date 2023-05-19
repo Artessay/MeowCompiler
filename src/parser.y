@@ -139,7 +139,7 @@ void yyerror(char *str){ fprintf(stderr,"error:%s\n",str); }
 %%
 
 Program 
-        : Top_Clause_List { A_root = $1; $$ = A_root; }
+        : Top_Clause_List { $$ = $1; A_setParseTreeRoot($$); }
         ;
 Top_Clause_List
         : Top_Clause Top_Clause_List { $$ = A_TopClauseList($1, $2); }
@@ -281,17 +281,26 @@ L_Value
         /* | L_Value DOT IDENTITY {} */
         ;
 Binary_Exp 
-        : Expression ADD Expression { $$ = A_OpExp(7, A_plusOp,   $1, $3); }
-        | Expression SUB Expression { $$ = A_OpExp(7, A_minusOp,  $1, $3); }
-        | Expression MUL Expression { $$ = A_OpExp(7, A_timesOp,  $1, $3); }
-        | Expression DIV Expression { $$ = A_OpExp(7, A_divideOp, $1, $3); }
-        | Expression MOD Expression { $$ = A_OpExp(7, A_modOp,    $1, $3); }
-        | Expression EQ  Expression { $$ = A_OpExp(7, A_eqOp,     $1, $3); }
-        | Expression NEQ Expression { $$ = A_OpExp(7, A_neqOp,    $1, $3); }
-        | Expression LT  Expression { $$ = A_OpExp(7, A_ltOp,     $1, $3); }
-        | Expression LE  Expression { $$ = A_OpExp(7, A_leOp,     $1, $3); }
-        | Expression GT  Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
-        | Expression GE  Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
+        : Expression ADD  Expression { $$ = A_OpExp(7, A_plusOp,   $1, $3); }
+        | Expression SUB  Expression { $$ = A_OpExp(7, A_minusOp,  $1, $3); }
+        | Expression MUL  Expression { $$ = A_OpExp(7, A_timesOp,  $1, $3); }
+        | Expression DIV  Expression { $$ = A_OpExp(7, A_divideOp, $1, $3); }
+        | Expression MOD  Expression { $$ = A_OpExp(7, A_modOp,    $1, $3); }
+        | Expression EQ   Expression { $$ = A_OpExp(7, A_eqOp,     $1, $3); }
+        | Expression NEQ  Expression { $$ = A_OpExp(7, A_neqOp,    $1, $3); }
+        | Expression LT   Expression { $$ = A_OpExp(7, A_ltOp,     $1, $3); }
+        | Expression LE   Expression { $$ = A_OpExp(7, A_leOp,     $1, $3); }
+        | Expression GT   Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
+        | Expression GE   Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
+        | Expression SHL  Expression { $$ = A_OpExp(7, A_shlOp,    $1, $3); }
+        | Expression SHR  Expression { $$ = A_OpExp(7, A_shrOp,    $1, $3); }
+        | Expression BAND Expression { $$ = A_OpExp(7, A_bAndOp,   $1, $3); }
+        | Expression BOR  Expression { $$ = A_OpExp(7, A_bOrOp,    $1, $3); }
+        | Expression BXOR Expression { $$ = A_OpExp(7, A_bXorOp,   $1, $3); }
+        | Expression BNOT Expression { $$ = A_OpExp(7, A_bNotOp,   $1, $3); }
+        | Expression NOT  Expression { $$ = A_OpExp(7, A_notOp,    $1, $3); }
+        | Expression AND  Expression { $$ = A_OpExp(7, A_andOp,    $1, $3); }
+        | Expression OR   Expression { $$ = A_OpExp(7, A_orOp,     $1, $3); }
         ;
 /* 
 

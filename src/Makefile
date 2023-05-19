@@ -1,9 +1,11 @@
-CC 		= gcc
+CC 		= clang
 LEX 	= flex
 YACC 	= bison
 
+CFLAGS  = `llvm-config --cflags --ldflags --libs`
+
 SRC		= main.c \
-		  ErrorMessage.c ParseTree.c symbol.c table.c utility.c
+		  ErrorMessage.c ParseTree.c semantic.c symbol.c table.c utility.c
 
 LEXER_CPP = lexer.c
 PARSER_CPP = parser.c
@@ -17,7 +19,7 @@ TEST_AS = $(TEST_FILE:.c=.s)
 all:
 	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
 	$(LEX) -o $(LEXER_CPP) lexer.l
-	$(CC) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
+	$(CC) $(CFLAGS) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
 	./$(TARGET) $(TEST_FILE)
 
 run:
