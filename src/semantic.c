@@ -27,10 +27,17 @@ SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilde
 
 static void transProgram(A_topClauseList root, SEM_context env);
 static void transTopClause(A_topClause root, SEM_context env);
+
 static void transFunctionDeclare(A_funcDeclare root, SEM_context env);
 static void transGlobalVarDefine(A_varDeclare root, SEM_context env);
+
 static void transStatementList(A_stmtList root, SEM_context env);
 static void transStatement(A_stmt root, SEM_context env);
+
+static LLVMValueRef transExpression(A_exp root, SEM_context env);
+static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
+static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
+static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 
 void SEM_transProgram(A_topClauseList program, char *module_name) {
     // initial LLVM
@@ -84,6 +91,10 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 }
 
 static LLVMTypeRef transType(A_varType typ, SEM_context env) {
+    if (typ == NULL) {
+        return NULL;
+    }
+
     switch (typ->kind) {
         case A_basic:
             switch (typ->u.basic) {
@@ -248,13 +259,12 @@ static void transStatement(A_stmt root, SEM_context env) {
 static LLVMValueRef transExpression(A_exp root, SEM_context env) {
     assert(root != NULL);
 
-    LLVMTypeRef exprType = transType(root->typ, env);
-
     switch (root->kind) {
         case A_varExp:
-            ;
+            return transVariableExpression(root, env);
         case A_nilExp:
-            return LLVMConstNull(exprType);
+            // @TODO
+            return LLVMConstNull(LLVMInt32Type());
         case A_intExp:
             return LLVMConstInt(LLVMInt32Type(), root->u.intt, 1);
         case A_charExp:
@@ -265,7 +275,31 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             return transCallExpression(root, env);
         case A_opExp:
             return transBinaryExpression(root, env);
+        default:
+            puts("[error] unrecognized expression");
+            return NULL;
     }
+}
+
+static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
+    assert(root->kind == A_varExp);
+
+    char *var_name;
+    if (root->u.var->kind == A_simpleVar) {
+        var_name = S_name(root->u.var->u.simple);
+    } else {
+        puts("[error] unimplemented variable expression");
+        return NULL;
+    }
+
+    LLVMValueRef variable = LLVMGetNamedGlobal(env->module, var_name);
+
+    if (variable == NULL) {
+        puts("[error] variable not found");
+        return NULL;
+    }
+
+    return LLVMBuildLoad2(env->builder, transType(root->u.var->typ, env), variable, var_name);
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
@@ -273,6 +307,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
 
     char *func_name = S_name(root->u.call.func);
     LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
+    LLVMTypeRef functionType = LLVMGetCalledFunctionType(function);
 
     if (function == NULL) {
         puts("[error] function not found");
@@ -291,7 +326,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
         }
     }
 
-    return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
+    return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
 }
 
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
@@ -314,7 +349,7 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
             return LLVMBuildMul(env->builder, lhs, rhs, "temperate");
             
         case A_divideOp:
-            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType) {
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
                 return LLVMBuildFDiv(env->builder, lhs, rhs, "fDiv");
             } else {
                 return LLVMBuildSDiv(env->builder, lhs, rhs, "sDiv");

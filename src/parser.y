@@ -44,11 +44,11 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 //terminals
 //binary operator    +   -   *   /   %  <<  >>   &    |   ^   &&  ||  ~    !
-%token              ADD SUB MUL DIV MOD SHL SHR BAND BOR BXOR AND OR // BNOT NOT
+%token              ADD SUB MUL DIV MOD SHL SHR BAND BOR BXOR AND OR BNOT NOT
 //unary operator     ++   --
 /* %token              DADD DSUB */
 //assignment operator =     +=    -=    *=    /=    %=    <<=   >>=    &=    |=     ^=
-%token              ASSIGN // ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
+%token              ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
 //logic operator    !=  >  <  >= <= ==
 %token              NEQ GT LT GE LE EQ
 //                     (      )      [     ]      {      }
@@ -56,9 +56,9 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 //                    ,       ;       .  
 %token              COMMA SEMICOLON  DOT
 //                   :     ->   \'     \"     #   NULL
-/* %token              COLON ARW SQUOTE DQUOTE POUND NIL */
+%token              COLON ARW SQUOTE DQUOTE POUND NIL
 //keyword
-%token              RETURN TYPE_INT TYPE_DOUBLE TYPE_CHAR TYPE_VOID TYPE_STRING // IF ELSE WHILE FOR BREAK CONTINUE CONST DEFINE
+%token              RETURN TYPE_INT TYPE_DOUBLE TYPE_CHAR TYPE_VOID TYPE_STRING IF ELSE WHILE FOR BREAK CONTINUE CONST DEFINE
 //function
 // %token <node>       PRINT SCAN
 //ID
@@ -123,7 +123,7 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 %type Expression Uni_Exp LUOP RUOP L_Value Call_Exp Arg_List Binary_Exp Expression_List */
 
 //priority
-%right  ASSIGN // ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
+%right  ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
 %left   OR
 %left   AND 
 %left   BOR
@@ -134,7 +134,7 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 %left   SHL SHR
 %left   ADD SUB
 %left   MUL DIV MOD
-/* %right  DADD DSUB NOT BNOT */
+%right  DADD DSUB NOT BNOT
 %left   LPAREN RPAREN
 %left   LBRACK RBRACK
 
@@ -188,11 +188,11 @@ Type_Specifier
         : Basic_Type_Specifier { $$ = $1; }
         ;
 Basic_Type_Specifier 
-        : TYPE_VOID   { $$ = A_varTypeBasic(7, A_voidType); }
-        | TYPE_INT    { $$ = A_varTypeBasic(7, A_intType); }
-        | TYPE_CHAR   { $$ = A_varTypeBasic(7, A_charType); }
-        | TYPE_STRING { $$ = A_varTypeBasic(7, A_stringType); }
-        | TYPE_DOUBLE { $$ = A_varTypeBasic(7, A_doubleType); }
+        : TYPE_VOID   { $$ = A_VarTypeBasic(7, A_voidType); }
+        | TYPE_INT    { $$ = A_VarTypeBasic(7, A_intType); }
+        | TYPE_CHAR   { $$ = A_VarTypeBasic(7, A_charType); }
+        | TYPE_STRING { $$ = A_VarTypeBasic(7, A_stringType); }
+        | TYPE_DOUBLE { $$ = A_VarTypeBasic(7, A_doubleType); }
         ;
 Block 
         : LBRACE Statements RBRACE { $$ = $2; /* puts("Block"); */ }

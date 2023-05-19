@@ -137,6 +137,7 @@ A_varType A_NilTyp() {
 	A_varType p = (A_varType)checked_malloc(sizeof(*p));
 	p->kind = A_basic;
 	p->u.basic = A_voidType;
+	return p;
 }
 
 A_exp A_NilExp(A_pos pos)
@@ -148,12 +149,27 @@ A_exp A_NilExp(A_pos pos)
 	return p;
 }
 
+A_varType A_IntTyp() {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->kind = A_basic;
+	p->u.basic = A_intType;
+	return p;
+}
+
 A_exp A_IntExp(A_pos pos, int i)
 {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_intExp;
 	p->pos = pos;
+	p->typ = A_IntTyp();
 	p->u.intt = i;
+	return p;
+}
+
+A_varType A_CharTyp() {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->kind = A_basic;
+	p->u.basic = A_charType;
 	return p;
 }
 
@@ -162,7 +178,15 @@ A_exp A_CharExp(A_pos pos, char c)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_charExp;
 	p->pos = pos;
+	p->typ = A_CharTyp();
 	p->u.charr = c;
+	return p;
+}
+
+A_varType A_DoubleTyp() {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->kind = A_basic;
+	p->u.basic = A_doubleType;
 	return p;
 }
 
@@ -171,7 +195,15 @@ A_exp A_DoubleExp(A_pos pos, double d)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_doubleExp;
 	p->pos = pos;
+	p->typ = A_DoubleTyp();
 	p->u.doublee = d;
+	return p;
+}
+
+A_varType A_StringTyp() {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->kind = A_basic;
+	p->u.basic = A_stringType;
 	return p;
 }
 
@@ -180,6 +212,7 @@ A_exp A_StringExp(A_pos pos, char *s)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_stringExp;
 	p->pos = pos;
+	p->typ = A_StringTyp();
 	p->u.stringg = s;
 	return p;
 }
@@ -189,6 +222,7 @@ A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_callExp;
 	p->pos = pos;
+	p->typ = NULL;	// @TODO
 	p->u.call.func = func;
 	p->u.call.args = args;
 	return p;

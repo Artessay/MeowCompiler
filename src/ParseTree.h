@@ -172,17 +172,6 @@ struct A_stmtList_ {
     A_stmtList next;
 };
 
-// struct A_declaration_ {
-//     enum {
-        
-//     } kind;
-//     A_pos pos;
-//     union {
-        
-        
-//     } u;
-// };
-
 struct A_exp_ {
     enum {
         A_varExp, 
