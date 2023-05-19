@@ -35,9 +35,9 @@ int main(int argc, const char *argv[]) {
     yyin = fopen(source_filename, "r");
     assert(yyin != NULL);
     
-    puts("[front end] start parsing");
+    puts("[front] start parsing");
     yyparse();
-    puts("[front end] end parsing\n");
+    puts("[front] end parsing\n");
 
     // puts(module_name);
     // puts(source_filename);
@@ -46,9 +46,9 @@ int main(int argc, const char *argv[]) {
     A_topClauseList root = A_getParseTreeRoot();
     assert(root != NULL);
 
-    puts("[front end] start translate to IR");
+    puts("[front] start translate to IR");
     SEM_transProgram(root, module_name);
-    puts("[front end] end translate to IR\n");
+    puts("[front] end translate to IR\n");
     
     return 0;
 }

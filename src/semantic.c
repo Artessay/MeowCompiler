@@ -1,5 +1,7 @@
 #include "semantic.h"
+
 #include "config.h"
+#include "symbol.h"
 #include "utility.h"
 
 #include <stdio.h>
@@ -24,6 +26,34 @@ SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilde
     p->builder = builder;
     return p;
 };
+
+typedef struct SEM_table_ *SEM_table;
+
+struct SEM_table_ {
+    S_table variableTable;
+    S_table functionTable;
+};
+
+SEM_table tables = NULL;
+
+SEM_table SEM_Table() {
+    SEM_table p = (SEM_table)checked_malloc(sizeof(*p));
+    
+    p->variableTable = S_empty();
+    p->functionTable = S_empty();
+    
+    return p;
+}
+
+void SEM_enterScope(SEM_table t) {
+    S_beginScope(t->variableTable);
+    S_beginScope(t->functionTable);
+}
+
+void SEM_leaveScope(SEM_table t) {
+    S_endScope(t->variableTable);
+    S_endScope(t->functionTable);
+}
 
 static void transProgram(A_topClauseList root, SEM_context env);
 static void transTopClause(A_topClause root, SEM_context env);
@@ -56,7 +86,12 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     SEM_context env = SEM_Context(module, context, builder);
 
+    tables = SEM_Table();
+    SEM_enterScope(tables);
+
     transProgram(program, env);
+
+    SEM_leaveScope(tables);
 
     // // 创建主函数类型
     // LLVMTypeRef mainFunctionType = LLVMFunctionType(LLVMInt32TypeInContext(context), NULL, 0, 0);
@@ -127,6 +162,11 @@ static LLVMTypeRef transType(A_varType typ, SEM_context env) {
 
 static void transProgram(A_topClauseList root, SEM_context env) {
     for (A_topClauseList p = root; p != NULL; p = p->next) {
+        if (p->value == NULL) {
+            puts("[error] top clause is null");
+            continue;
+        }
+        
         transTopClause(p->value, env);
     }
 }
@@ -148,16 +188,16 @@ static void transTopClause(A_topClause root, SEM_context env) {
 static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     unsigned int param_count = 0;
     LLVMTypeRef param_types[MAX_FUNCTION_PARAMS];
+    S_symbol param_names[MAX_FUNCTION_PARAMS];
 
     for (A_fieldList p = root->params; p != NULL; p = p->next) {
         A_field field = p->value;
         if (field == NULL) {
-            // puts("[warrning] field is null");
-            // continue;
             break;
         }
 
         param_types[param_count] = transType(field->typ, env);
+        param_names[param_count] = field->name;
         ++param_count;
 
         if (param_count == MAX_FUNCTION_PARAMS) {
@@ -173,6 +213,8 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     
     LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType, env), param_types, param_count, root->isVarArg);
     LLVMValueRef function = LLVMAddFunction(env->module, func_name, ret_type);
+    
+    S_enter(tables->functionTable, root->name, function);
 
     if (root->isImplment) {
         // create function basic block
@@ -186,9 +228,19 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
 
         // LLVMContextRef functionContext = LLVMContextCreate();
         // SEM_context functionEnv = SEM_Context(env->module, functionContext, functionBuilder);
+
         SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder);
 
+        SEM_enterScope(tables);
+
+        for (unsigned int i = 0; i < param_count; ++i) {
+            LLVMValueRef param = LLVMGetParam(function, i);
+            S_enter(tables->variableTable, param_names[i], param);
+        }
+
         transStatementList(root->body, functionEnv);
+
+        SEM_leaveScope(tables);
 
         free(functionEnv);
     }
@@ -221,6 +273,7 @@ static void transVarDefine(A_varDeclare root, SEM_context env) {
     LLVMTypeRef varType = transType(root->typ, env);
     LLVMValueRef localVar = LLVMBuildAlloca(env->builder, varType, S_name(root->name));
 
+    S_enter(tables->variableTable, root->name, localVar);
 }
 
 static void transStatementList(A_stmtList root, SEM_context env) {
@@ -289,17 +342,23 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
     assert(root->kind == A_varExp);
 
     char *var_name;
+    LLVMValueRef variable;
+
+    // find local variable
     if (root->u.var->kind == A_simpleVar) {
         var_name = S_name(root->u.var->u.simple);
+        variable = S_look(tables->variableTable, root->u.var->u.simple);
     } else {
         puts("[error] unimplemented variable expression");
-        return NULL;
+        variable = NULL;
     }
 
-    LLVMValueRef variable = NULL;
-    variable = 0; // HERE
-    variable = LLVMGetNamedGlobal(env->module, var_name);
-
+    // find global variable
+    if (variable == NULL) {
+        variable = LLVMGetNamedGlobal(env->module, var_name);
+    }
+    
+    // still not found
     if (variable == NULL) {
         puts("[error] variable not found");
         return NULL;

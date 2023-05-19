@@ -23,4 +23,8 @@ void S_enter(S_table t, S_symbol sym, LLVMValueRef value);
 
 LLVMValueRef S_look(S_table t, S_symbol sym);
 
+void S_beginScope(S_table table);
+
+void S_endScope(S_table table);
+
 #endif

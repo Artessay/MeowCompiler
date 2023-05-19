@@ -38,11 +38,28 @@ char *S_name(S_symbol symbol) {
 
 /** Table operation */
 
-void S_enter();
+S_table S_empty() {
+    return TAB_empty();
+}
+
+void S_enter(S_table table, S_symbol sym, LLVMValueRef value) {
+    TAB_enter(table, S_name(sym), (void *)value);
+}
+
+LLVMValueRef S_look(S_table table, S_symbol sym) {
+    return (LLVMValueRef)TAB_look(table, S_name(sym));
+}
 
 /** Defien a mark symbol used to mark the end of one scope */
-static S_symbol markSymbol = { "<mark>", NULL };
+static char *markSymbol = "<mark>";
 
-void S_beginScope(TAB_table table) {
-    TAB_enter(table, S_Symbol(""), NULL);
+void S_beginScope(S_table table) {
+    TAB_enter(table, markSymbol, NULL);
+}
+
+void S_endScope(S_table table) {
+    char *mark;
+    do {
+        mark = TAB_pop(table);
+    } while (mark != markSymbol);
 }
