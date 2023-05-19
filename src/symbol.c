@@ -35,3 +35,14 @@ S_symbol S_Symbol(char *name) {
 char *S_name(S_symbol symbol) {
     return symbol->name;
 }
+
+/** Table operation */
+
+void S_enter();
+
+/** Defien a mark symbol used to mark the end of one scope */
+static S_symbol markSymbol = { "<mark>", NULL };
+
+void S_beginScope(TAB_table table) {
+    TAB_enter(table, S_Symbol(""), NULL);
+}

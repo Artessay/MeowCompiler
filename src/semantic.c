@@ -229,6 +229,7 @@ static void transStatementList(A_stmtList root, SEM_context env) {
     }
 
     A_stmt statement = root->value;
+    transStatement(statement, env);
     transStatementList(root->next, env);
 }
 
@@ -241,12 +242,15 @@ static void transStatement(A_stmt root, SEM_context env) {
 
     switch (root->kind) {
         case A_expStmt:
+            puts("expression");
             transExpression(root->u.exp, env);
             break;
         case A_varDecStmt:
+            puts("variable declare");
             transVarDefine(root->u.varDec, env);
             break;
         case A_returnStmt:
+            puts("return");
             exp = transExpression(root->u.returnn.exp, env);
             LLVMBuildRet(env->builder, exp);
             break;
@@ -292,7 +296,9 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
         return NULL;
     }
 
-    LLVMValueRef variable = LLVMGetNamedGlobal(env->module, var_name);
+    LLVMValueRef variable = NULL;
+    variable = 0; // HERE
+    variable = LLVMGetNamedGlobal(env->module, var_name);
 
     if (variable == NULL) {
         puts("[error] variable not found");

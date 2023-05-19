@@ -4,15 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define HASH_MAGIC 65599
-
-unsigned int hash(char *s) {
-    unsigned int h = 0;
-    for (char *p = s; *p; ++p) {
-        h = h * HASH_MAGIC + *p;
-    }
-    return h;
-}
 
 struct bucket *Bucket(char *key, void *binding, struct bucket *next) {
     struct bucket *b = checked_malloc(sizeof(*b));
