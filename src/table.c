@@ -35,6 +35,7 @@ void *TAB_look(TAB_table t, char *key) {
 
     unsigned int index = hash(key) % TABLE_SIZE;
     for (TAB_bucket b = t->table[index]; b != NULL; b = b->next) {
+        // puts(b->key);
         if (strcmp(b->key, key) == 0) {
             return b->value;
         }

@@ -374,7 +374,7 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
 
     LLVMValueRef variable = getValueByVar(root->u.var, env);
 
-    puts("load variable");
+    // puts("load variable");
 
     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
@@ -387,6 +387,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
     char *func_name = S_name(root->u.call.func);
     LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
     LLVMTypeRef functionType = LLVMGetCalledFunctionType(function);
+    LLVMTypeRef returnType = LLVMGetReturnType(functionType);
 
     if (function == NULL) {
         puts("[error] function not found");
@@ -395,6 +396,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
 
     unsigned int arg_count = 0;
     LLVMValueRef args[MAX_FUNCTION_PARAMS];
+    // LLVMValueRef *args = (LLVMValueRef *)checked_malloc(sizeof(LLVMValueRef) * MAX_FUNCTION_PARAMS);
     for (A_expList p = root->u.call.args; p != NULL; p = p->next) {
         args[arg_count] = transExpression(p->value, env);
         ++arg_count;
@@ -404,8 +406,10 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
             return NULL;
         }
     }
+    // LLVMDumpValue(function);
 
-    return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+    return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
+    // return LLVMBuildCall2(env->builder, returnType, function, args, arg_count, "callVal");
 }
 
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
@@ -491,13 +495,15 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.assign.exp, env);
     assert(value != NULL);
 
-    puts("LLVM assign expression");
+    LLVMDumpValue(value);
+    putchar('\n');
+
     LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
     assert(variable != NULL);
 
     puts("LLVM build store");
-    LLVMValueRef ret = LLVMBuildStore(env->builder, value, variable);
-    puts("LLVM build store done");
-    return ret;
-    // return LLVMBuildStore(env->builder, value, variable);
+    // LLVMValueRef ret = LLVMBuildStore(env->builder, value, variable);
+    // puts("LLVM build store done");
+    // return ret;
+    return LLVMBuildStore(env->builder, value, variable);
 }
