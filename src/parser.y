@@ -165,8 +165,8 @@ Var_Def : Var_Def LBRACK INT RBRACK {  }
         ; */
 
 Fun_Declaration
-        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL); }
-        | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6); }
+        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL, A_getVarArgFlag()); }
+        | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6, A_getVarArgFlag()); }
         ;
 Params 
         : Param COMMA Params { $$ = A_FieldList($1, $3); }
@@ -176,7 +176,7 @@ Params
 Param 
         : Type_Specifier IDENTITY { $$ = A_Field(7, $1, $2); }
         /* | Type_Specifier ID LBRACK RBRACK {  } */
-        | DOT DOT DOT  { $$ = NULL; printf("TODO: Function ...\n"); }
+        | DOT DOT DOT  { $$ = NULL; A_setVarArgFlag(); }
         ;
 IDENTITY
         : ID { $$ = S_Symbol($1); printf("Identity: %s\n", $1); }

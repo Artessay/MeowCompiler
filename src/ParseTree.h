@@ -75,6 +75,7 @@ struct A_funcDeclare_ {
     A_fieldList params;
     A_stmtList body;
 
+    int isVarArg;
     char escape;
 };
 
@@ -257,7 +258,7 @@ A_topClause A_FuncDeclare(A_funcDeclare function);
 
 A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body);
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg);
 
 A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name);
 
@@ -309,10 +310,16 @@ A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym);
 
 A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
 
+// get and set
+
 void A_setParseTreeRoot(A_topClauseList root);
 
 A_topClauseList A_getParseTreeRoot();
 
-// extern A_topClauseList A_root;
+void A_setVarArgFlag();
+
+void A_resetVarArgFlag();
+
+int A_getVarArgFlag();
 
 #endif

@@ -12,7 +12,7 @@ static S_symbol hashtable[SYMBOL_TABLE_SIZE];
 static S_symbol mksymbol(char *name, S_symbol next)
 {
 	S_symbol s = (S_symbol)checked_malloc(sizeof(*s));
-	s->name = name;
+	s->name = strdup(name);
 	s->next = next;
 	return s;
 }

@@ -2,13 +2,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "config.h"
 #include "semantic.h"
 #include "ParseTree.h"
 
 extern FILE *yyin;
 extern int yyparse();
-
-#define MAX_FILE_NAME 255
 
 int main(int argc, const char *argv[]) {
     char module_name[MAX_FILE_NAME];
