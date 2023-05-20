@@ -112,6 +112,58 @@ A_stmt A_VarDecStmt(A_varDeclare varDec) {
 	return p;
 }
 
+A_stmt A_CompoundStmt(A_pos pos, A_stmtList stmts) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_compoundStmt;
+	p->pos = pos;
+	p->u.compound = stmts;
+	return p;
+}
+
+A_stmt A_IfStmt(A_pos pos, A_exp cond, A_stmt then, A_stmt elsee) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_ifStmt;
+	p->pos = pos;
+	p->u.iff.condition = cond;
+	p->u.iff.then = then;
+	p->u.iff.elsee = elsee;
+	return p;
+}
+
+A_stmt A_WhileStmt(A_pos pos, A_exp cond, A_stmt body) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_whileStmt;
+	p->pos = pos;
+	p->u.whilee.condition = cond;
+	p->u.whilee.body = body;
+	return p;
+}
+
+A_stmt A_ForStmt(A_pos pos, A_stmt init, A_exp cond, A_exp step, A_stmt body) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_forStmt;
+	p->pos = pos;
+	p->u.forr.init = init;
+	p->u.forr.condition = cond;
+	p->u.forr.step = step;
+	p->u.forr.body = body;
+	return p;
+}
+
+A_stmt A_BreakStmt(A_pos pos) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_breakStmt;
+	p->pos = pos;
+	return p;
+}
+
+A_stmt A_ContinueStmt(A_pos pos) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_continueStmt;
+	p->pos = pos;
+	return p;
+}
+
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp) {
 	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
 	p->kind = A_returnStmt;

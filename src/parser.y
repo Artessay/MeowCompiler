@@ -103,8 +103,7 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 %type <expList> Expression_List Nonempty_Exp_List
 
-%type <stmt> Statement Exp_Stmt Return_Stmt
-/* Selection_Stmt Iteration_Stmt */
+%type <stmt> Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt
 
 %type <stmtList> Block Statements
 
@@ -138,20 +137,23 @@ Top_Clause_List
         | Top_Clause { $$ = A_TopClauseList($1, NULL); }
         ;
 Top_Clause 
-        : Var_Declaration { $$ = A_VarDeclare($1); }
+        : Var_Declaration SEMICOLON { $$ = A_VarDeclare($1); }
         | Fun_Declaration { $$ = A_FuncDeclare($1); }
         ;
 
 Var_Declaration
-        : Type_Specifier Var_List SEMICOLON { $$ = A_VarDeclaration(7, $1, $2); }
+        : Type_Specifier Var_List { $$ = A_VarDeclaration(7, $1, $2); }
         ;
-Var_List : Var_Init COMMA Var_List { $$ = A_VarDecList($1, $3); }
-         | Var_Init { $$ = A_VarDecList($1, NULL); } 
-         ;
-Var_Init : Var_Def { $$ = A_VarDec(7, $1, NULL); }
-         | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
-         ;
-Var_Def : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
+Var_List 
+        : Var_Init COMMA Var_List { $$ = A_VarDecList($1, $3); }
+        | Var_Init { $$ = A_VarDecList($1, NULL); } 
+        ;
+Var_Init 
+        : Var_Def { $$ = A_VarDec(7, $1, NULL); }
+        | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
+        ;
+Var_Def 
+        : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         | MUL Var_Def { $$ = A_PointVar(7, $2); }
         | IDENTITY { $$ = A_SimpleVar(7, $1); } 
         ;
@@ -192,30 +194,27 @@ Statements
         ;
 Statement 
         : Exp_Stmt { $$ = $1; }
-        /* | Selection_Stmt { $$ = $1; cout << "20-1" << endl; } */
-        /* | Iteration_Stmt { $$ = $1; cout << "20-2" << endl; } */
+        | Var_Declaration SEMICOLON { $$ = A_VarDecStmt($1); }
+        | Block { $$ = A_CompoundStmt(7, $1); }
+        | Selection_Stmt { $$ = $1; }
+        | Iteration_Stmt { $$ = $1; }
         | Return_Stmt { $$ = $1; }
-        /* | BREAK SEMICOLON { $$ = new Node(BREAK_); cout << "20-5" << endl; } */
-        /* | CONTINUE SEMICOLON { $$ = new Node(CONTINUE_); cout << "20-6" << endl; } */
-        | Var_Declaration { $$ = A_VarDecStmt($1); }
+        | BREAK SEMICOLON { $$ = A_BreakStmt(7); }
+        | CONTINUE SEMICOLON { $$ = A_ContinueStmt(7); }
         ;
 
 Exp_Stmt 
         : Expression SEMICOLON { $$ = A_ExprStmt(7, $1); }   
         ;
-/* Selection_Stmt : IF LPAREN Expression RPAREN Block { $$ = new Node(If_Stmt_); $$->children.push_back($3); $$->children.push_back($5); cout << "22-1" << endl; }
-               | IF LPAREN Expression RPAREN Block ELSE Block { $$ = new Node(IfElse_Stmt_); $$->children.push_back($3); $$->children.push_back($5); $$->children.push_back($7); cout << "22-2" << endl; }
-               | IF LPAREN Expression RPAREN Block ELSEIF_List { $$ = new Node(IfElseif_Stmt_); $$->children.push_back($3); $$->children.push_back($5); $$->children.push_back($6); cout << "22-3" << endl; }
-               | IF LPAREN Expression RPAREN Block ELSEIF_List ELSE Block { $$ = new Node(IfElseifElse_Stmt_); $$->children.push_back($3); $$->children.push_back($5); $$->children.push_back($6); $$->children.push_back($8); cout << "22-4" << endl; }
-               ;
-ELSEIF_List : ELSEIF_List ELSE IF LPAREN Expression RPAREN Block { $$ = new Node(ElseIf_); $$->children.push_back($5); $$->children.push_back($7); $$->children.push_back($1); cout << "22.5-1" << endl; }
-            | ELSE IF LPAREN Expression RPAREN Block { $$ = new Node(ElseIf_); $$->children.push_back($4); $$->children.push_back($6); cout << "22.5-2" << endl; }
-            ;
-Iteration_Stmt : FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Block { $$ = new Node(For_Stmt_); $$->children.push_back($3); $$->children.push_back($5); $$->children.push_back($7); $$->children.push_back($9); cout << "23-1" << endl; }
-               | FOR LPAREN Var_Declaration Expression SEMICOLON Expression RPAREN Block { $$ = new Node(For_Stmt_); $$->children.push_back($3); $$->children.push_back($4); $$->children.push_back($6); $$->children.push_back($8); cout << "23-2" << endl; }
-               | WHILE LPAREN Expression_List RPAREN Block { $$ = new Node(While_Stmt_); $$->children.push_back($3); $$->children.push_back($5); cout << "23-3" << endl; }
-               ; */
-
+Selection_Stmt 
+        : IF LPAREN Expression RPAREN Statement ELSE Statement { $$ = A_IfStmt(7, $3, $5, $7); } 
+        | IF LPAREN Expression RPAREN Statement { $$ = A_IfStmt(7, $3, $5, NULL); }
+        ;
+Iteration_Stmt 
+        : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, $3, $5, $7, $9); }
+        | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_ExprStmt(7, $3), $5, $7, $9); }
+        | WHILE LPAREN Expression RPAREN Statement { $$ = A_WhileStmt(7, $3, $5); }
+        ;
 Return_Stmt 
         : RETURN SEMICOLON { $$ = NULL; printf("TODO: return void type\n"); }
         | RETURN Expression SEMICOLON { $$ = A_ReturnStmt(7, $2); }

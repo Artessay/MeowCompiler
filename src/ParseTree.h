@@ -44,6 +44,12 @@ typedef struct A_stmt_ *A_stmt;
 
 typedef struct A_stmtList_ *A_stmtList;
 
+    typedef struct A_if_ *A_if;
+
+    typedef struct A_while_ *A_while;
+
+    typedef struct A_for_ *A_for;
+
 typedef struct A_arg_ *A_arg;
 
 typedef struct A_argList_ *A_argList;
@@ -162,6 +168,24 @@ struct A_fieldList_ {
 	A_fieldList next;
 };
 
+struct A_if_ {
+    A_exp condition;
+    A_stmt then;
+    A_stmt elsee;
+};
+
+struct A_while_ {
+    A_exp condition;
+    A_stmt body;
+};
+
+struct A_for_ {
+    A_stmt init;
+    A_exp condition;
+    A_exp step;
+    A_stmt body;
+};
+
 struct A_stmt_ {
     enum {
         A_expStmt, 
@@ -176,19 +200,9 @@ struct A_stmt_ {
         A_exp exp;
         A_varDeclare varDec;
         A_stmtList compound;
-        struct {
-            A_exp test;
-            A_stmt then;
-            A_stmt elsee;
-        } iff;
-        struct {
-            A_exp test;
-            A_stmt body;
-        } whilee;
-        struct {
-            A_exp test;
-            A_stmt body;
-        } forr;
+        struct A_if_ iff;
+        struct A_while_ whilee;
+        struct A_for_ forr;
         /* breakk; - need only the pos */
         /* continuee; - need only the pos */
         struct {
@@ -209,8 +223,9 @@ struct A_exp_ {
         A_callExp,
         A_opExp, 
         A_assignExp,
-        A_recordExp, A_seqExp, A_ifExp,
-        A_whileExp, A_forExp, A_breakExp, A_letExp, A_arrayExp
+        A_ifExp,
+        A_recordExp, A_seqExp, 
+        A_whileExp, A_forExp, A_breakExp, A_continueExp,
     } kind;
     
     A_pos pos;
@@ -236,7 +251,7 @@ struct A_exp_ {
         } op;
         // struct {
         //     S_symbol type;
-        //     A_efieldList fields;
+        //     A_fieldList fields;
         // } record;
         A_expList seq;
         struct {
@@ -288,6 +303,18 @@ A_stmtList A_StmtList(A_stmt value, A_stmtList next);
 A_stmt A_ExprStmt(A_pos pos, A_exp exp);
 
 A_stmt A_VarDecStmt(A_varDeclare varDec);
+
+A_stmt A_CompoundStmt(A_pos pos, A_stmtList stmts);
+
+A_stmt A_IfStmt(A_pos pos, A_exp cond, A_stmt then, A_stmt elsee);
+
+A_stmt A_WhileStmt(A_pos pos, A_exp cond, A_stmt body);
+
+A_stmt A_ForStmt(A_pos pos, A_stmt init, A_exp cond, A_exp step, A_stmt body);
+
+A_stmt A_BreakStmt(A_pos pos);
+
+A_stmt A_ContinueStmt(A_pos pos);
 
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp);
 

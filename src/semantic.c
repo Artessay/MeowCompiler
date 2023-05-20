@@ -65,7 +65,7 @@ static void transStatementList(A_stmtList root, SEM_context env);
 static void transStatement(A_stmt root, SEM_context env);
 
 static void transVarDefine(A_varDeclare root, SEM_context env);
-static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env);
+static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_context env);
 static LLVMValueRef transVar(A_var var, SEM_context env);
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env);
 
@@ -200,9 +200,6 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     }
 
     char *func_name = S_name(root->name);
-    // puts("function name:");
-    // puts(func_name);
-    // puts("");
     
     LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType, env), param_types, param_count, root->isVarArg);
     LLVMValueRef function = LLVMAddFunction(env->module, func_name, ret_type);
@@ -242,25 +239,15 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
 }
 
 static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
-    switch (root->typ->kind) {
-        case A_basic:
-            switch (root->typ->u.basic) {
-                case A_intType:
-                    break;
-                case A_doubleType:
-                    break;
-                case A_charType:
-                    break;
-                case A_stringType:
-                    break;
-                case A_voidType:
-                    break;
-            }
+    LLVMTypeRef varType = transType(root->typ, env);
+    
+    for (A_varDecList p = root->decs; p != NULL; p = p->next) {
+        A_varDec dec = p->value;
+        if (dec == NULL) {
             break;
-        case A_point:
-            break;
-        case A_array:
-            break;
+        }
+
+        transGlobalVarDec(dec, varType, 1, env);
     }
 }
 
@@ -336,7 +323,7 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
     return variable;
 }
 
-static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
+static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_context env) {
     assert(root != NULL);
     assert(varType != NULL);
     
@@ -349,11 +336,13 @@ static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
     varType = transVarType(var, varType, env);
     assert(varType != NULL);
 
-    // puts("var type: ");
-    // LLVMDumpType(varType);
-    // puts("");
-
-    LLVMValueRef localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+    LLVMValueRef localVar = NULL;
+    if (isGlobal) {
+        localVar = LLVMAddGlobal(env->module, varType, S_name(varName));
+    } else {
+        localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+    }
+    
     S_enter(tables->variableTable, varName, localVar);
 
     if (root->init != NULL) {
@@ -372,7 +361,7 @@ static void transVarDefine(A_varDeclare root, SEM_context env) {
             break;
         }
 
-        transVarDec(dec, varType, env);
+        transVarDec(dec, varType, 0, env);
     }
 }
 
@@ -386,6 +375,21 @@ static void transStatementList(A_stmtList root, SEM_context env) {
     transStatementList(root->next, env);
 }
 
+static void transSelection(A_if root, SEM_context env) {
+    LLVMValueRef cond = transExpression(root->condition, env);
+
+    LLVMValueRef currentBasicBlock = LLVMGetBasicBlockParent();
+    // LLVMBasicBlockRef thenBlock = LLVMAppendBasicBlock()
+}
+
+static void transFor(A_for root, SEM_context env) {
+    ;
+}
+
+static void transWhile(A_while root, SEM_context env) {
+    ;
+}
+
 static void transStatement(A_stmt root, SEM_context env) {
     if (root == NULL) {
         return;
@@ -395,15 +399,25 @@ static void transStatement(A_stmt root, SEM_context env) {
 
     switch (root->kind) {
         case A_expStmt:
-            puts("expression");
+            // puts("expression");
             transExpression(root->u.exp, env);
             break;
         case A_varDecStmt:
-            puts("variable declare");
+            // puts("variable declare");
             transVarDefine(root->u.varDec, env);
             break;
+        case A_ifStmt:
+            transSelection(&(root->u.iff), env);
+            break;
+        case A_forStmt:
+            transFor(&(root->u.forr), env);
+            break;
+        case A_whileStmt:
+            transWhile(&(root->u.whilee), env);
+            break;
+        
         case A_returnStmt:
-            puts("return");
+            // puts("return");
             exp = transExpression(root->u.returnn.exp, env);
             LLVMBuildRet(env->builder, exp);
             break;
