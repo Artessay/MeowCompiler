@@ -126,19 +126,11 @@ static LLVMValueRef getValueByVar(A_var var, SEM_context env) {
         variable = S_look(tables->variableTable, var->u.simple);
     } else if (var->kind == A_subscriptVar) {
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
-        LLVMValueRef index = transExpression(var->u.subscript.exp, env);
+        LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
         
-        LLVMTypeRef varType = LLVMTypeOf(variable);
-        puts("[debug] type: ");
-        LLVMDumpType(varType);
-        putchar('\n');
-
-        variable = LLVMBuildGEP2(env->builder, varType, variable, &index, 1, "arrayElement");
-
-        puts("[debug] variable: ");
-        LLVMDumpValue(variable);
-        putchar('\n');
-        // variable = LLVMBuildGEP(env->builder, variable, &index, 1, "arrayElement");
+        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        
+        variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;
@@ -463,11 +455,9 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
 
     LLVMValueRef variable = getValueByVar(root->u.var, env);
 
-    // puts("load variable");
-
     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
-    return LLVMBuildLoad2(env->builder, varType, variable, S_name(root->u.var->u.simple));
+    return LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(root->u.var)));
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
@@ -605,11 +595,28 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.assign.exp, env);
     assert(value != NULL);
 
-    // LLVMDumpValue(value);
-    // putchar('\n');
-
     LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
     assert(variable != NULL);
+    
+    // A_var var = root->u.assign.var;
+
+    // if (var->kind == A_simpleVar) {
+    //     return LLVMBuildStore(env->builder, value, variable);
+    // } else if (root->u.assign.var->kind == A_fieldVar) {
+    //     variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
+    //     LLVMValueRef index = transExpression(var->u.subscript.exp, env);
+        
+    //     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+    //     varType = LLVMGetElementType(varType);
+        
+    //     variable = LLVMBuildGEP2(env->builder, varType, variable, &index, 1, "arrayElement");
+    // } else if (root->u.assign.var->kind == A_subscriptVar) {
+    //     return LLVMBuildStore(env->builder, value, variable);
+    // } else {
+    //     puts("[error] unrecognized assign expression");
+    //     return NULL;
+    // }
+
 
     return LLVMBuildStore(env->builder, value, variable);
 }

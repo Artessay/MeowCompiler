@@ -167,7 +167,7 @@ Var_List : Var_Init COMMA Var_List { $$ = A_VarDecList($1, $3); }
 Var_Init : Var_Def { $$ = A_VarDec(7, $1, NULL); }
          | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
          ;
-Var_Def : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); puts("define x[i]"); }
+Var_Def : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         | MUL Var_Def { $$ = A_PointVar(7, $2); }
         | IDENTITY { $$ = A_SimpleVar(7, $1); } 
         ;
@@ -285,7 +285,7 @@ Call_Exp
 
 L_Value
         : IDENTITY { $$ = A_SimpleVar(7, $1); }
-        | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); puts("x[i]"); }
+        | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         /* | L_Value DOT IDENTITY {} */
         ;
 Binary_Exp 
