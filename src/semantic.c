@@ -64,6 +64,10 @@ static void transGlobalVarDefine(A_varDeclare root, SEM_context env);
 static void transStatementList(A_stmtList root, SEM_context env);
 static void transStatement(A_stmt root, SEM_context env);
 
+static void transVarDefine(A_varDeclare root, SEM_context env);
+static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env);
+static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env);
+
 static LLVMValueRef transExpression(A_exp root, SEM_context env);
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
@@ -286,18 +290,78 @@ static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
     }
 }
 
-static void transVarDefine(A_varDeclare root, SEM_context env) {
-    LLVMTypeRef varType = transType(root->typ, env);
-    LLVMValueRef localVar = LLVMBuildAlloca(env->builder, varType, S_name(root->name));
+static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env) {
+    switch (var->kind) {
+        case A_simpleVar:
+            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            break;
+
+        case A_subscriptVar:
+            varType = transVarType(var->u.subscript.var, varType, env);
+            // localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
+            break;
+
+        case A_pointVar:
+            varType = transVarType(var->u.point, varType, env);
+            varType = LLVMPointerType(varType, 0);
+            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            break;
+        default:
+            puts("[error] unrecognized var kind");
+            break;
+    }
+
+    return varType;
+}
+
+static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
+    assert(root != NULL);
+    assert(varType != NULL);
+
+    A_var var = root->var;
+    assert(var != NULL);
     
+    LLVMValueRef localVar = NULL;
+    S_symbol varName = S_getVarSymbol(var);
+
+    switch (var->kind) {
+        case A_simpleVar:
+            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            S_enter(tables->variableTable, varName, localVar);
+            break;
+        case A_subscriptVar:
+            varType = transVarType(var->u.subscript.var, varType, env);
+            localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
+            S_enter(tables->variableTable, varName, localVar);
+            break;
+        case A_pointVar:
+            varType = transVarType(var->u.point, varType, env);
+            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            S_enter(tables->variableTable, varName, localVar);
+            break;
+        default:
+            puts("[error] unrecognized var kind");
+            break;
+    }
+
     if (root->init != NULL) {
         LLVMBuildStore(env->builder, transExpression(root->init, env), localVar);
-    } 
-    // else {
-    //     LLVMBuildStore(env->builder, LLVMConstNull(varType), localVar);
-    // }    
+    }
 
-    S_enter(tables->variableTable, root->name, localVar);
+    return;
+}
+
+static void transVarDefine(A_varDeclare root, SEM_context env) {
+    LLVMTypeRef varType = transType(root->typ, env);
+    
+    for (A_varDecList p = root->decs; p != NULL; p = p->next) {
+        A_varDec dec = p->value;
+        if (dec == NULL) {
+            break;
+        }
+
+        transVarDec(dec, varType, env);
+    }
 }
 
 static void transStatementList(A_stmtList root, SEM_context env) {
@@ -396,7 +460,6 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
 
     unsigned int arg_count = 0;
     LLVMValueRef args[MAX_FUNCTION_PARAMS];
-    // LLVMValueRef *args = (LLVMValueRef *)checked_malloc(sizeof(LLVMValueRef) * MAX_FUNCTION_PARAMS);
     for (A_expList p = root->u.call.args; p != NULL; p = p->next) {
         args[arg_count] = transExpression(p->value, env);
         ++arg_count;
@@ -407,7 +470,6 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
         }
     }
 
-    // return LLVMBuildCall(env->builder, function, args, arg_count, "callVal");
     return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
 }
 
@@ -464,23 +526,47 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
         case A_orOp:
             return LLVMBuildOr(env->builder, lhs, rhs, "temperate");
             
-        // case A_eqOp: 
-        //     return LLVMBuildICmp(env->builder, lhs, rhs, "temperate");
+        case A_eqOp: 
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealOEQ, lhs, rhs, "cmpEQ");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntEQ, lhs, rhs, "cmpEQ");
+            }
             
-        // case A_neqOp: 
-        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+        case A_neqOp: 
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealONE, lhs, rhs, "cmpNE");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntNE, lhs, rhs, "cmpNE");
+            }
             
-        // case A_ltOp: 
-        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+        case A_ltOp: 
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealOLT, lhs, rhs, "cmpLT");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntSLT, lhs, rhs, "cmpLT");
+            }
             
-        // case A_leOp: 
-        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+        case A_leOp: 
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealOLE, lhs, rhs, "cmpLE");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntSLE, lhs, rhs, "cmpLE");
+            }
             
-        // case A_gtOp: 
-        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+        case A_gtOp: 
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealOGT, lhs, rhs, "cmpGT");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntSGT, lhs, rhs, "cmpGT");
+            }
             
-        // case A_geOp:
-        //     return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+        case A_geOp:
+            if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
+                return LLVMBuildFCmp(env->builder, LLVMRealOGE, lhs, rhs, "cmpGE");
+            } else {
+                return LLVMBuildICmp(env->builder, LLVMIntSGE, lhs, rhs, "cmpGE");
+            }
             
         default:
             puts("[error] unrecognized binary op");

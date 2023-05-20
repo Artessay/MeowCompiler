@@ -15,3 +15,20 @@ void *checked_malloc(int len) {
     assert(p);
     return p;
 }
+
+S_symbol S_getVarSymbol(A_var var) {
+    if (var == NULL) {
+        return NULL;
+    }
+
+    switch (var->kind) {
+        case A_simpleVar:
+            return var->u.simple;
+        case A_subscriptVar:
+            return S_getVarSymbol(var->u.subscript.var);
+        case A_pointVar:
+            return S_getVarSymbol(var->u.point);
+        default:
+            return NULL;
+    }
+}

@@ -66,12 +66,26 @@ A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fi
 	return p;
 }
 
-A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name, A_exp initVal) {
+A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, A_varDecList decList) {
 	A_varDeclare p = (A_varDeclare)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->typ = typ;
-	p->name = name;
+	p->decs = decList;
+	return p;
+}
+
+A_varDec A_VarDec(A_pos pos, A_var var, A_exp initVal) {
+	A_varDec p = (A_varDec)checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->var = var;
 	p->init = initVal;
+	return p;
+}
+
+A_varDecList A_VarDecList(A_varDec value, A_varDecList next) {
+	A_varDecList p = (A_varDecList)checked_malloc(sizeof(*p));
+	p->value = value;
+	p->next = next;
 	return p;
 }
 
@@ -293,5 +307,13 @@ A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp) {
 	p->pos = pos;
 	p->u.subscript.var = var;
 	p->u.subscript.exp = exp;
+	return p;
+}
+
+A_var A_PointVar(A_pos pos, A_var var) {
+	A_var p = (A_var)checked_malloc(sizeof(*p));
+	p->kind = A_pointVar;
+	p->pos = pos;
+	p->u.point = var;
 	return p;
 }

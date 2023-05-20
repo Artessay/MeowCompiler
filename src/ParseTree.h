@@ -24,6 +24,10 @@ typedef struct A_declarationList_ *A_declarationList;
 
     typedef struct A_varDeclare_ *A_varDeclare;
 
+    typedef struct A_varDec_ *A_varDec;
+
+    typedef struct A_varDecList_ *A_varDecList;
+
 typedef struct A_var_ *A_var;
 
     typedef struct A_varType_ *A_varType;
@@ -81,14 +85,24 @@ struct A_funcDeclare_ {
 
 struct A_varDeclare_ {
     A_pos pos;
-    S_symbol name;
     A_varType typ;
+    A_varDecList decs;
+};
+
+struct A_varDec_ {
+    A_pos pos;
+    A_var var;
     A_exp init;
+};
+
+struct A_varDecList_ {
+    A_varDec value;
+    A_varDecList next;
 };
 
 struct A_var_ {
     enum {
-        A_simpleVar, A_fieldVar, A_subscriptVar
+        A_simpleVar, A_fieldVar, A_subscriptVar, A_pointVar
     } kind;
     A_pos pos;
     A_varType typ;
@@ -102,6 +116,7 @@ struct A_var_ {
             A_var var;
             A_exp exp;
         } subscript;
+        A_var point;
     } u;
 };
 
@@ -138,6 +153,7 @@ struct A_stmt_ {
     enum {
         A_expStmt, 
         A_varDecStmt,
+        A_compoundStmt,
         A_ifStmt, 
         A_whileStmt, A_forStmt, A_breakStmt, A_continueStmt, 
         A_returnStmt
@@ -146,6 +162,7 @@ struct A_stmt_ {
     union {
         A_exp exp;
         A_varDeclare varDec;
+        A_stmtList compound;
         struct {
             A_exp test;
             A_stmt then;
@@ -245,7 +262,11 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
 A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg);
 
-A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, S_symbol name, A_exp initVal);
+A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, A_varDecList decList);
+
+A_varDec A_VarDec(A_pos pos, A_var var, A_exp init);
+
+A_varDecList A_VarDecList(A_varDec value, A_varDecList next);
 
 // stmt
 
@@ -294,6 +315,8 @@ A_var A_SimpleVar(A_pos pos, S_symbol sym);
 A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym);
 
 A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
+
+A_var A_PointVar(A_pos pos, A_var var);
 
 // get and set
 

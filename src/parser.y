@@ -26,6 +26,8 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
     
     struct A_funcDeclare_ *funcDeclare;
     struct A_varDeclare_ *varDeclare;
+    struct A_varDec_ *varDec;
+    struct A_varDecList_ *varDecList;
     
     struct A_var_ *var;
     struct A_varType_ *varType;
@@ -79,6 +81,10 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 %type <varDeclare> Var_Declaration
 
+%type <varDecList> Var_List
+
+%type <varDec> Var_Init
+
 %type <varType> Type_Specifier Basic_Type_Specifier
 
 /* %type <basicType>  */
@@ -89,7 +95,7 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 /* %type <block> Block */
 
-%type <var>  L_Value;
+%type <var>  L_Value Var_Def;
 
 %type <exp> Expression Binary_Exp Call_Exp
 
@@ -153,19 +159,18 @@ Top_Clause
         ;
 
 Var_Declaration
-        : Type_Specifier IDENTITY SEMICOLON { $$ = A_VarDeclaration(7, $1, $2, NULL); }
-        | Type_Specifier IDENTITY ASSIGN Expression SEMICOLON { $$ = A_VarDeclaration(7, $1, $2, $4); }
-        /* : Type_Specifier Var_List SEMICOLON { $$ = A_VarDeclaration(7, $1, ); } */
+        : Type_Specifier Var_List SEMICOLON { $$ = A_VarDeclaration(7, $1, $2); }
         ;
-/* Var_List : Var_List COMMA Var_Init {  }
-         | Var_Init {  } */
+Var_List : Var_Init COMMA Var_List { $$ = A_VarDecList($1, $3); }
+         | Var_Init { $$ = A_VarDecList($1, NULL); } 
          ;
-/* Var_Init : Var_Def {  }
-         | Var_Def ASSIGN Expression {  }
+Var_Init : Var_Def { $$ = A_VarDec(7, $1, NULL); }
+         | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
          ;
-Var_Def : Var_Def LBRACK INT RBRACK {  }
-        | IDENTITY {  } 
-        ; */
+Var_Def : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
+        | MUL Var_Def { $$ = A_PointVar(7, $2); }
+        | IDENTITY { $$ = A_SimpleVar(7, $1); } 
+        ;
 
 Fun_Declaration
         : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL, A_getVarArgFlag()); }
