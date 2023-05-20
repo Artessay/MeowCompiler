@@ -30,6 +30,9 @@ show:
 	llc $(TEST_IR) -o $(TEST_AS)
 	clang $(TEST_AS)
 
+emit:
+	clang -S -emit-llvm -o testAns.ll -O0 $(TEST_FILE)
+
 clean:
 	-rm -f *.exe
 	-rm $(LEXER_CPP)

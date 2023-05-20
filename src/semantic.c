@@ -122,8 +122,23 @@ static LLVMValueRef getValueByVar(A_var var, SEM_context env) {
 
     // find local variable
     if (var->kind == A_simpleVar) {
-        printf("[debug] find local variable: %s\n", var->u.simple->name);
+        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
         variable = S_look(tables->variableTable, var->u.simple);
+    } else if (var->kind == A_subscriptVar) {
+        variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
+        LLVMValueRef index = transExpression(var->u.subscript.exp, env);
+        
+        LLVMTypeRef varType = LLVMTypeOf(variable);
+        puts("[debug] type: ");
+        LLVMDumpType(varType);
+        putchar('\n');
+
+        variable = LLVMBuildGEP2(env->builder, varType, variable, &index, 1, "arrayElement");
+
+        puts("[debug] variable: ");
+        LLVMDumpValue(variable);
+        putchar('\n');
+        // variable = LLVMBuildGEP(env->builder, variable, &index, 1, "arrayElement");
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;
@@ -291,21 +306,35 @@ static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
 }
 
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env) {
+    LLVMValueRef expValue = NULL;
+    unsigned int elementCount = 0;
+
     switch (var->kind) {
         case A_simpleVar:
-            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            puts("[debug] transVarType: simple var");
             break;
 
         case A_subscriptVar:
+            puts("[debug] transVarType: subscript var");
+
             varType = transVarType(var->u.subscript.var, varType, env);
-            // localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
+            expValue = transExpression(var->u.subscript.exp, env);
+            if (LLVMIsAConstantInt(expValue)) {
+                elementCount = LLVMConstIntGetZExtValue(expValue);
+                varType = LLVMArrayType(varType, elementCount);
+            } else {
+                puts("[error] subscript is not a constant int");
+                return NULL;
+            }
             break;
 
         case A_pointVar:
+            puts("[debug] transVarType: point var");
+
             varType = transVarType(var->u.point, varType, env);
             varType = LLVMPointerType(varType, 0);
-            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
             break;
+
         default:
             puts("[error] unrecognized var kind");
             break;
@@ -318,31 +347,27 @@ static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
     assert(root != NULL);
     assert(varType != NULL);
 
+    // if (varType == LLVMInt32Type() && root->var->kind == A_simpleVar) {
+    //     puts("int32");
+    // } else if (varType == LLVMInt32Type() && root->var->kind == A_subscriptVar) {
+    //     puts("int32 []");
+    // }
+
     A_var var = root->var;
     assert(var != NULL);
     
-    LLVMValueRef localVar = NULL;
     S_symbol varName = S_getVarSymbol(var);
+    // printf("var name: %s\n", S_name(varName));
 
-    switch (var->kind) {
-        case A_simpleVar:
-            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        case A_subscriptVar:
-            varType = transVarType(var->u.subscript.var, varType, env);
-            localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        case A_pointVar:
-            varType = transVarType(var->u.point, varType, env);
-            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        default:
-            puts("[error] unrecognized var kind");
-            break;
-    }
+    varType = transVarType(var, varType, env);
+    assert(varType != NULL);
+
+    // puts("var type: ");
+    // LLVMDumpType(varType);
+    // puts("");
+
+    LLVMValueRef localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+    S_enter(tables->variableTable, varName, localVar);
 
     if (root->init != NULL) {
         LLVMBuildStore(env->builder, transExpression(root->init, env), localVar);
@@ -580,8 +605,8 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.assign.exp, env);
     assert(value != NULL);
 
-    LLVMDumpValue(value);
-    putchar('\n');
+    // LLVMDumpValue(value);
+    // putchar('\n');
 
     LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
     assert(variable != NULL);

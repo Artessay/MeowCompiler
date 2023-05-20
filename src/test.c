@@ -1,13 +1,12 @@
-int add(int a, int b) {
-    return a + b;
-}
+// int add(int a, int b) {
+//     return a + b;
+// }
 
 int main() {
-    int n;
-    // add(1, 2);
-    // n = 1 + 2 * 3;
-    // n = 1 + 2;
-    n = add(1, 2);
+    int a[2];
+    // a[0] = 3;
+    // a[1] = 4;
 
-    return n;
+    // return a[1];
+    return 0;
 }
