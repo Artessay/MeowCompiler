@@ -65,8 +65,9 @@ static void transStatementList(A_stmtList root, SEM_context env);
 static void transStatement(A_stmt root, SEM_context env);
 
 static void transVarDefine(A_varDeclare root, SEM_context env);
-static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env);
 static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env);
+static LLVMValueRef transVar(A_var var, SEM_context env);
+static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env);
 
 static LLVMValueRef transExpression(A_exp root, SEM_context env);
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
@@ -115,40 +116,6 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     // dispose LLVM context
     LLVMContextDispose(context);
-}
-
-static LLVMValueRef getValueByVar(A_var var, SEM_context env) {
-    LLVMValueRef variable = NULL;
-
-    // find local variable
-    if (var->kind == A_simpleVar) {
-        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
-        variable = S_look(tables->variableTable, var->u.simple);
-    } else if (var->kind == A_subscriptVar) {
-        variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
-        LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
-        
-        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
-        
-        variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
-    } else {
-        puts("[error] unimplemented variable expression");
-        variable = NULL;
-    }
-
-    // find global variable
-    if (variable == NULL) {
-        puts("[debug] find global variable");
-        variable = LLVMGetNamedGlobal(env->module, var->u.simple->name);
-    }
-    
-    // still not found
-    if (variable == NULL) {
-        puts("[error] variable not found");
-        return NULL;
-    }
-
-    return variable;
 }
 
 static LLVMTypeRef transType(A_varType typ, SEM_context env) {
@@ -335,6 +302,40 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
     return varType;
 }
 
+static LLVMValueRef transVar(A_var var, SEM_context env) {
+    LLVMValueRef variable = NULL;
+
+    // find local variable
+    if (var->kind == A_simpleVar) {
+        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
+        variable = S_look(tables->variableTable, var->u.simple);
+    } else if (var->kind == A_subscriptVar) {
+        variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
+        LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
+        
+        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        
+        variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
+    } else {
+        puts("[error] unimplemented variable expression");
+        variable = NULL;
+    }
+
+    // find global variable
+    if (variable == NULL) {
+        puts("[debug] find global variable");
+        variable = LLVMGetNamedGlobal(env->module, var->u.simple->name);
+    }
+    
+    // still not found
+    if (variable == NULL) {
+        puts("[error] variable not found");
+        return NULL;
+    }
+
+    return variable;
+}
+
 static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
     assert(root != NULL);
     assert(varType != NULL);
@@ -453,7 +454,7 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
     assert(root->kind == A_varExp);
 
-    LLVMValueRef variable = getValueByVar(root->u.var, env);
+    LLVMValueRef variable = transVar(root->u.var, env);
 
     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
@@ -466,7 +467,6 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
     char *func_name = S_name(root->u.call.func);
     LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
     LLVMTypeRef functionType = LLVMGetElementType(LLVMTypeOf(function));
-    // LLVMDumpType(functionType);
 
     if (function == NULL) {
         puts("[error] function not found");
@@ -595,28 +595,8 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.assign.exp, env);
     assert(value != NULL);
 
-    LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
+    LLVMValueRef variable = transVar(root->u.assign.var, env);
     assert(variable != NULL);
     
-    // A_var var = root->u.assign.var;
-
-    // if (var->kind == A_simpleVar) {
-    //     return LLVMBuildStore(env->builder, value, variable);
-    // } else if (root->u.assign.var->kind == A_fieldVar) {
-    //     variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
-    //     LLVMValueRef index = transExpression(var->u.subscript.exp, env);
-        
-    //     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
-    //     varType = LLVMGetElementType(varType);
-        
-    //     variable = LLVMBuildGEP2(env->builder, varType, variable, &index, 1, "arrayElement");
-    // } else if (root->u.assign.var->kind == A_subscriptVar) {
-    //     return LLVMBuildStore(env->builder, value, variable);
-    // } else {
-    //     puts("[error] unrecognized assign expression");
-    //     return NULL;
-    // }
-
-
     return LLVMBuildStore(env->builder, value, variable);
 }
