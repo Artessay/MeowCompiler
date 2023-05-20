@@ -1,15 +1,38 @@
-CC 		= g++
+CC 		= clang
 LEX 	= flex
 YACC 	= bison
 
+CFLAGS  = `llvm-config --cflags --ldflags --libs`
+
+SRC		= main.c \
+		  ErrorMessage.c ParseTree.c semantic.c symbol.c table.c utility.c
+
+LEXER_CPP = lexer.c
+PARSER_CPP = parser.c
+PARSER_HPP = parser.h
+
+TARGET = a.out
+TEST_FILE = test.c
+TEST_IR = $(TEST_FILE:.c=.ll)
+TEST_AS = $(TEST_FILE:.c=.s)
+
 all:
-	bison --yacc -dv parser.y
-	flex Lexer.l
-	g++ -o test y.tab.c lex.yy.c
+	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
+	$(LEX) -o $(LEXER_CPP) lexer.l
+	$(CC) $(CFLAGS) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
+	./$(TARGET) $(TEST_FILE)
+
+run:
+	./$(TARGET) $(TEST_FILE)
+
+show:
+	clang -S -emit-llvm -o $(TEST_IR) -O0 $(TEST_FILE)
+	llc $(TEST_IR) -o $(TEST_AS)
+	clang $(TEST_AS)
 
 clean:
 	-rm -f *.exe
-	-rm lex.yy.c 
-	-rm y.tab.h 
-	-rm y.tab.c 
-	-rm y.output
+	-rm $(LEXER_CPP)
+	-rm $(PARSER_HPP)
+	-rm $(PARSER_CPP)
+	-rm parser.output

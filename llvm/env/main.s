@@ -32,7 +32,7 @@ main:                                   # @main
 	movl	$10, -4(%rbp)
 .LBB0_3:
 	movl	-4(%rbp), %esi
-	movabsq	$.L.str, %rdi
+	movabsq	$.L.str.1, %rdi
 	movb	$0, %al
 	callq	printf@PLT
 	xorl	%eax, %eax
@@ -49,6 +49,11 @@ main:                                   # @main
 .L.str:
 	.asciz	"%d"
 	.size	.L.str, 3
+
+	.type	.L.str.1,@object                # @.str.1
+.L.str.1:
+	.asciz	"%d\n"
+	.size	.L.str.1, 4
 
 	.ident	"Ubuntu clang version 14.0.0-1ubuntu1"
 	.section	".note.GNU-stack","",@progbits
