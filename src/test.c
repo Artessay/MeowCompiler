@@ -1,3 +1,7 @@
+int scanf(char *__format, ...);
+
+int printf(char *__format, ...);
+
 int add(int a, int b) {
     return a + b;
 }

@@ -50,7 +50,7 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable) {
 	return p;
 }
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg) {
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_argList params, A_stmtList body, int isVarArg) {
 	A_funcDeclare p = (A_funcDeclare)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->returnType = retTyp;
@@ -279,6 +279,21 @@ A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
 
 A_fieldList A_FieldList(A_field value, A_fieldList next) {
 	A_fieldList p = (A_fieldList)checked_malloc(sizeof(*p));
+	p->value = value;
+	p->next = next;
+	return p;
+}
+
+A_arg A_Arg(A_pos pos, A_varType typ, A_var var) {
+	A_arg p = (A_arg)checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->typ = typ;
+	p->var = var;
+	return p;
+}
+
+A_argList A_ArgList(A_arg value, A_argList next) {
+	A_argList p = (A_argList)checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
 	return p;

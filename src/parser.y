@@ -37,6 +37,8 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
     struct A_field_ *field;
     struct A_fieldList_ *fieldList;
+    struct A_arg_ *arg;
+    struct A_argList_ *argList;
     
     struct A_exp_ *exp;
     struct A_expList_ *expList;
@@ -89,9 +91,9 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 /* %type <basicType>  */
 
-%type <field> Param
+%type <arg> Param
 
-%type <fieldList> Params
+%type <argList> Params
 
 /* %type <block> Block */
 
@@ -109,24 +111,6 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 // terminals
 
 %type <sym> IDENTITY
-
-// Define
-/* %type Define_List Define Declarator */
-// Declaration List
-/* %type <decList> Declaration_List  */
-// Declaration
-/* %type <declaration> Declaration  */
-/* 
-//variable definition
-%type Type_Specifier Var_Declaration Var_List Var_Init Var_Def
-//function definition
-%type Params Param Fun_Prototype Fun_Declaration
-//block definition
-%type Block Block_Items Block_Item
-//statement definition
-%type Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt ELSEIF_List
-//expression definition
-%type Expression Uni_Exp LUOP RUOP L_Value Call_Exp Arg_List Binary_Exp Expression_List */
 
 //priority
 %right  ASSIGN ADDAS SUBAS MULAS DIVAS MODAS SHLAS SHRAS BANDAS BORAS BXORAS
@@ -177,13 +161,12 @@ Fun_Declaration
         | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6, A_getVarArgFlag()); }
         ;
 Params 
-        : Param COMMA Params { $$ = A_FieldList($1, $3); }
-        | Param { $$ = A_FieldList($1, NULL); }
-        | /* empty */ { $$ = A_FieldList(NULL, NULL); }
+        : Param COMMA Params { $$ = A_ArgList($1, $3); }
+        | Param { $$ = A_ArgList($1, NULL); }
+        | /* empty */ { $$ = A_ArgList(NULL, NULL); }
         ;
 Param 
-        : Type_Specifier IDENTITY { $$ = A_Field(7, $1, $2); }
-        /* | Type_Specifier ID LBRACK RBRACK {  } */
+        : Type_Specifier Var_Def { $$ = A_Arg(7, $1, $2); }
         | DOT DOT DOT  { $$ = NULL; A_setVarArgFlag(); }
         ;
 IDENTITY

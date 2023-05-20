@@ -136,8 +136,7 @@ static LLVMTypeRef transType(A_varType typ, SEM_context env) {
                     return LLVMInt8Type();
 
                 case A_stringType:
-                    puts("TODO: trans to string type");
-                    return NULL;
+                    return LLVMPointerType(LLVMInt8Type(), 0);
 
                 case A_voidType:
                     return LLVMVoidType();
@@ -183,14 +182,15 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     LLVMTypeRef param_types[MAX_FUNCTION_PARAMS];
     S_symbol param_names[MAX_FUNCTION_PARAMS];
 
-    for (A_fieldList p = root->params; p != NULL; p = p->next) {
-        A_field field = p->value;
-        if (field == NULL) {
+    for (A_argList p = root->params; p != NULL; p = p->next) {
+        A_arg arg = p->value;
+        if (arg == NULL) {
             break;
         }
 
-        param_types[param_count] = transType(field->typ, env);
-        param_names[param_count] = field->name;
+        LLVMTypeRef basic_type = transType(arg->typ, env);
+        param_types[param_count] = transVarType(arg->var, basic_type, env);
+        param_names[param_count] = S_getVarSymbol(arg->var);
         ++param_count;
 
         if (param_count == MAX_FUNCTION_PARAMS) {
@@ -339,13 +339,7 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
 static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
     assert(root != NULL);
     assert(varType != NULL);
-
-    // if (varType == LLVMInt32Type() && root->var->kind == A_simpleVar) {
-    //     puts("int32");
-    // } else if (varType == LLVMInt32Type() && root->var->kind == A_subscriptVar) {
-    //     puts("int32 []");
-    // }
-
+    
     A_var var = root->var;
     assert(var != NULL);
     
@@ -436,6 +430,9 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             return LLVMConstInt(LLVMInt8Type(), root->u.charr, 1);
         case A_doubleExp:
             return LLVMConstReal(LLVMDoubleType(), root->u.doublee);
+        case A_stringExp:
+            printf("string expression: %s\n", root->u.stringg);
+            return LLVMBuildGlobalStringPtr(env->builder, root->u.stringg, "string");
         case A_callExp:
             puts("call expression");
             return transCallExpression(root, env);

@@ -32,8 +32,6 @@ typedef struct A_var_ *A_var;
 
     typedef struct A_varType_ *A_varType;
 
-    // typedef struct A_basicType_ *A_basicType;
-
     typedef struct A_pointType_ *A_pointType;
 
     typedef struct A_arrayType_ *A_arrayType;
@@ -45,6 +43,10 @@ typedef struct A_expList_ *A_expList;
 typedef struct A_stmt_ *A_stmt;
 
 typedef struct A_stmtList_ *A_stmtList;
+
+typedef struct A_arg_ *A_arg;
+
+typedef struct A_argList_ *A_argList;
 
 typedef struct A_field_ *A_field;
 
@@ -76,7 +78,7 @@ struct A_funcDeclare_ {
 
     A_varType returnType;
     S_symbol name;
-    A_fieldList params;
+    A_argList params;
     A_stmtList body;
 
     int isVarArg;
@@ -136,12 +138,23 @@ struct A_varType_ {
     } u;
 };
 
+struct A_arg_ {
+	A_pos pos;
+
+    A_varType typ;
+	A_var var;
+};
+
+struct A_argList_ {
+	A_arg value;
+	A_argList next;
+};
+
 struct A_field_ {
 	A_pos pos;
 
     A_varType typ;
 	S_symbol name;
-	// bool escape;
 };
 
 struct A_fieldList_ {
@@ -260,7 +273,7 @@ A_topClause A_FuncDeclare(A_funcDeclare function);
 
 A_topClause A_VarDeclare(A_varDeclare globalVariable);
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg);
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_argList params, A_stmtList body, int isVarArg);
 
 A_varDeclare A_VarDeclaration(A_pos pos, A_varType typ, A_varDecList decList);
 
@@ -304,11 +317,13 @@ A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right);
 
 A_varType A_VarTypeBasic(A_pos pos, enum A_BasicType_ type);
 
-// A_basicType A_BasicType(enum A_BasicType_ type);
-
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
 
 A_fieldList A_FieldList(A_field value, A_fieldList next);
+
+A_arg A_Arg(A_pos pos, A_varType typ, A_var var);
+
+A_argList A_ArgList(A_arg value, A_argList next);
 
 A_var A_SimpleVar(A_pos pos, S_symbol sym);
 
