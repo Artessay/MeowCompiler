@@ -397,11 +397,50 @@ static void transSelection(A_if root, SEM_context env) {
 }
 
 static void transFor(A_for root, SEM_context env) {
-    ;
+    assert(root != NULL);
+
+    SEM_enterScope(tables);
+
+    transStatement(root->init, env);
+
+    LLVMBasicBlockRef loopBlock = LLVMAppendBasicBlock(env->currentFunction, "for.loop");
+    LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "for.body");
+    LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "for.after");
+
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, loopBlock);
+    LLVMValueRef cond = transExpression(root->condition, env);
+    LLVMBuildCondBr(env->builder, cond, bodyBlock, afterBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, bodyBlock);
+    transStatement(root->body, env);
+    transExpression(root->step, env);
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, afterBlock);
+
+    SEM_leaveScope(tables);
 }
 
 static void transWhile(A_while root, SEM_context env) {
-    ;
+    assert(root != NULL);
+
+    LLVMBasicBlockRef loopBlock = LLVMAppendBasicBlock(env->currentFunction, "while.loop");
+    LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "while.body");
+    LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "while.after");
+
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, loopBlock);
+    LLVMValueRef cond = transExpression(root->condition, env);
+    LLVMBuildCondBr(env->builder, cond, bodyBlock, afterBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, bodyBlock);
+    transStatement(root->body, env);
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, afterBlock);
 }
 
 static void transStatement(A_stmt root, SEM_context env) {

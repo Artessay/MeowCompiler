@@ -1,11 +1,14 @@
-int main() {
-    int n = 10;
-    int x;
-    if (n <= 16) {
-        x = 1;
-    } else {
-        x = 2;
-    }
+// #define MaxN 10000
 
-    return x;
+// int scanf(char *__format, ...);
+
+int printf(char *__format, ...);
+
+int main() {
+    int T = 10;
+    while (T != 0) {
+        printf("%d\n", T);
+        T = T - 1;
+    }
+    return 0;
 }
