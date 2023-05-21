@@ -14,20 +14,20 @@ int quickSort(int left, int right) {
 
     while (i <= j) {
         while (arr[i] < pivot){
-            // ++i;
-            i = i + 1;
+            ++i;
+            // i = i + 1;
         }            
         while (arr[j] > pivot){
-            // --j;
-            j = j - 1;
+            --j;
+            // j = j - 1;
         }  
         if (i <= j) {
             int temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
-            // ++i; --j;
-            i = i + 1;
-            j = j - 1;
+            ++i; --j;
+            // i = i + 1;
+            // j = j - 1;
         }
     }
 

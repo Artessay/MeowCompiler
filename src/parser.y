@@ -99,11 +99,11 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 %type <var>  L_Value Var_Def;
 
-%type <exp> Expression Binary_Exp Call_Exp
+%type <exp> Expression Binary_Exp Uni_Exp Call_Exp
 
 %type <expList> Expression_List Nonempty_Exp_List
 
-%type <stmt> Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt
+%type <stmt> Statement Exp_Stmt Selection_Stmt Iteration_Stmt Return_Stmt Else_Stmt
 
 %type <stmtList> Block Statements
 
@@ -152,7 +152,7 @@ Var_Init
         : Var_Def { $$ = A_VarDec(7, $1, NULL); }
         | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
         ;
-Var_Def 
+Var_Def
         : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         | MUL Var_Def { $$ = A_PointVar(7, $2); }
         | IDENTITY { $$ = A_SimpleVar(7, $1); } 
@@ -201,14 +201,40 @@ Statement
         | Return_Stmt { $$ = $1; }
         | BREAK SEMICOLON { $$ = A_BreakStmt(7); }
         | CONTINUE SEMICOLON { $$ = A_ContinueStmt(7); }
+        | DADD Var_Def SEMICOLON {
+                puts("++i");
+                A_exp var = A_VarExp(7, $2);
+                A_exp exp1 = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
+                A_stmt stmt1 = A_ExprStmt(7, exp1);
+                A_exp exp2 = A_AssignExp(7, $2, exp1);
+                A_stmt stmt2 = A_ExprStmt(7, exp2);
+                
+                A_stmtList compound = A_StmtList(stmt1, A_StmtList(stmt2, NULL));
+                $$ = A_CompoundStmt(7, compound);
+        }
+        | DSUB Var_Def SEMICOLON {
+                A_exp var = A_VarExp(7, $2);
+                A_exp exp1 = A_OpExp(7, A_minusOp, var, A_IntExp(7, 1));
+                A_stmt stmt1 = A_ExprStmt(7, exp1);
+                A_exp exp2 = A_AssignExp(7, $2, exp1);
+                A_stmt stmt2 = A_ExprStmt(7, exp2);
+                
+                A_stmtList compound = A_StmtList(stmt1, A_StmtList(stmt2, NULL));
+                $$ = A_CompoundStmt(7, compound);
+        }
+        | Expression DADD { $$ = NULL; puts("TODO: RUOP"); }
+        | Expression DSUB { $$ = NULL; puts("TODO: RUOP"); }
         ;
 
 Exp_Stmt 
         : Expression SEMICOLON { $$ = A_ExprStmt(7, $1); }   
         ;
 Selection_Stmt 
-        : IF LPAREN Expression RPAREN Statement ELSE Statement { $$ = A_IfStmt(7, $3, $5, $7); } 
-        | IF LPAREN Expression RPAREN Statement { $$ = A_IfStmt(7, $3, $5, NULL); }
+        : IF LPAREN Expression RPAREN Statement Else_Stmt { $$ = A_IfStmt(7, $3, $5, $6); }
+        ;
+Else_Stmt 
+        : ELSE Statement { $$ = $2; }
+        | /* empty */ { $$ = NULL; }
         ;
 Iteration_Stmt 
         : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_VarDecStmt($3), $5, $7, $9); }
@@ -235,7 +261,7 @@ Expression
         | L_Value { $$ = A_VarExp(7, $1); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
-        /* | Uni_Exp { $$ = $1; cout << "25-15" << endl; } */
+        | Uni_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
         | INT { $$ = A_IntExp(7, $1); }
         | CHAR { $$ = A_CharExp(7, $1); }
@@ -250,16 +276,12 @@ Nonempty_Exp_List
         : Expression { $$ = A_ExpList($1, NULL); }
         | Expression COMMA Expression_List { $$ = A_ExpList($1, $3); }
         ;
-/* Uni_Exp : LUOP Declarator { $$ = new Node(LUOP_); $$->children.push_back($1); $$->children.push_back($2); cout << "26-1" << endl; }
-        | Declarator RUOP { $$ = new Node(RUOP_); $$->children.push_back($1); $$->children.push_back($2); cout << "26-2" << endl; }
+
+Uni_Exp 
+        : NOT Expression { $$ = NULL; puts("TODO: ! NOT"); }
+        | BNOT Expression { $$ = NULL; puts("TODO: ~ BNOT"); }
+        | BAND Expression { $$ = NULL; puts("TODO: BAND"); }
         ;
-LUOP : NOT { $$ = new Node(NOT_); cout << "27-1" << endl; }
-     | DADD { $$ = new Node(DADD_); cout << "27-2" << endl; }
-     | DSUB { $$ = new Node(DSUB_); cout << "27-3" << endl; }
-     ;
-RUOP : DADD { $$ = new Node(DADD_); cout << "28-1" << endl; }
-     | DSUB { $$ = new Node(DSUB_); cout << "28-2" << endl; }
-     ; */
 
 Call_Exp 
         : IDENTITY LPAREN Expression_List RPAREN { $$ = A_CallExp(7, $1, $3); }
@@ -292,15 +314,6 @@ Binary_Exp
         | Expression AND  Expression { $$ = A_OpExp(7, A_andOp,    $1, $3); }
         | Expression OR   Expression { $$ = A_OpExp(7, A_orOp,     $1, $3); }
         ;
-/* 
-
-
-Declarator : MUL ID { $$ = $2; $$->setPointer(); cout << "7-1" << endl; }
-           | BAND ID { $$ = $2; $$->setPointer(); cout << "7-2" << endl; }
-           | LPAREN Basic_Type_Specifier RPAREN ID { $$ = new Node(TYPE_CHANGE_); $$->children.push_back($2); $$->children.push_back($4); cout << "7-3" << endl; }
-           | ID { $$ = $1; cout << "7-4" << endl; }
-           ;
-*/
 
 %%
 
