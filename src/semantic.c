@@ -340,6 +340,9 @@ static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_c
     LLVMValueRef localVar = NULL;
     if (isGlobal) {
         localVar = LLVMAddGlobal(env->module, varType, S_name(varName));
+        LLVMSetValueName2(localVar, S_name(varName), strlen(S_name(varName)));
+        
+        LLVMSetInitializer(localVar, LLVMConstNull(varType));
     } else {
         localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
     }
@@ -528,6 +531,7 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
 
     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
+    // return LLVMBuildLoad2(env->builder, varType, variable, "exp");
     return LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(root->u.var)));
 }
 

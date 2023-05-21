@@ -5,11 +5,12 @@
 int printf(char *__format, ...);
 
 // int array[10000];
-int array[10];
+int arr[10];
 
-void quickSort(int left, int right, int* arr) {
+int quickSort(int left, int right) {
     int i = left, j = right;
-    int pivot = arr[(left + right) / 2];
+    int mid = (left + right) / 2;
+    int pivot = arr[mid];
 
     while (i <= j) {
         while (arr[i] < pivot){
@@ -31,38 +32,43 @@ void quickSort(int left, int right, int* arr) {
     }
 
     if (left < j){
-        quickSort(left, j, arr);
+        quickSort(left, j);
     }
     if (i < right){
-        quickSort(i, right, arr);
+        quickSort(i, right);
     }
+
+    return 0;
 }
 
 int main() {
-    // int n = 10;
-    // scanf("%d", &n);
-
-    // for (int i = 0; i < n; ++i) {
-    //     scanf("%d", array + i);
-    // }
+    printf("Hello World!\n");
 
     int n = 4;
-    array[0] = 3; 
-    array[1] = 6;
-    array[2] = 5;
-    array[3] = 9;
-    // array[4] = 2;
-    // array[5] = 1;
-    // array[6] = 0;
-    // array[7] = 4;
-    // array[8] = 8;
-    // array[9] = 7;
+    printf("n = %d\n", n);
 
-    quickSort(0, n - 1 , array);
+    arr[0] = 3; 
+    arr[1] = 6;
+    arr[2] = 5;
+    arr[3] = 9;
+    // arr[4] = 2;
+    // arr[5] = 1;
+    // arr[6] = 0;
+    // arr[7] = 4;
+    // arr[8] = 8;
+    // arr[9] = 7;
+
+    printf("before quicksort\n");
+
+    // quickSort(0, n - 1 );
+
+    printf("after quicksort\n");
 
     for (int i = 0; i < n; i = i + 1) {
-        printf("%d\n", array[i]);
+        printf("%d\n", arr[i]);
     }
+
+    printf("end\n");
 
     return 0;
 }

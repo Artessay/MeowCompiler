@@ -280,8 +280,8 @@ Binary_Exp
         | Expression NEQ  Expression { $$ = A_OpExp(7, A_neqOp,    $1, $3); }
         | Expression LT   Expression { $$ = A_OpExp(7, A_ltOp,     $1, $3); }
         | Expression LE   Expression { $$ = A_OpExp(7, A_leOp,     $1, $3); }
-        | Expression GT   Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
-        | Expression GE   Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
+        | Expression GT   Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
+        | Expression GE   Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
         | Expression SHL  Expression { $$ = A_OpExp(7, A_shlOp,    $1, $3); }
         | Expression SHR  Expression { $$ = A_OpExp(7, A_shrOp,    $1, $3); }
         | Expression BAND Expression { $$ = A_OpExp(7, A_bAndOp,   $1, $3); }
