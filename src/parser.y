@@ -211,7 +211,7 @@ Selection_Stmt
         | IF LPAREN Expression RPAREN Statement { $$ = A_IfStmt(7, $3, $5, NULL); }
         ;
 Iteration_Stmt 
-        : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, $3, $5, $7, $9); }
+        : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_VarDecStmt($3), $5, $7, $9); }
         | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_ExprStmt(7, $3), $5, $7, $9); }
         | WHILE LPAREN Expression RPAREN Statement { $$ = A_WhileStmt(7, $3, $5); }
         ;

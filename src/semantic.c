@@ -17,13 +17,17 @@ struct SEM_context_ {
     LLVMContextRef context;
     LLVMModuleRef module;
     LLVMBuilderRef builder;
+
+    LLVMValueRef currentFunction;
 };
 
-SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder) {
+SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder, LLVMValueRef currentFunction) {
     SEM_context p = (SEM_context)checked_malloc(sizeof(*p));
     p->module = module;
     p->context = context;
     p->builder = builder;
+
+    p->currentFunction = currentFunction;
     return p;
 };
 
@@ -94,7 +98,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     // LLVMContextSetOpaquePointers(context, 0);
 
-    SEM_context env = SEM_Context(module, context, builder);
+    SEM_context env = SEM_Context(module, context, builder, NULL);
 
     tables = SEM_Table();
     SEM_enterScope(tables);
@@ -216,10 +220,7 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
         // entry function basic block and set instruction insert point
         LLVMPositionBuilderAtEnd(functionBuilder, functionEntryBlock);
 
-        // LLVMContextRef functionContext = LLVMContextCreate();
-        // SEM_context functionEnv = SEM_Context(env->module, functionContext, functionBuilder);
-
-        SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder);
+        SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder, function);
 
         SEM_enterScope(tables);
 
@@ -247,7 +248,7 @@ static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
             break;
         }
 
-        transGlobalVarDec(dec, varType, 1, env);
+        transVarDec(dec, varType, 1, env);
     }
 }
 
@@ -378,8 +379,21 @@ static void transStatementList(A_stmtList root, SEM_context env) {
 static void transSelection(A_if root, SEM_context env) {
     LLVMValueRef cond = transExpression(root->condition, env);
 
-    LLVMValueRef currentBasicBlock = LLVMGetBasicBlockParent();
-    // LLVMBasicBlockRef thenBlock = LLVMAppendBasicBlock()
+    LLVMBasicBlockRef thenBlock = LLVMAppendBasicBlock(env->currentFunction, "if.then");
+    LLVMBasicBlockRef elseBlock = LLVMAppendBasicBlock(env->currentFunction, "if.else");
+    LLVMBasicBlockRef mergeBlock = LLVMAppendBasicBlock(env->currentFunction, "if.merge");
+
+    LLVMBuildCondBr(env->builder, cond, thenBlock, elseBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, thenBlock);
+    transStatement(root->then, env);
+    LLVMBuildBr(env->builder, mergeBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, elseBlock);
+    transStatement(root->elsee, env);
+    LLVMBuildBr(env->builder, mergeBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, mergeBlock);
 }
 
 static void transFor(A_for root, SEM_context env) {
@@ -405,6 +419,12 @@ static void transStatement(A_stmt root, SEM_context env) {
         case A_varDecStmt:
             // puts("variable declare");
             transVarDefine(root->u.varDec, env);
+            break;
+        case A_compoundStmt:
+            // puts("compound");
+            SEM_enterScope(tables);
+            transStatementList(root->u.compound, env);
+            SEM_leaveScope(tables);
             break;
         case A_ifStmt:
             transSelection(&(root->u.iff), env);
