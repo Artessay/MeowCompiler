@@ -77,6 +77,7 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env);
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAmpersandExp(A_var root, SEM_context env);
 static LLVMValueRef transStarExp(A_var root, SEM_context env);
+static LLVMValueRef transTypeCast(A_exp root, SEM_context env);
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
@@ -535,6 +536,8 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
         case A_starExp:
             puts("* var");
             return transStarExp(root->u.star, env);
+        case A_typeCastExp:
+            return transTypeCast(root, env);
         case A_nilExp:
             // @TODO
             return LLVMConstNull(LLVMInt32Type());
@@ -585,6 +588,18 @@ static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
 static LLVMValueRef transStarExp(A_var root, SEM_context env) {
     puts("TODO: *x");
     return NULL;
+}
+
+static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
+    assert(root->kind == A_typeCastExp);
+
+    LLVMTypeRef varType = transType(root->u.cast.castType, env);
+    LLVMValueRef value = transExpression(root->u.cast.exp, env);
+    if (varType == LLVMDoubleType()) {
+        return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
+    } else {
+        puts("[error] unimplemented type cast");
+    }
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {

@@ -241,9 +241,10 @@ Expression
         | L_Value BORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bOrOp, A_VarExp(7, $1), $3)); }
         | L_Value BXORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bXorOp, A_VarExp(7, $1), $3)); }
         | L_Value { $$ = A_VarExp(7, $1); }
+        | Uni_Exp { $$ = $1; }
+        | LPAREN Type_Specifier RPAREN Expression { $$ = NULL; TODO!; }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
-        | Uni_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
         | NIL { $$ = A_NilExp(7); }
         | INT { $$ = A_IntExp(7, $1); }
