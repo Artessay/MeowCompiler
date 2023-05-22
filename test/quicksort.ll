@@ -145,52 +145,56 @@ if.merge54:                                       ; preds = %if.else53, %if.then
 define i32 @main() {
 entry:
   %n = alloca i32, align 4
-  %n1 = bitcast i32* %n to i32**
-  %callVal = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @string, i32 0, i32 0), i32** %n1)
+  %n1 = alloca i32*, align 8
+  store i32* %n, i32** %n1, align 8
+  %n2 = load i32*, i32** %n1, align 8
+  %callVal = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @string, i32 0, i32 0), i32* %n2)
   %i = alloca i32, align 4
   store i32 0, i32* %i, align 4
   br label %for.loop
 
 for.loop:                                         ; preds = %for.body, %entry
-  %i2 = load i32, i32* %i, align 4
-  %n3 = load i32, i32* %n, align 4
-  %cmpLT = icmp slt i32 %i2, %n3
+  %i3 = load i32, i32* %i, align 4
+  %n4 = load i32, i32* %n, align 4
+  %cmpLT = icmp slt i32 %i3, %n4
   br i1 %cmpLT, label %for.body, label %for.after
 
 for.body:                                         ; preds = %for.loop
-  %i4 = load i32, i32* %i, align 4
-  %arrayElement = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i4
-  %array = bitcast i32* %arrayElement to i32**
-  %callVal5 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @string.1, i32 0, i32 0), i32** %array)
-  %i6 = load i32, i32* %i, align 4
-  %temperate = add i32 %i6, 1
+  %i5 = load i32, i32* %i, align 4
+  %arrayElement = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i5
+  %array = alloca i32*, align 8
+  store i32* %arrayElement, i32** %array, align 8
+  %array6 = load i32*, i32** %array, align 8
+  %callVal7 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @string.1, i32 0, i32 0), i32* %array6)
+  %i8 = load i32, i32* %i, align 4
+  %temperate = add i32 %i8, 1
   store i32 %temperate, i32* %i, align 4
   br label %for.loop
 
 for.after:                                        ; preds = %for.loop
-  %n7 = load i32, i32* %n, align 4
-  %temperate8 = sub i32 %n7, 1
-  %callVal9 = call i32 @quickSort(i32 0, i32 %temperate8)
-  %i10 = alloca i32, align 4
-  store i32 0, i32* %i10, align 4
-  br label %for.loop11
+  %n9 = load i32, i32* %n, align 4
+  %temperate10 = sub i32 %n9, 1
+  %callVal11 = call i32 @quickSort(i32 0, i32 %temperate10)
+  %i12 = alloca i32, align 4
+  store i32 0, i32* %i12, align 4
+  br label %for.loop13
 
-for.loop11:                                       ; preds = %for.body12, %for.after
-  %i14 = load i32, i32* %i10, align 4
-  %n15 = load i32, i32* %n, align 4
-  %cmpLT16 = icmp slt i32 %i14, %n15
-  br i1 %cmpLT16, label %for.body12, label %for.after13
+for.loop13:                                       ; preds = %for.body14, %for.after
+  %i16 = load i32, i32* %i12, align 4
+  %n17 = load i32, i32* %n, align 4
+  %cmpLT18 = icmp slt i32 %i16, %n17
+  br i1 %cmpLT18, label %for.body14, label %for.after15
 
-for.body12:                                       ; preds = %for.loop11
-  %i17 = load i32, i32* %i10, align 4
-  %arrayElement18 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i17
-  %array19 = load i32, i32* %arrayElement18, align 4
-  %callVal20 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @string.2, i32 0, i32 0), i32 %array19)
-  %i21 = load i32, i32* %i10, align 4
-  %temperate22 = add i32 %i21, 1
-  store i32 %temperate22, i32* %i10, align 4
-  br label %for.loop11
+for.body14:                                       ; preds = %for.loop13
+  %i19 = load i32, i32* %i12, align 4
+  %arrayElement20 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i19
+  %array21 = load i32, i32* %arrayElement20, align 4
+  %callVal22 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([4 x i8], [4 x i8]* @string.2, i32 0, i32 0), i32 %array21)
+  %i23 = load i32, i32* %i12, align 4
+  %temperate24 = add i32 %i23, 1
+  store i32 %temperate24, i32* %i12, align 4
+  br label %for.loop13
 
-for.after13:                                      ; preds = %for.loop11
+for.after15:                                      ; preds = %for.loop13
   ret i32 0
 }

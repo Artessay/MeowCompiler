@@ -32,13 +32,15 @@ int judge(int courseIndex) {
             ++i;
             ++index;
         }
-        precourse[i] = '\0';
+        precourse[i] = 0;
+
+        // h = hash(precourse);
 
         // hash
         int h = 0;
         int t = 0;
         while (precourse[t] != '\0') {
-            h = h * 33 + (int)precourse[t];
+            h = h * 33 + precourse[t];
             h = h % 65537;
             ++t;
         }
@@ -46,7 +48,7 @@ int judge(int courseIndex) {
         if (state == 0) {
             ready = coursePassed[h];
             if (coursePrerequisite[courseIndex][index] == ';') {
-                if (ready == 1) {
+                if (ready) {
                     return 1;
                 } else {
                     state = 0;
@@ -62,7 +64,7 @@ int judge(int courseIndex) {
         } else if (state == 1) {
             ready &= coursePassed[h];
             if (coursePrerequisite[courseIndex][index] == ';') {
-                if (ready == 1) {
+                if (ready) {
                     return 1;
                 } else {
                     state = 0;
@@ -77,8 +79,6 @@ int judge(int courseIndex) {
             }
         }
     }
-
-    return 0;
 }
 
 int main() {
@@ -102,11 +102,11 @@ int main() {
             ++i;
             ++index;
         }
-        courseName[courseNum][i] = '\0';
+        courseName[courseNum][i] = 0;
         ++index;
 
         // course credit
-        int credit = (int)(courses[courseNum][index] - '0');
+        int credit = courses[courseNum][index] - '0';
         ++index;
         totalCredit += credit;
         ++index;
@@ -117,7 +117,7 @@ int main() {
             coursePrerequisite[courseNum][i] = courses[courseNum][index];
             ++i; ++index;
         }
-        coursePrerequisite[courseNum][i] = '\0';
+        coursePrerequisite[courseNum][i] = 0;
         ++index;
 
         // grade
@@ -151,7 +151,7 @@ int main() {
             int h = 0;
             int t = 0;
             while (courseName[courseNum][t] != '\0') {
-                h = h * 33 + (int)courseName[courseNum][t];
+                h = h * 33 + courseName[courseNum][t];
                 h = h % 65537;
                 ++t;
             }
@@ -165,7 +165,7 @@ int main() {
 
     double GPA;
     if (totalAttemptedCredit == 0){
-        GPA = 0.0;
+        GPA = 0;
     }
     else{
         GPA = (double)totalGPA / (double)totalAttemptedCredit;
@@ -189,15 +189,17 @@ int main() {
             int h = 0;
             int t = 0;
             while (courseName[i][t] != '\0') {
-                h = h * 33 + (int)courseName[i][t];
+                h = h * 33 + courseName[i][t];
                 h = h % 65537;
                 ++t;
             }
 
-            if (coursePassed[h] == 0) {
-                if (judge(i) == 1) {
-                    printf("  %s\n", courseName[i]);
-                }
+            if (coursePassed[h]) {
+                continue;
+            }
+            
+            if (judge(i)) {
+                printf("  %s\n", courseName[i]);
             }
         }
     }
