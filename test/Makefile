@@ -12,6 +12,9 @@ all: $(TARGET)
 	./tester/matrix/matrix-$(PLATFORM)-amd64 ./matrix-multiplication.out
 	./tester/advisor/advisor-$(PLATFORM)-amd64 ./auto-advisor.out
 
+test:
+	$(CC) auto-advisor.c -o auto-advisor.out
+	./tester/advisor/advisor-$(PLATFORM)-amd64 ./auto-advisor.out
 
 %.out : %.o
 	$(CC) $< -o $@ -no-pie
