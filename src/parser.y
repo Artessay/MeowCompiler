@@ -202,7 +202,6 @@ Statement
         | BREAK SEMICOLON { $$ = A_BreakStmt(7); }
         | CONTINUE SEMICOLON { $$ = A_ContinueStmt(7); }
         | DADD Var_Def SEMICOLON {
-                puts("++i");
                 A_exp var = A_VarExp(7, $2);
                 A_exp exp1 = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
                 A_stmt stmt1 = A_ExprStmt(7, exp1);
@@ -263,6 +262,7 @@ Expression
         | Binary_Exp { $$ = $1; }
         | Uni_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
+        | NIL { $$ = A_NilExp(7, $1); }
         | INT { $$ = A_IntExp(7, $1); }
         | CHAR { $$ = A_CharExp(7, $1); }
         | DOUBLE { $$ = A_DoubleExp(7, $1); }
@@ -280,7 +280,8 @@ Nonempty_Exp_List
 Uni_Exp 
         : NOT Expression { $$ = NULL; puts("TODO: ! NOT"); }
         | BNOT Expression { $$ = NULL; puts("TODO: ~ BNOT"); }
-        | BAND Expression { $$ = NULL; puts("TODO: BAND"); }
+        | BAND Var_Def { $$ = A_AmpersandExp(7, $2); }
+        | MUL Var_Def { $$ = A_StarExp(7, $2); }
         ;
 
 Call_Exp 

@@ -219,6 +219,7 @@ struct A_stmtList_ {
 struct A_exp_ {
     enum {
         A_varExp, 
+        A_ampersandExp, A_starExp,
         A_nilExp, A_intExp, A_charExp, A_doubleExp, A_stringExp, 
         A_callExp,
         A_opExp, 
@@ -229,10 +230,12 @@ struct A_exp_ {
     } kind;
     
     A_pos pos;
-    A_varType typ;
 
     union {
         A_var var;
+
+        A_var ampersand;
+        A_var star;
         
         /* nil; - needs only the pos */
         int intt;

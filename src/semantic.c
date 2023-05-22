@@ -75,6 +75,8 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
 
 static LLVMValueRef transExpression(A_exp root, SEM_context env);
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
+static LLVMValueRef transAmpersandExp(A_var root, SEM_context env);
+static LLVMValueRef transStarExp(A_var root, SEM_context env);
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
@@ -496,6 +498,12 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
         case A_varExp:
             puts("variable expression");
             return transVariableExpression(root, env);
+        case A_ampersandExp:
+            puts("& var");
+            return transAmpersandExp(root->u.ampersand, env);
+        case A_starExp:
+            puts("* var");
+            return transStarExp(root->u.star, env);
         case A_nilExp:
             // @TODO
             return LLVMConstNull(LLVMInt32Type());
@@ -533,6 +541,18 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
 
     // return LLVMBuildLoad2(env->builder, varType, variable, "exp");
     return LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(root->u.var)));
+}
+
+static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
+    LLVMValueRef variable = transVar(root, env);
+    LLVMTypeRef variableType = LLVMTypeOf(variable);
+    
+    LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
+}
+
+static LLVMValueRef transStarExp(A_var root, SEM_context env) {
+    puts("TODO: *x");
+    return NULL;
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
