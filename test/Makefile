@@ -7,7 +7,7 @@ TARGET = $(SRCS:.c=.out)
 PLATFORM = linux
 
 all: $(TARGET)
-	./tester/quicksort/$(PLATFORM)-amd64 ./quicksort.out
+	./tester/quicksort/quicksort-$(PLATFORM)-amd64 ./quicksort.out
 #	./tester/matrix-multiplication/$(PLATFORM)-amd64 ./matrix-multiplication.out
 #	./tester/auto-advisor/$(PLATFORM)-amd64 ./auto-advisor.out
 
