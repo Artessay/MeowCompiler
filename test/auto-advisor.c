@@ -15,18 +15,22 @@ int judge(int courseIndex) {
     int ready = 0;
     int state = 0; // 0: init, 1: and
 
-    char *p = coursePrerequisite[courseIndex];
-    if (*p == 0) {
+    // char *p = coursePrerequisite[courseIndex];
+    int index = 0;
+    if (coursePrerequisite[courseIndex][index] == '\0') {
         return 1;
     }
 
-    while (*p) {
+    while (coursePrerequisite[courseIndex][index] != '\0') {
         char precourse[8];
         i = 0;
-        while (*p && *p != ',' && *p != ';') {
+        while (coursePrerequisite[courseIndex][index] 
+            && coursePrerequisite[courseIndex][index] != ',' 
+            && coursePrerequisite[courseIndex][index] != ';') {
             // precourse[i++] = *(p++);
-            precourse[i++] = *p;
-            p++;
+            precourse[i] = coursePrerequisite[courseIndex][index];
+            ++i;
+            ++index;
         }
         precourse[i] = 0;
 
@@ -43,33 +47,33 @@ int judge(int courseIndex) {
 
         if (state == 0) {
             ready = coursePassed[h];
-            if (*p == ';') {
+            if (coursePrerequisite[courseIndex][index] == ';') {
                 if (ready) {
                     return 1;
                 } else {
                     state = 0;
                     ready = 0;
                 }
-                ++p;
-            } else if (*p == ',') {
+                ++index;
+            } else if (coursePrerequisite[courseIndex][index] == ',') {
                 state = 1;
-                ++p;
+                ++index;
             } else {
                 return ready;
             }
         } else if (state == 1) {
             ready &= coursePassed[h];
-            if (*p == ';') {
+            if (coursePrerequisite[courseIndex][index] == ';') {
                 if (ready) {
                     return 1;
                 } else {
                     state = 0;
                     ready = 0;
                 }
-                ++p;
-            } else if (*p == ',') {
+                ++index;
+            } else if (coursePrerequisite[courseIndex][index] == ',') {
                 state = 1;
-                ++p;
+                ++index;
             } else {
                 return ready;
             }
