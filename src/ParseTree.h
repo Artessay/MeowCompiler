@@ -224,9 +224,7 @@ struct A_exp_ {
         A_callExp,
         A_opExp, 
         A_assignExp,
-        A_ifExp,
         A_recordExp, A_seqExp, 
-        A_whileExp, A_forExp, A_breakExp, A_continueExp,
     } kind;
     
     A_pos pos;
@@ -261,18 +259,7 @@ struct A_exp_ {
             A_var var;
             A_exp exp;
         } assign;
-        struct {
-            A_exp test, then, elsee;
-        } iff;
-        struct {
-            A_exp test, body;
-        } whilee;
-        struct {
-            S_symbol var;
-            A_exp lo, hi, body;
-            // bool escape;
-        } forr;
-        /* breakk; - need only the pos */
+        
         struct {
             S_symbol type;
             A_exp size, init;
@@ -328,6 +315,10 @@ A_expList A_ExpList(A_exp value, A_expList next);
 A_exp A_VarExp(A_pos pos, A_var var);
 
 A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp);
+
+A_exp A_AmpersandExp(A_pos pos, A_var var);
+
+A_exp A_StarExp(A_pos pos, A_var var);
 
 A_exp A_NilExp(A_pos pos);
 

@@ -482,8 +482,13 @@ static void transStatement(A_stmt root, SEM_context env) {
         
         case A_returnStmt:
             // puts("return");
-            exp = transExpression(root->u.returnn.exp, env);
-            LLVMBuildRet(env->builder, exp);
+            if (root->u.returnn.exp != NULL) {
+                exp = transExpression(root->u.returnn.exp, env);
+                LLVMBuildRet(env->builder, exp);
+            } else {
+                LLVMBuildRetVoid(env->builder);
+            }
+            
             break;
         default:
             puts("[error] unimplemented statement");
@@ -548,6 +553,7 @@ static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
     LLVMTypeRef variableType = LLVMTypeOf(variable);
     
     LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
+    return addressOfVariable;
 }
 
 static LLVMValueRef transStarExp(A_var root, SEM_context env) {
@@ -579,7 +585,14 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
         }
     }
 
-    return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+    if (LLVMGetReturnType(LLVMTypeOf(function)) != LLVMVoidType()) {
+        return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+    } else {
+        // TODO: Debug needed
+        puts("[debug] return void type");
+        LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+        return NULL;
+    }
 }
 
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {

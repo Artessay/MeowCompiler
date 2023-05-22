@@ -1,49 +1,49 @@
-// #define MaxN 10000
-
 int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
 int array[10000];
 
-void quickSort(int left, int right, int arr[]) {
+int quickSort(int left, int right) {
     int i = left, j = right;
-    int pivot = arr[(left + right) / 2];
+    int pivot = array[(left + right) / 2];
 
     while (i <= j) {
-        while (arr[i] < pivot){
+        while (array[i] < pivot){
             ++i;
         }            
-        while (arr[j] > pivot){
+        while (array[j] > pivot){
             --j;
         }  
         if (i <= j) {
-            int temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
+            int temp = array[i];
+            array[i] = array[j];
+            array[j] = temp;
             ++i; --j;
         }
     }
 
     if (left < j){
-        quickSort(left, j, arr);
+        quickSort(left, j);
     }
     if (i < right){
-        quickSort(i, right, arr);
+        quickSort(i, right);
     }
+
+    return 0;
 }
 
 int main() {
     int n;
     scanf("%d", &n);
 
-    for (int i = 0; i < n; ++i) {
-        scanf("%d", array + i);
+    for (int i = 0; i < n; i = i + 1) {
+        scanf("%d", &array[i]);
     }   
 
-    quickSort(0, n - 1 , array);
+    quickSort(0, n - 1);
 
-    for (int i = 0; i < n; ++i) {
+    for (int i = 0; i < n; i = i + 1) {
         printf("%d\n", array[i]);
     }
 

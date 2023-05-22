@@ -241,7 +241,7 @@ Iteration_Stmt
         | WHILE LPAREN Expression RPAREN Statement { $$ = A_WhileStmt(7, $3, $5); }
         ;
 Return_Stmt 
-        : RETURN SEMICOLON { $$ = NULL; printf("TODO: return void type\n"); }
+        : RETURN SEMICOLON { $$ = A_ReturnStmt(7, NULL); }
         | RETURN Expression SEMICOLON { $$ = A_ReturnStmt(7, $2); }
         ;
 
@@ -262,7 +262,7 @@ Expression
         | Binary_Exp { $$ = $1; }
         | Uni_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
-        | NIL { $$ = A_NilExp(7, $1); }
+        | NIL { $$ = A_NilExp(7); }
         | INT { $$ = A_IntExp(7, $1); }
         | CHAR { $$ = A_CharExp(7, $1); }
         | DOUBLE { $$ = A_DoubleExp(7, $1); }
