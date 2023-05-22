@@ -316,7 +316,8 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         variable = S_look(tables->variableTable, var->u.simple);
     } else if (var->kind == A_subscriptVar) {
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
-        LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
+        LLVMValueRef index[2];
+        index[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
         
         // LLVMTypeRef varType = NULL; // @TODO : can only solve 2D array
         // if (var->u.subscript.var->kind == A_simpleVar) {
@@ -327,7 +328,7 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         
         for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
             LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
-
+            index[1] = transExpression(p->u.subscript.exp, env);
             variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
         }
         
