@@ -5,13 +5,13 @@ YACC 	= bison
 CFLAGS  = `llvm-config --cflags --ldflags --libs`
 
 SRC		= main.c \
-		  ErrorMessage.c ParseTree.c semantic.c symbol.c table.c utility.c
+		  assemble.c ErrorMessage.c ParseTree.c semantic.c symbol.c table.c utility.c
 
 LEXER_CPP = lexer.c
 PARSER_CPP = parser.c
 PARSER_HPP = parser.h
 
-TARGET = a.out
+TARGET = meow.out
 TEST_FILE = test.c
 TEST_IR = $(TEST_FILE:.c=.ll)
 TEST_AS = $(TEST_FILE:.c=.s)
@@ -20,6 +20,7 @@ all:
 	$(YACC) --yacc -dv -o $(PARSER_CPP) parser.y
 	$(LEX) -o $(LEXER_CPP) lexer.l
 	$(CC) $(CFLAGS) -o $(TARGET) $(LEXER_CPP) $(PARSER_CPP) $(SRC)
+	cp ./$(TARGET) ../test/$(TARGET)
 	./$(TARGET) $(TEST_FILE)
 
 run:

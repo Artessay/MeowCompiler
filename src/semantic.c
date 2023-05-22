@@ -81,7 +81,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
 
-void SEM_transProgram(A_topClauseList program, char *module_name) {
+LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
     // initial LLVM
     LLVMInitializeCore(LLVMGetGlobalPassRegistry());
     LLVMInitializeNativeTarget();
@@ -91,7 +91,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     LLVMContextRef context = LLVMContextCreate();
 
     // create module
-    LLVMModuleRef module = LLVMModuleCreateWithNameInContext(module_name, context);
+    LLVMModuleRef module = LLVMModuleCreateWithName(module_name);
         
     // create LLVMBuilderRef Object
     LLVMBuilderRef builder = LLVMCreateBuilder();
@@ -110,7 +110,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     SEM_leaveScope(tables);
 
     // print module content
-    LLVMDumpModule(module);
+    // LLVMDumpModule(module);
 
     // output to file
     char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
@@ -122,6 +122,8 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     // dispose LLVM context
     LLVMContextDispose(context);
+
+    return module;
 }
 
 static LLVMTypeRef transType(A_varType typ, SEM_context env) {
