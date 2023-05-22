@@ -243,6 +243,7 @@ Expression
         | L_Value { $$ = A_VarExp(7, $1); }
         | Uni_Exp { $$ = $1; }
         | LPAREN Type_Specifier RPAREN Expression { $$ = A_TypeCastExp(7, $2, $4); }
+        | LPAREN Type_Specifier MUL RPAREN Expression { $$ = A_TypeCastExp(7, A_VarTypePoint(7, $2), $5); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
