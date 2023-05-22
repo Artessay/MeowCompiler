@@ -4,9 +4,11 @@ int printf(char *__format, ...);
 
 int main() {
     int n = 4;
-    // scanf("%d", &n);
+    scanf("%d", &n);
+    printf("%d\n", n);
     int *x;
-    *x = &n;
-    // printf("%d\n", *x);
-    return 0;
+    x = &n;
+    printf("%d\n", *x);
+    *x = 3;
+    return n;
 }

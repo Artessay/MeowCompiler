@@ -335,6 +335,7 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         printf("[debug] find local deref variable: %s\n", S_name(S_getVarSymbol(var)));
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.deref));
         LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+
         LLVMDumpType(varType); putchar('\n');
         variable = LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(var)));
         
@@ -769,7 +770,8 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
 
     LLVMValueRef variable = transVar(root->u.assign.var, env);
     assert(variable != NULL);
-    // LLVMDumpValue(variable);
+    LLVMDumpValue(variable); putchar('\n');
+    LLVMDumpValue(value); putchar('\n');
     
     return LLVMBuildStore(env->builder, value, variable);
 }
