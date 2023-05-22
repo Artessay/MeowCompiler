@@ -294,7 +294,7 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
             break;
 
         case A_pointVar:
-            puts("[debug] transVarType: point var");
+            // puts("[debug] transVarType: point var");
 
             varType = transVarType(var->u.point, varType, env);
             varType = LLVMPointerType(varType, 0);

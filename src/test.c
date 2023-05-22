@@ -2,6 +2,8 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
+int getchar();
+
 char courses[100][300];
 char courseName[100][8];
 char coursePrerequisite[100][300];
@@ -10,9 +12,9 @@ int coursePassed[65537];
 
 // int hash(char *s) {
 //     int h = 0;
-//     // for (char *p = s; *p; ++p) {
-//     //     h = (h * 33 + *p) % 65537;
-//     // }
+//     for (char *p = s; *p; ++p) {
+//         h = (h * 33 + *p) % 65537;
+//     }
 //     return h;
 // }
 
@@ -30,7 +32,7 @@ int judge(int courseIndex) {
     while (coursePrerequisite[courseIndex][index] != '\0') {
         char precourse[8];
         i = 0;
-        while (coursePrerequisite[courseIndex][index] 
+        while (coursePrerequisite[courseIndex][index] != '\0'
             && coursePrerequisite[courseIndex][index] != ',' 
             && coursePrerequisite[courseIndex][index] != ';'
         ) {
@@ -41,6 +43,7 @@ int judge(int courseIndex) {
         precourse[i] = '\0';
 
         h = 0;
+        // hash
         int t = 0;
         while (courseName[i][t] != '\0') {
             h = h * 33 + courseName[i][t];
@@ -94,7 +97,9 @@ int main() {
     int totalAttemptedCredit = 0;
     int totalCompletedCredit = 0;
 
-    scanf("%[^\n]s", courses[courseNum]);
+    scanf("%[^\n]s", courses[courseNum]); getchar();
+    // printf("[read] %s\n", courses[courseNum]);
+    
     while (courses[courseNum][0] != '\0') {
         // read in course information
 
@@ -167,7 +172,8 @@ int main() {
 
         ++courseNum;
 
-        scanf("%[^\n]s", courses[courseNum]);
+        scanf("%[^\n]s", courses[courseNum]); getchar();
+        // printf("[read] %s\n   while %d\n", courses[courseNum], (courses[courseNum][0] != '\0'));
     }
 
     double GPA;
@@ -191,6 +197,7 @@ int main() {
         for (int i = 0; i < courseNum; ++i) {
             // hash
             int h = 0;
+
             int t = 0;
             while (courseName[i][t] != '\0') {
                 h = h * 33 + courseName[i][t];
