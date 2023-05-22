@@ -172,7 +172,7 @@ Param
         | DOT DOT DOT  { $$ = NULL; A_setVarArgFlag(); }
         ;
 IDENTITY
-        : ID { $$ = S_Symbol($1); printf("Identity: %s\n", $1); }
+        : ID { $$ = S_Symbol($1); /* printf("Identity: %s\n", $1); */ }
         ;
 
 Type_Specifier 

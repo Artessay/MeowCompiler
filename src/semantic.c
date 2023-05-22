@@ -279,7 +279,7 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
             break;
 
         case A_subscriptVar:
-            puts("[debug] transVarType: subscript var");
+            // puts("[debug] transVarType: subscript var");
 
             varType = transVarType(var->u.subscript.var, varType, env);
             expValue = transExpression(var->u.subscript.exp, env);
@@ -527,10 +527,10 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
 
     switch (root->kind) {
         case A_varExp:
-            puts("variable expression");
+            // puts("variable expression");
             return transVariableExpression(root, env);
         case A_ampersandExp:
-            puts("& var");
+            // puts("& var");
             return transAmpersandExp(root->u.ampersand, env);
         case A_starExp:
             puts("* var");
@@ -539,23 +539,23 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             // @TODO
             return LLVMConstNull(LLVMInt32Type());
         case A_intExp:
-            printf("int expression: %d\n", root->u.intt);
+            // printf("int expression: %d\n", root->u.intt);
             return LLVMConstInt(LLVMInt32Type(), root->u.intt, 1);
         case A_charExp:
             return LLVMConstInt(LLVMInt8Type(), root->u.charr, 1);
         case A_doubleExp:
             return LLVMConstReal(LLVMDoubleType(), root->u.doublee);
         case A_stringExp:
-            printf("string expression: %s\n", root->u.stringg);
+            // printf("string expression: %s\n", root->u.stringg);
             return LLVMBuildGlobalStringPtr(env->builder, root->u.stringg, "string");
         case A_callExp:
-            puts("call expression");
+            // puts("call expression");
             return transCallExpression(root, env);
         case A_opExp:
-            puts("binary expression");
+            // puts("binary expression");
             return transBinaryExpression(root, env);
         case A_assignExp:
-            puts("assign expression");
+            // puts("assign expression");
             return transAssignExpression(root, env);
         default:
             puts("[error] unrecognized expression");

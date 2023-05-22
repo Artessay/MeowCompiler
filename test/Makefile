@@ -1,6 +1,6 @@
 CC = clang
 
-SRCS = quicksort.c # matrix-multiplication.c auto-advisor.c
+SRCS = quicksort.c matrix-multiplication.c # auto-advisor.c
 OBJS = $(SRCS:.c=.o)
 TARGET = $(SRCS:.c=.out)
 
@@ -8,7 +8,7 @@ PLATFORM = linux
 
 all: $(TARGET)
 	./tester/quicksort/quicksort-$(PLATFORM)-amd64 ./quicksort.out
-#	./tester/matrix-multiplication/$(PLATFORM)-amd64 ./matrix-multiplication.out
+	./tester/matrix/matrix-$(PLATFORM)-amd64 ./matrix-multiplication.out
 #	./tester/auto-advisor/$(PLATFORM)-amd64 ./auto-advisor.out
 
 
