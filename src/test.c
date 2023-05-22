@@ -4,19 +4,11 @@ int printf(char *__format, ...);
 
 int getchar();
 
-char courses[100][300];
-char courseName[100][8];
-char coursePrerequisite[100][300];
+char courses[102][300];
+char courseName[102][8];
+char coursePrerequisite[102][300];
 
 int coursePassed[65537];
-
-// int hash(char *s) {
-//     int h = 0;
-//     for (char *p = s; *p; ++p) {
-//         h = (h * 33 + *p) % 65537;
-//     }
-//     return h;
-// }
 
 int judge(int courseIndex) {
     int i, h;
@@ -34,19 +26,21 @@ int judge(int courseIndex) {
         i = 0;
         while (coursePrerequisite[courseIndex][index] != '\0'
             && coursePrerequisite[courseIndex][index] != ',' 
-            && coursePrerequisite[courseIndex][index] != ';'
-        ) {
+            && coursePrerequisite[courseIndex][index] != ';') {
+            // precourse[i++] = *(p++);
             precourse[i] = coursePrerequisite[courseIndex][index];
             ++i;
             ++index;
         }
-        precourse[i] = '\0';
+        precourse[i] = 0;
 
-        h = 0;
+        // h = hash(precourse);
+
         // hash
+        int h = 0;
         int t = 0;
-        while (courseName[i][t] != '\0') {
-            h = h * 33 + courseName[i][t];
+        while (precourse[t] != '\0') {
+            h = h * 33 + precourse[t];
             h = h % 65537;
             ++t;
         }
@@ -85,8 +79,6 @@ int judge(int courseIndex) {
             }
         }
     }
-
-    return 1;
 }
 
 int main() {
@@ -98,10 +90,7 @@ int main() {
     int totalCompletedCredit = 0;
 
     scanf("%[^\n]s", courses[courseNum]); getchar();
-    // printf("[read] %s\n", courses[courseNum]);
-    
     while (courses[courseNum][0] != '\0') {
-        // read in course information
 
         // char *course = courses[courseNum];
         int i, index = 0;
@@ -113,7 +102,7 @@ int main() {
             ++i;
             ++index;
         }
-        courseName[courseNum][i] = '\0';
+        courseName[courseNum][i] = 0;
         ++index;
 
         // course credit
@@ -128,13 +117,12 @@ int main() {
             coursePrerequisite[courseNum][i] = courses[courseNum][index];
             ++i; ++index;
         }
-        coursePrerequisite[courseNum][i] = '\0';
+        coursePrerequisite[courseNum][i] = 0;
         ++index;
 
         // grade
         char gradeChar = courses[courseNum][index];
-        int grade;
-        grade = -1;
+        int grade = -1;
         if (gradeChar == 'A'){
             grade = 4;
         }
@@ -157,12 +145,13 @@ int main() {
             
         if (grade > 0) {
             totalCompletedCredit += credit;
-            
+            // int h = hash(courseName[courseNum]);
+
             // hash
             int h = 0;
             int t = 0;
-            while (courseName[i][t] != '\0') {
-                h = h * 33 + courseName[i][t];
+            while (courseName[courseNum][t] != '\0') {
+                h = h * 33 + courseName[courseNum][t];
                 h = h % 65537;
                 ++t;
             }
@@ -171,14 +160,12 @@ int main() {
         }
 
         ++courseNum;
-
         scanf("%[^\n]s", courses[courseNum]); getchar();
-        // printf("[read] %s\n   while %d\n", courses[courseNum], (courses[courseNum][0] != '\0'));
     }
 
     double GPA;
     if (totalAttemptedCredit == 0){
-        GPA = 0.0;
+        GPA = 0;
     }
     else{
         GPA = (double)totalGPA / (double)totalAttemptedCredit;
@@ -195,9 +182,11 @@ int main() {
         printf("  None - Congratulations!\n");
     } else {
         for (int i = 0; i < courseNum; ++i) {
+            // unsigned int h = hash(courseName[i]);
+            // int h = hash(courseName[i]);
+
             // hash
             int h = 0;
-
             int t = 0;
             while (courseName[i][t] != '\0') {
                 h = h * 33 + courseName[i][t];
@@ -205,10 +194,12 @@ int main() {
                 ++t;
             }
 
-            if (coursePassed[h] != 0) {
-                if (judge(i) == 1) {
-                    printf("  %s\n", courseName[i]);
-                }
+            if (coursePassed[h]) {
+                continue;
+            }
+            
+            if (judge(i)) {
+                printf("  %s\n", courseName[i]);
             }
         }
     }

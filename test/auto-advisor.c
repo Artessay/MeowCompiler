@@ -24,7 +24,7 @@ int judge(int courseIndex) {
     while (coursePrerequisite[courseIndex][index] != '\0') {
         char precourse[8];
         i = 0;
-        while (coursePrerequisite[courseIndex][index] 
+        while (coursePrerequisite[courseIndex][index] != '\0'
             && coursePrerequisite[courseIndex][index] != ',' 
             && coursePrerequisite[courseIndex][index] != ';') {
             // precourse[i++] = *(p++);
@@ -92,12 +92,12 @@ int main() {
     scanf("%[^\n]s", courses[courseNum]); getchar();
     while (courses[courseNum][0] != '\0') {
 
-        char *course = courses[courseNum];
+        // char *course = courses[courseNum];
         int i, index = 0;
 
         // course name
         i = 0;
-        while (course[index] != '|' && course[index] != '\0') {
+        while (courses[courseNum][index] != '|' && courses[courseNum][index] != '\0') {
             courseName[courseNum][i] = courses[courseNum][index];
             ++i;
             ++index;
@@ -106,22 +106,22 @@ int main() {
         ++index;
 
         // course credit
-        int credit = course[index] - '0';
+        int credit = courses[courseNum][index] - '0';
         ++index;
         totalCredit += credit;
         ++index;
 
         // prerequisite course
         i = 0;
-        while (course[index] != '|' && course[index] != '\0') {
-            coursePrerequisite[courseNum][i] = course[index];
+        while (courses[courseNum][index] != '|' && courses[courseNum][index] != '\0') {
+            coursePrerequisite[courseNum][i] = courses[courseNum][index];
             ++i; ++index;
         }
         coursePrerequisite[courseNum][i] = 0;
         ++index;
 
         // grade
-        char gradeChar = course[index];
+        char gradeChar = courses[courseNum][index];
         int grade = -1;
         if (gradeChar == 'A'){
             grade = 4;
