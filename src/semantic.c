@@ -315,12 +315,12 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
     LLVMValueRef variable = NULL;
     
     // find local variable
-    printf("var kind: %d\n", var->kind);
+    // printf("var kind: %d\n", var->kind);
     if (var->kind == A_simpleVar) {
-        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
+        // printf("[debug] find local simple variable: %s\n", var->u.simple->name);
         variable = S_look(tables->variableTable, var->u.simple);
     } else if (var->kind == A_subscriptVar) {
-        printf("[debug] find local subscript variable %s\n", S_name(S_getVarSymbol(var)));
+        // printf("[debug] find local subscript variable %s\n", S_name(S_getVarSymbol(var)));
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
         LLVMValueRef index[2];
         index[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
@@ -332,11 +332,11 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         }
         
     } else if (var->kind == A_derefVar) {
-        printf("[debug] find local deref variable: %s\n", S_name(S_getVarSymbol(var)));
+        // printf("[debug] find local deref variable: %s\n", S_name(S_getVarSymbol(var)));
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.deref));
         LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
-        LLVMDumpType(varType); putchar('\n');
+        // LLVMDumpType(varType); putchar('\n');
         variable = LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(var)));
         
         // varType = LLVMGetElementType(varType);
@@ -770,8 +770,8 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
 
     LLVMValueRef variable = transVar(root->u.assign.var, env);
     assert(variable != NULL);
-    LLVMDumpValue(variable); putchar('\n');
-    LLVMDumpValue(value); putchar('\n');
+    // LLVMDumpValue(variable); putchar('\n');
+    // LLVMDumpValue(value); putchar('\n');
     
     return LLVMBuildStore(env->builder, value, variable);
 }
