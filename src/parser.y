@@ -174,7 +174,7 @@ Param
 IDENTITY
         : ID { 
                 $$ = S_Symbol($1);  
-                printf("Identity: %s\n", $1);  
+                // printf("Identity: %s\n", $1);  
         }
         ;
 
@@ -242,7 +242,7 @@ Expression
         | L_Value BXORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bXorOp, A_VarExp(7, $1), $3)); }
         | L_Value { $$ = A_VarExp(7, $1); }
         | Uni_Exp { $$ = $1; }
-        | LPAREN Type_Specifier RPAREN Expression { $$ = NULL; TODO!; }
+        | LPAREN Type_Specifier RPAREN Expression { $$ = A_TypeCastExp(7, $2, $4); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }

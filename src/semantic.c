@@ -518,7 +518,7 @@ static void transStatement(A_stmt root, SEM_context env) {
             
             break;
         default:
-            puts("[error] unimplemented statement");
+            printf("[error] unimplemented statement %d\n", root->kind);
             break;
     }
 }
@@ -586,8 +586,9 @@ static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
 }
 
 static LLVMValueRef transStarExp(A_var root, SEM_context env) {
-    puts("TODO: *x");
-    return NULL;
+    LLVMValueRef value = transVar(root, env);
+    LLVMTypeRef varType = LLVMTypeOf(value);
+    return LLVMBuildLoad2(env->builder, varType, value, S_name(S_getVarSymbol(root)));
 }
 
 static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
@@ -597,9 +598,10 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.cast.exp, env);
     if (varType == LLVMDoubleType()) {
         return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
-    } else {
-        puts("[error] unimplemented type cast");
     }
+    
+    puts("[error] unimplemented type cast");
+    return NULL;
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {

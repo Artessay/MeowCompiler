@@ -16,7 +16,7 @@ int hash(char *s) {
     return h;
 }
 
-char judge(int courseIndex) {
+int judge(int courseIndex) {
     int i, h;
     int ready = 0;
     int state = 0; // 0: init, 1: and
@@ -79,13 +79,10 @@ int main() {
     int totalGPA = 0;
     int totalAttemptedCredit = 0;
     int totalCompletedCredit = 0;
-    while (1) {
+
+    scanf("%[^\n]s", courses[courseNum]);
+    while (courses[courseNum][0] != '\0') {
         // read in course information
-        // gets(courses[courseNum]);
-        scanf("%[^\n]s", courses[courseNum]);
-        if (courses[courseNum][0] == '\0') {
-            break;
-        }
 
         char *course = courses[courseNum];
         int i, index = 0;
@@ -146,6 +143,8 @@ int main() {
         }
 
         ++courseNum;
+
+        scanf("%[^\n]s", courses[courseNum]);
     }
 
     // double GPA = totalAttemptedCredit == 0 ? 0 : (double)totalGPA / (double)totalAttemptedCredit;
@@ -170,7 +169,7 @@ int main() {
         for (int i = 0; i < courseNum; ++i) {
             int h = hash(courseName[i]);
             if (coursePassed[h] != 0) {
-                if (judge(i)) {
+                if (judge(i) == 1) {
                     printf("  %s\n", courseName[i]);
                 }
             }
