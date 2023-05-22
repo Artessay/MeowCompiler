@@ -1,34 +1,19 @@
-#define MaxCourse 100
-#define MaxInput 300
-
-#define HASH_MAGIC 33
-#define HASH_SIZE 65537
-
 int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
 char *gets(char *_Buffer);
 
-char courses[MaxCourse][MaxInput];
-char courseName[MaxCourse][8];
-char coursePrerequisite[MaxCourse][MaxInput];
+char courses[100][300];
+char courseName[100][8];
+char coursePrerequisite[100][300];
 
-// char coursePassed[HASH_SIZE] = {0};
-char coursePassed[HASH_SIZE];
-
-// unsigned int hash(const char *s) {
-//     unsigned int h = 0;
-//     for (const char *p = s; *p; ++p) {
-//         h = (h * HASH_MAGIC + *p) % HASH_SIZE;
-//     }
-//     return h;
-// }
+char coursePassed[65537];
 
 int hash(char *s) {
     int h = 0;
     for (char *p = s; *p; ++p) {
-        h = (h * HASH_MAGIC + *p) % HASH_SIZE; //
+        h = (h * 33 + *p) % 65537; //
     }
     return h;
 }
@@ -47,9 +32,9 @@ char judge(int courseIndex) {
         char precourse[8];
         i = 0;
         while (*p && *p != ',' && *p != ';') {
-            // precourse[i++] = *(p++);
-            precourse[i++] = *p;
-            p++;
+            precourse[i] = *p;
+            ++i;
+            ++p;
         }
         precourse[i] = 0;
         h = hash(precourse);
@@ -109,7 +94,9 @@ int main() {
         // course name
         i = 0;
         while (course[index] != '|' && course[index] != '\0') {
-            courseName[courseNum][i++] = course[index++];
+            courseName[courseNum][i] = course[index];
+            ++i;
+            ++index;
         }
         courseName[courseNum][i] = 0;
         index++;
@@ -130,26 +117,6 @@ int main() {
         // grade
         char gradeChar = course[index];
         int grade;
-        // switch (gradeChar) {
-        //     case 'A':
-        //         grade = 4;
-        //         break;
-        //     case 'B':
-        //         grade = 3;
-        //         break;
-        //     case 'C':
-        //         grade = 2;
-        //         break;
-        //     case 'D':
-        //         grade = 1;
-        //         break;
-        //     case 'F':
-        //         grade = 0;
-        //         break;
-        //     default:
-        //         grade = -1;
-        //         break;
-        // }
         grade = -1;
         if (gradeChar == 'A'){
             grade = 4;

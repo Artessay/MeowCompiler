@@ -1,10 +1,8 @@
-#define MaxN 25
-
 int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-int a[MaxN][MaxN], b[MaxN][MaxN], c[MaxN][MaxN];
+int a[25][25], b[25][25], c[25][25];
 
 int main() {
     int ra, ca;
