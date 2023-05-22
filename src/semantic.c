@@ -256,13 +256,26 @@ static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
     }
 }
 
+static LLVMTypeRef transValueType(A_var var, LLVMValueRef variable, SEM_context env) {
+    if (var->kind == A_simpleVar) {
+        return LLVMTypeOf(variable);
+    } else if (var->kind == A_subscriptVar) {
+        return LLVMGetElementType(transValueType(var->u.subscript.var, variable, env));
+    } else if (var->kind == A_pointVar) {
+        return LLVMPointerType(transValueType(var->u.point, variable, env), 0);
+    } else {
+        puts("[error] unrecognized value type");
+        return NULL;
+    }
+}
+
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env) {
     LLVMValueRef expValue = NULL;
     unsigned int elementCount = 0;
 
     switch (var->kind) {
         case A_simpleVar:
-            puts("[debug] transVarType: simple var");
+            // puts("[debug] transVarType: simple var");
             break;
 
         case A_subscriptVar:
@@ -299,15 +312,25 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
 
     // find local variable
     if (var->kind == A_simpleVar) {
-        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
+        // printf("[debug] find local simple variable: %s\n", var->u.simple->name);
         variable = S_look(tables->variableTable, var->u.simple);
     } else if (var->kind == A_subscriptVar) {
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
         LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
         
-        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        // LLVMTypeRef varType = NULL; // @TODO : can only solve 2D array
+        // if (var->u.subscript.var->kind == A_simpleVar) {
+        //     varType = LLVMGetElementType(LLVMTypeOf(variable));
+        // } else {
+        //     varType = transValueType(var, variable, env); 
+        // }
         
-        variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
+        for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
+            LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+
+            variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
+        }
+        
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;
@@ -315,7 +338,7 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
 
     // find global variable
     if (variable == NULL) {
-        puts("[debug] find global variable");
+        // puts("[debug] find global variable");
         variable = LLVMGetNamedGlobal(env->module, var->u.simple->name);
     }
     
