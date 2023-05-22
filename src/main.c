@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "assemble.h"
 #include "semantic.h"
 #include "ParseTree.h"
 
@@ -47,8 +48,12 @@ int main(int argc, const char *argv[]) {
     assert(root != NULL);
 
     puts("[front] start translate to IR");
-    SEM_transProgram(root, module_name);
+    LLVMModuleRef module = SEM_transProgram(root, module_name);
     puts("[front] end translate to IR\n");
+
+    puts("[backend] start translate IR to Assembly code" );
+    AS_emit(module, module_name);
+    puts("[backend] end translate IR to Assembly code" );
     
     return 0;
 }

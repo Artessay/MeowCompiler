@@ -17,13 +17,17 @@ struct SEM_context_ {
     LLVMContextRef context;
     LLVMModuleRef module;
     LLVMBuilderRef builder;
+
+    LLVMValueRef currentFunction;
 };
 
-SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder) {
+SEM_context SEM_Context(LLVMModuleRef module, LLVMContextRef context, LLVMBuilderRef builder, LLVMValueRef currentFunction) {
     SEM_context p = (SEM_context)checked_malloc(sizeof(*p));
     p->module = module;
     p->context = context;
     p->builder = builder;
+
+    p->currentFunction = currentFunction;
     return p;
 };
 
@@ -65,16 +69,19 @@ static void transStatementList(A_stmtList root, SEM_context env);
 static void transStatement(A_stmt root, SEM_context env);
 
 static void transVarDefine(A_varDeclare root, SEM_context env);
+static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_context env);
+static LLVMValueRef transVar(A_var var, SEM_context env);
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env);
-static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env);
 
 static LLVMValueRef transExpression(A_exp root, SEM_context env);
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env);
+static LLVMValueRef transAmpersandExp(A_var root, SEM_context env);
+static LLVMValueRef transStarExp(A_var root, SEM_context env);
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
 
-void SEM_transProgram(A_topClauseList program, char *module_name) {
+LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
     // initial LLVM
     LLVMInitializeCore(LLVMGetGlobalPassRegistry());
     LLVMInitializeNativeTarget();
@@ -84,7 +91,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     LLVMContextRef context = LLVMContextCreate();
 
     // create module
-    LLVMModuleRef module = LLVMModuleCreateWithNameInContext(module_name, context);
+    LLVMModuleRef module = LLVMModuleCreateWithName(module_name);
         
     // create LLVMBuilderRef Object
     LLVMBuilderRef builder = LLVMCreateBuilder();
@@ -93,7 +100,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     // LLVMContextSetOpaquePointers(context, 0);
 
-    SEM_context env = SEM_Context(module, context, builder);
+    SEM_context env = SEM_Context(module, context, builder, NULL);
 
     tables = SEM_Table();
     SEM_enterScope(tables);
@@ -103,7 +110,7 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
     SEM_leaveScope(tables);
 
     // print module content
-    LLVMDumpModule(module);
+    // LLVMDumpModule(module);
 
     // output to file
     char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
@@ -115,33 +122,8 @@ void SEM_transProgram(A_topClauseList program, char *module_name) {
 
     // dispose LLVM context
     LLVMContextDispose(context);
-}
 
-static LLVMValueRef getValueByVar(A_var var, SEM_context env) {
-    LLVMValueRef variable = NULL;
-
-    // find local variable
-    if (var->kind == A_simpleVar) {
-        printf("[debug] find local variable: %s\n", var->u.simple->name);
-        variable = S_look(tables->variableTable, var->u.simple);
-    } else {
-        puts("[error] unimplemented variable expression");
-        variable = NULL;
-    }
-
-    // find global variable
-    if (variable == NULL) {
-        puts("[debug] find global variable");
-        variable = LLVMGetNamedGlobal(env->module, var->u.simple->name);
-    }
-    
-    // still not found
-    if (variable == NULL) {
-        puts("[error] variable not found");
-        return NULL;
-    }
-
-    return variable;
+    return module;
 }
 
 static LLVMTypeRef transType(A_varType typ, SEM_context env) {
@@ -162,8 +144,7 @@ static LLVMTypeRef transType(A_varType typ, SEM_context env) {
                     return LLVMInt8Type();
 
                 case A_stringType:
-                    puts("TODO: trans to string type");
-                    return NULL;
+                    return LLVMPointerType(LLVMInt8Type(), 0);
 
                 case A_voidType:
                     return LLVMVoidType();
@@ -209,14 +190,15 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     LLVMTypeRef param_types[MAX_FUNCTION_PARAMS];
     S_symbol param_names[MAX_FUNCTION_PARAMS];
 
-    for (A_fieldList p = root->params; p != NULL; p = p->next) {
-        A_field field = p->value;
-        if (field == NULL) {
+    for (A_argList p = root->params; p != NULL; p = p->next) {
+        A_arg arg = p->value;
+        if (arg == NULL) {
             break;
         }
 
-        param_types[param_count] = transType(field->typ, env);
-        param_names[param_count] = field->name;
+        LLVMTypeRef basic_type = transType(arg->typ, env);
+        param_types[param_count] = transVarType(arg->var, basic_type, env);
+        param_names[param_count] = S_getVarSymbol(arg->var);
         ++param_count;
 
         if (param_count == MAX_FUNCTION_PARAMS) {
@@ -226,9 +208,6 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
     }
 
     char *func_name = S_name(root->name);
-    // puts("function name:");
-    // puts(func_name);
-    // puts("");
     
     LLVMTypeRef ret_type = LLVMFunctionType(transType(root->returnType, env), param_types, param_count, root->isVarArg);
     LLVMValueRef function = LLVMAddFunction(env->module, func_name, ret_type);
@@ -245,10 +224,7 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
         // entry function basic block and set instruction insert point
         LLVMPositionBuilderAtEnd(functionBuilder, functionEntryBlock);
 
-        // LLVMContextRef functionContext = LLVMContextCreate();
-        // SEM_context functionEnv = SEM_Context(env->module, functionContext, functionBuilder);
-
-        SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder);
+        SEM_context functionEnv = SEM_Context(env->module, env->context, functionBuilder, function);
 
         SEM_enterScope(tables);
 
@@ -268,44 +244,48 @@ static void transFunctionDeclare(A_funcDeclare root, SEM_context env) {
 }
 
 static void transGlobalVarDefine(A_varDeclare root, SEM_context env) {
-    switch (root->typ->kind) {
-        case A_basic:
-            switch (root->typ->u.basic) {
-                case A_intType:
-                    break;
-                case A_doubleType:
-                    break;
-                case A_charType:
-                    break;
-                case A_stringType:
-                    break;
-                case A_voidType:
-                    break;
-            }
+    LLVMTypeRef varType = transType(root->typ, env);
+    
+    for (A_varDecList p = root->decs; p != NULL; p = p->next) {
+        A_varDec dec = p->value;
+        if (dec == NULL) {
             break;
-        case A_point:
-            break;
-        case A_array:
-            break;
+        }
+
+        transVarDec(dec, varType, 1, env);
     }
 }
 
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env) {
+    LLVMValueRef expValue = NULL;
+    unsigned int elementCount = 0;
+
     switch (var->kind) {
         case A_simpleVar:
-            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
+            puts("[debug] transVarType: simple var");
             break;
 
         case A_subscriptVar:
+            puts("[debug] transVarType: subscript var");
+
             varType = transVarType(var->u.subscript.var, varType, env);
-            // localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
+            expValue = transExpression(var->u.subscript.exp, env);
+            if (LLVMIsAConstantInt(expValue)) {
+                elementCount = LLVMConstIntGetZExtValue(expValue);
+                varType = LLVMArrayType(varType, elementCount);
+            } else {
+                puts("[error] subscript is not a constant int");
+                return NULL;
+            }
             break;
 
         case A_pointVar:
+            puts("[debug] transVarType: point var");
+
             varType = transVarType(var->u.point, varType, env);
             varType = LLVMPointerType(varType, 0);
-            // localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
             break;
+
         default:
             puts("[error] unrecognized var kind");
             break;
@@ -314,35 +294,64 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
     return varType;
 }
 
-static void transVarDec(A_varDec root, LLVMTypeRef varType, SEM_context env) {
+static LLVMValueRef transVar(A_var var, SEM_context env) {
+    LLVMValueRef variable = NULL;
+
+    // find local variable
+    if (var->kind == A_simpleVar) {
+        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
+        variable = S_look(tables->variableTable, var->u.simple);
+    } else if (var->kind == A_subscriptVar) {
+        variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
+        LLVMValueRef index[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), transExpression(var->u.subscript.exp, env)};
+        
+        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        
+        variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
+    } else {
+        puts("[error] unimplemented variable expression");
+        variable = NULL;
+    }
+
+    // find global variable
+    if (variable == NULL) {
+        puts("[debug] find global variable");
+        variable = LLVMGetNamedGlobal(env->module, var->u.simple->name);
+    }
+    
+    // still not found
+    if (variable == NULL) {
+        puts("[error] variable not found");
+        return NULL;
+    }
+
+    return variable;
+}
+
+static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_context env) {
     assert(root != NULL);
     assert(varType != NULL);
-
+    
     A_var var = root->var;
     assert(var != NULL);
     
-    LLVMValueRef localVar = NULL;
     S_symbol varName = S_getVarSymbol(var);
+    // printf("var name: %s\n", S_name(varName));
 
-    switch (var->kind) {
-        case A_simpleVar:
-            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        case A_subscriptVar:
-            varType = transVarType(var->u.subscript.var, varType, env);
-            localVar = LLVMBuildArrayAlloca(env->builder, varType, transExpression(var->u.subscript.exp, env), S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        case A_pointVar:
-            varType = transVarType(var->u.point, varType, env);
-            localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
-            S_enter(tables->variableTable, varName, localVar);
-            break;
-        default:
-            puts("[error] unrecognized var kind");
-            break;
+    varType = transVarType(var, varType, env);
+    assert(varType != NULL);
+
+    LLVMValueRef localVar = NULL;
+    if (isGlobal) {
+        localVar = LLVMAddGlobal(env->module, varType, S_name(varName));
+        LLVMSetValueName2(localVar, S_name(varName), strlen(S_name(varName)));
+        
+        LLVMSetInitializer(localVar, LLVMConstNull(varType));
+    } else {
+        localVar = LLVMBuildAlloca(env->builder, varType, S_name(varName));
     }
+    
+    S_enter(tables->variableTable, varName, localVar);
 
     if (root->init != NULL) {
         LLVMBuildStore(env->builder, transExpression(root->init, env), localVar);
@@ -360,7 +369,7 @@ static void transVarDefine(A_varDeclare root, SEM_context env) {
             break;
         }
 
-        transVarDec(dec, varType, env);
+        transVarDec(dec, varType, 0, env);
     }
 }
 
@@ -374,6 +383,73 @@ static void transStatementList(A_stmtList root, SEM_context env) {
     transStatementList(root->next, env);
 }
 
+static void transSelection(A_if root, SEM_context env) {
+    LLVMValueRef cond = transExpression(root->condition, env);
+
+    LLVMBasicBlockRef thenBlock = LLVMAppendBasicBlock(env->currentFunction, "if.then");
+    LLVMBasicBlockRef elseBlock = LLVMAppendBasicBlock(env->currentFunction, "if.else");
+    LLVMBasicBlockRef mergeBlock = LLVMAppendBasicBlock(env->currentFunction, "if.merge");
+
+    LLVMBuildCondBr(env->builder, cond, thenBlock, elseBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, thenBlock);
+    transStatement(root->then, env);
+    LLVMBuildBr(env->builder, mergeBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, elseBlock);
+    transStatement(root->elsee, env);
+    LLVMBuildBr(env->builder, mergeBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, mergeBlock);
+}
+
+static void transFor(A_for root, SEM_context env) {
+    assert(root != NULL);
+
+    SEM_enterScope(tables);
+
+    transStatement(root->init, env);
+
+    LLVMBasicBlockRef loopBlock = LLVMAppendBasicBlock(env->currentFunction, "for.loop");
+    LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "for.body");
+    LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "for.after");
+
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, loopBlock);
+    LLVMValueRef cond = transExpression(root->condition, env);
+    LLVMBuildCondBr(env->builder, cond, bodyBlock, afterBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, bodyBlock);
+    transStatement(root->body, env);
+    transExpression(root->step, env);
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, afterBlock);
+
+    SEM_leaveScope(tables);
+}
+
+static void transWhile(A_while root, SEM_context env) {
+    assert(root != NULL);
+
+    LLVMBasicBlockRef loopBlock = LLVMAppendBasicBlock(env->currentFunction, "while.loop");
+    LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "while.body");
+    LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "while.after");
+
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, loopBlock);
+    LLVMValueRef cond = transExpression(root->condition, env);
+    LLVMBuildCondBr(env->builder, cond, bodyBlock, afterBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, bodyBlock);
+    transStatement(root->body, env);
+    LLVMBuildBr(env->builder, loopBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, afterBlock);
+}
+
 static void transStatement(A_stmt root, SEM_context env) {
     if (root == NULL) {
         return;
@@ -383,17 +459,38 @@ static void transStatement(A_stmt root, SEM_context env) {
 
     switch (root->kind) {
         case A_expStmt:
-            puts("expression");
+            // puts("expression");
             transExpression(root->u.exp, env);
             break;
         case A_varDecStmt:
-            puts("variable declare");
+            // puts("variable declare");
             transVarDefine(root->u.varDec, env);
             break;
+        case A_compoundStmt:
+            // puts("compound");
+            SEM_enterScope(tables);
+            transStatementList(root->u.compound, env);
+            SEM_leaveScope(tables);
+            break;
+        case A_ifStmt:
+            transSelection(&(root->u.iff), env);
+            break;
+        case A_forStmt:
+            transFor(&(root->u.forr), env);
+            break;
+        case A_whileStmt:
+            transWhile(&(root->u.whilee), env);
+            break;
+        
         case A_returnStmt:
-            puts("return");
-            exp = transExpression(root->u.returnn.exp, env);
-            LLVMBuildRet(env->builder, exp);
+            // puts("return");
+            if (root->u.returnn.exp != NULL) {
+                exp = transExpression(root->u.returnn.exp, env);
+                LLVMBuildRet(env->builder, exp);
+            } else {
+                LLVMBuildRetVoid(env->builder);
+            }
+            
             break;
         default:
             puts("[error] unimplemented statement");
@@ -408,6 +505,12 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
         case A_varExp:
             puts("variable expression");
             return transVariableExpression(root, env);
+        case A_ampersandExp:
+            puts("& var");
+            return transAmpersandExp(root->u.ampersand, env);
+        case A_starExp:
+            puts("* var");
+            return transStarExp(root->u.star, env);
         case A_nilExp:
             // @TODO
             return LLVMConstNull(LLVMInt32Type());
@@ -418,6 +521,9 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             return LLVMConstInt(LLVMInt8Type(), root->u.charr, 1);
         case A_doubleExp:
             return LLVMConstReal(LLVMDoubleType(), root->u.doublee);
+        case A_stringExp:
+            printf("string expression: %s\n", root->u.stringg);
+            return LLVMBuildGlobalStringPtr(env->builder, root->u.stringg, "string");
         case A_callExp:
             puts("call expression");
             return transCallExpression(root, env);
@@ -436,13 +542,25 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
 static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
     assert(root->kind == A_varExp);
 
-    LLVMValueRef variable = getValueByVar(root->u.var, env);
-
-    // puts("load variable");
+    LLVMValueRef variable = transVar(root->u.var, env);
 
     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
 
-    return LLVMBuildLoad2(env->builder, varType, variable, S_name(root->u.var->u.simple));
+    // return LLVMBuildLoad2(env->builder, varType, variable, "exp");
+    return LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(root->u.var)));
+}
+
+static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
+    LLVMValueRef variable = transVar(root, env);
+    LLVMTypeRef variableType = LLVMTypeOf(variable);
+    
+    LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
+    return addressOfVariable;
+}
+
+static LLVMValueRef transStarExp(A_var root, SEM_context env) {
+    puts("TODO: *x");
+    return NULL;
 }
 
 static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
@@ -451,7 +569,6 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
     char *func_name = S_name(root->u.call.func);
     LLVMValueRef function = LLVMGetNamedFunction(env->module, func_name);
     LLVMTypeRef functionType = LLVMGetElementType(LLVMTypeOf(function));
-    // LLVMDumpType(functionType);
 
     if (function == NULL) {
         puts("[error] function not found");
@@ -470,7 +587,14 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env) {
         }
     }
 
-    return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+    if (LLVMGetReturnType(LLVMTypeOf(function)) != LLVMVoidType()) {
+        return LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+    } else {
+        // TODO: Debug needed
+        puts("[debug] return void type");
+        LLVMBuildCall2(env->builder, functionType, function, args, arg_count, "callVal");
+        return NULL;
+    }
 }
 
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
@@ -580,11 +704,8 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.assign.exp, env);
     assert(value != NULL);
 
-    LLVMDumpValue(value);
-    putchar('\n');
-
-    LLVMValueRef variable = getValueByVar(root->u.assign.var, env);
+    LLVMValueRef variable = transVar(root->u.assign.var, env);
     assert(variable != NULL);
-
+    
     return LLVMBuildStore(env->builder, value, variable);
 }

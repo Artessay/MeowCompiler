@@ -50,7 +50,7 @@ A_topClause A_VarDeclare(A_varDeclare globalVariable) {
 	return p;
 }
 
-A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_fieldList params, A_stmtList body, int isVarArg) {
+A_funcDeclare A_FuncDeclaration(A_pos pos, A_varType retTyp, S_symbol name, A_argList params, A_stmtList body, int isVarArg) {
 	A_funcDeclare p = (A_funcDeclare)checked_malloc(sizeof(*p));
 	p->pos = pos;
 	p->returnType = retTyp;
@@ -112,6 +112,58 @@ A_stmt A_VarDecStmt(A_varDeclare varDec) {
 	return p;
 }
 
+A_stmt A_CompoundStmt(A_pos pos, A_stmtList stmts) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_compoundStmt;
+	p->pos = pos;
+	p->u.compound = stmts;
+	return p;
+}
+
+A_stmt A_IfStmt(A_pos pos, A_exp cond, A_stmt then, A_stmt elsee) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_ifStmt;
+	p->pos = pos;
+	p->u.iff.condition = cond;
+	p->u.iff.then = then;
+	p->u.iff.elsee = elsee;
+	return p;
+}
+
+A_stmt A_WhileStmt(A_pos pos, A_exp cond, A_stmt body) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_whileStmt;
+	p->pos = pos;
+	p->u.whilee.condition = cond;
+	p->u.whilee.body = body;
+	return p;
+}
+
+A_stmt A_ForStmt(A_pos pos, A_stmt init, A_exp cond, A_exp step, A_stmt body) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_forStmt;
+	p->pos = pos;
+	p->u.forr.init = init;
+	p->u.forr.condition = cond;
+	p->u.forr.step = step;
+	p->u.forr.body = body;
+	return p;
+}
+
+A_stmt A_BreakStmt(A_pos pos) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_breakStmt;
+	p->pos = pos;
+	return p;
+}
+
+A_stmt A_ContinueStmt(A_pos pos) {
+	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
+	p->kind = A_continueStmt;
+	p->pos = pos;
+	return p;
+}
+
 A_stmt A_ReturnStmt(A_pos pos, A_exp exp) {
 	A_stmt p = (A_stmt)checked_malloc(sizeof(*p));
 	p->kind = A_returnStmt;
@@ -133,7 +185,7 @@ A_exp A_VarExp(A_pos pos, A_var var) {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_varExp;
 	p->pos = pos;
-	p->typ = var->typ;
+	// p->typ = var->typ;
 	p->u.var = var;
 	return p;
 }
@@ -142,9 +194,25 @@ A_exp A_AssignExp(A_pos pos, A_var var, A_exp exp) {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_assignExp;
 	p->pos = pos;
-	p->typ = var->typ;
+	// p->typ = var->typ;
 	p->u.assign.var = var;
 	p->u.assign.exp = exp;
+	return p;
+}
+
+A_exp A_AmpersandExp(A_pos pos, A_var var) {
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
+	p->kind = A_ampersandExp;
+	p->pos = pos;
+	p->u.ampersand = var;
+	return p;
+}
+
+A_exp A_StarExp(A_pos pos, A_var var) {
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
+	p->kind = A_starExp;
+	p->pos = pos;
+	p->u.star = var;
 	return p;
 }
 
@@ -160,7 +228,7 @@ A_exp A_NilExp(A_pos pos)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_nilExp;
 	p->pos = pos;
-	p->typ = A_NilTyp();
+	// p->typ = A_NilTyp();
 	return p;
 }
 
@@ -176,7 +244,7 @@ A_exp A_IntExp(A_pos pos, int i)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_intExp;
 	p->pos = pos;
-	p->typ = A_IntTyp();
+	// p->typ = A_IntTyp();
 	p->u.intt = i;
 	return p;
 }
@@ -193,7 +261,7 @@ A_exp A_CharExp(A_pos pos, char c)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_charExp;
 	p->pos = pos;
-	p->typ = A_CharTyp();
+	// p->typ = A_CharTyp();
 	p->u.charr = c;
 	return p;
 }
@@ -210,7 +278,7 @@ A_exp A_DoubleExp(A_pos pos, double d)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_doubleExp;
 	p->pos = pos;
-	p->typ = A_DoubleTyp();
+	// p->typ = A_DoubleTyp();
 	p->u.doublee = d;
 	return p;
 }
@@ -227,7 +295,7 @@ A_exp A_StringExp(A_pos pos, char *s)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_stringExp;
 	p->pos = pos;
-	p->typ = A_StringTyp();
+	// p->typ = A_StringTyp();
 	p->u.stringg = s;
 	return p;
 }
@@ -237,7 +305,7 @@ A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));
 	p->kind = A_callExp;
 	p->pos = pos;
-	p->typ = NULL;	// @TODO
+	// p->typ = NULL;	// @TODO
 	p->u.call.func = func;
 	p->u.call.args = args;
 	return p;
@@ -279,6 +347,21 @@ A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
 
 A_fieldList A_FieldList(A_field value, A_fieldList next) {
 	A_fieldList p = (A_fieldList)checked_malloc(sizeof(*p));
+	p->value = value;
+	p->next = next;
+	return p;
+}
+
+A_arg A_Arg(A_pos pos, A_varType typ, A_var var) {
+	A_arg p = (A_arg)checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->typ = typ;
+	p->var = var;
+	return p;
+}
+
+A_argList A_ArgList(A_arg value, A_argList next) {
+	A_argList p = (A_argList)checked_malloc(sizeof(*p));
 	p->value = value;
 	p->next = next;
 	return p;
