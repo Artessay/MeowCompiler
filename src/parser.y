@@ -172,7 +172,10 @@ Param
         | DOT DOT DOT  { $$ = NULL; A_setVarArgFlag(); }
         ;
 IDENTITY
-        : ID { $$ = S_Symbol($1); printf("Identity: %s\n", $1); }
+        : ID { 
+                $$ = S_Symbol($1);  
+                // printf("Identity: %s\n", $1);  
+        }
         ;
 
 Type_Specifier 
@@ -201,26 +204,6 @@ Statement
         | Return_Stmt { $$ = $1; }
         | BREAK SEMICOLON { $$ = A_BreakStmt(7); }
         | CONTINUE SEMICOLON { $$ = A_ContinueStmt(7); }
-        | DADD Var_Def SEMICOLON {
-                A_exp var = A_VarExp(7, $2);
-                A_exp exp1 = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
-                A_stmt stmt1 = A_ExprStmt(7, exp1);
-                A_exp exp2 = A_AssignExp(7, $2, exp1);
-                A_stmt stmt2 = A_ExprStmt(7, exp2);
-                
-                A_stmtList compound = A_StmtList(stmt1, A_StmtList(stmt2, NULL));
-                $$ = A_CompoundStmt(7, compound);
-        }
-        | DSUB Var_Def SEMICOLON {
-                A_exp var = A_VarExp(7, $2);
-                A_exp exp1 = A_OpExp(7, A_minusOp, var, A_IntExp(7, 1));
-                A_stmt stmt1 = A_ExprStmt(7, exp1);
-                A_exp exp2 = A_AssignExp(7, $2, exp1);
-                A_stmt stmt2 = A_ExprStmt(7, exp2);
-                
-                A_stmtList compound = A_StmtList(stmt1, A_StmtList(stmt2, NULL));
-                $$ = A_CompoundStmt(7, compound);
-        }
         | Expression DADD { $$ = NULL; puts("TODO: RUOP"); }
         | Expression DSUB { $$ = NULL; puts("TODO: RUOP"); }
         ;
@@ -247,20 +230,21 @@ Return_Stmt
 
 Expression 
         : L_Value ASSIGN Expression { $$ = A_AssignExp(7, $1, $3); }
-        /* | L_Value ADDAS Expression { $$ = new Node(ADDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-2" << endl; }
-        | L_Value SUBAS Expression { $$ = new Node(SUBAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-3" << endl; }
-        | L_Value MULAS Expression { $$ = new Node(MULAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-4" << endl; }
-        | L_Value DIVAS Expression { $$ = new Node(DIVAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-5" << endl; }
-        | L_Value MODAS Expression { $$ = new Node(MODAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-6" << endl; }
-        | L_Value SHLAS Expression { $$ = new Node(SHLAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-7" << endl; }
-        | L_Value SHRAS Expression { $$ = new Node(SHRAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-8" << endl; }
-        | L_Value BANDAS Expression { $$ = new Node(BANDAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-9" << endl; }
-        | L_Value BORAS Expression { $$ = new Node(BORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-10" << endl; }
-        | L_Value BXORAS Expression { $$ = new Node(BXORAS_); $$->children.push_back($1); $$->children.push_back($3); cout << "25-11" << endl; } */
+        | L_Value ADDAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_plusOp, A_VarExp(7, $1), $3)); }
+        | L_Value SUBAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_minusOp, A_VarExp(7, $1), $3)); }
+        | L_Value MULAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_timesOp, A_VarExp(7, $1), $3)); }
+        | L_Value DIVAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_divideOp, A_VarExp(7, $1), $3)); }
+        | L_Value MODAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_modOp, A_VarExp(7, $1), $3)); }
+        | L_Value SHLAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_shlOp, A_VarExp(7, $1), $3)); }
+        | L_Value SHRAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_shrOp, A_VarExp(7, $1), $3)); }
+        | L_Value BANDAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bAndOp, A_VarExp(7, $1), $3)); }
+        | L_Value BORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bOrOp, A_VarExp(7, $1), $3)); }
+        | L_Value BXORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bXorOp, A_VarExp(7, $1), $3)); }
         | L_Value { $$ = A_VarExp(7, $1); }
+        | Uni_Exp { $$ = $1; }
+        | LPAREN Type_Specifier RPAREN Expression { $$ = A_TypeCastExp(7, $2, $4); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
-        | Uni_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
         | NIL { $$ = A_NilExp(7); }
         | INT { $$ = A_IntExp(7, $1); }
@@ -282,6 +266,16 @@ Uni_Exp
         | BNOT Expression { $$ = NULL; puts("TODO: ~ BNOT"); }
         | BAND Var_Def { $$ = A_AmpersandExp(7, $2); }
         | MUL Var_Def { $$ = A_StarExp(7, $2); }
+        | DADD Var_Def {
+                A_exp var = A_VarExp(7, $2);
+                A_exp exp = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
+                $$ = A_AssignExp(7, $2, exp);
+        }
+        | DSUB Var_Def {
+                A_exp var = A_VarExp(7, $2);
+                A_exp exp = A_OpExp(7, A_minusOp, var, A_IntExp(7, 1));
+                $$ = A_AssignExp(7, $2, exp);
+        }
         ;
 
 Call_Exp 

@@ -42,10 +42,10 @@ while.body:                                       ; preds = %while.loop
   br label %while.loop5
 
 while.after:                                      ; preds = %while.loop
-  %left49 = load i32, i32* %2, align 4
-  %j50 = load i32, i32* %j, align 4
-  %cmpLT51 = icmp slt i32 %left49, %j50
-  br i1 %cmpLT51, label %if.then52, label %if.else53
+  %left41 = load i32, i32* %2, align 4
+  %j42 = load i32, i32* %j, align 4
+  %cmpLT43 = icmp slt i32 %left41, %j42
+  br i1 %cmpLT43, label %if.then44, label %if.else45
 
 while.loop5:                                      ; preds = %while.body6, %while.body
   %i8 = load i32, i32* %i, align 4
@@ -58,95 +58,87 @@ while.loop5:                                      ; preds = %while.body6, %while
 while.body6:                                      ; preds = %while.loop5
   %i12 = load i32, i32* %i, align 4
   %temperate13 = add i32 %i12, 1
-  %i14 = load i32, i32* %i, align 4
-  %temperate15 = add i32 %i14, 1
-  store i32 %temperate15, i32* %i, align 4
+  store i32 %temperate13, i32* %i, align 4
   br label %while.loop5
 
 while.after7:                                     ; preds = %while.loop5
-  br label %while.loop16
+  br label %while.loop14
 
-while.loop16:                                     ; preds = %while.body17, %while.after7
-  %j19 = load i32, i32* %j, align 4
-  %arrayElement20 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j19
-  %array21 = load i32, i32* %arrayElement20, align 4
-  %pivot22 = load i32, i32* %pivot, align 4
-  %cmpGT = icmp sgt i32 %array21, %pivot22
-  br i1 %cmpGT, label %while.body17, label %while.after18
+while.loop14:                                     ; preds = %while.body15, %while.after7
+  %j17 = load i32, i32* %j, align 4
+  %arrayElement18 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j17
+  %array19 = load i32, i32* %arrayElement18, align 4
+  %pivot20 = load i32, i32* %pivot, align 4
+  %cmpGT = icmp sgt i32 %array19, %pivot20
+  br i1 %cmpGT, label %while.body15, label %while.after16
 
-while.body17:                                     ; preds = %while.loop16
-  %j23 = load i32, i32* %j, align 4
-  %temperate24 = sub i32 %j23, 1
-  %j25 = load i32, i32* %j, align 4
-  %temperate26 = sub i32 %j25, 1
-  store i32 %temperate26, i32* %j, align 4
-  br label %while.loop16
+while.body15:                                     ; preds = %while.loop14
+  %j21 = load i32, i32* %j, align 4
+  %temperate22 = sub i32 %j21, 1
+  store i32 %temperate22, i32* %j, align 4
+  br label %while.loop14
 
-while.after18:                                    ; preds = %while.loop16
-  %i27 = load i32, i32* %i, align 4
-  %j28 = load i32, i32* %j, align 4
-  %cmpLE29 = icmp sle i32 %i27, %j28
-  br i1 %cmpLE29, label %if.then, label %if.else
+while.after16:                                    ; preds = %while.loop14
+  %i23 = load i32, i32* %i, align 4
+  %j24 = load i32, i32* %j, align 4
+  %cmpLE25 = icmp sle i32 %i23, %j24
+  br i1 %cmpLE25, label %if.then, label %if.else
 
-if.then:                                          ; preds = %while.after18
+if.then:                                          ; preds = %while.after16
   %temp = alloca i32, align 4
-  %i30 = load i32, i32* %i, align 4
-  %arrayElement31 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i30
-  %array32 = load i32, i32* %arrayElement31, align 4
-  store i32 %array32, i32* %temp, align 4
-  %j33 = load i32, i32* %j, align 4
-  %arrayElement34 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j33
-  %array35 = load i32, i32* %arrayElement34, align 4
-  %i36 = load i32, i32* %i, align 4
-  %arrayElement37 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i36
-  store i32 %array35, i32* %arrayElement37, align 4
-  %temp38 = load i32, i32* %temp, align 4
+  %i26 = load i32, i32* %i, align 4
+  %arrayElement27 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i26
+  %array28 = load i32, i32* %arrayElement27, align 4
+  store i32 %array28, i32* %temp, align 4
+  %j29 = load i32, i32* %j, align 4
+  %arrayElement30 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j29
+  %array31 = load i32, i32* %arrayElement30, align 4
+  %i32 = load i32, i32* %i, align 4
+  %arrayElement33 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %i32
+  store i32 %array31, i32* %arrayElement33, align 4
+  %temp34 = load i32, i32* %temp, align 4
+  %j35 = load i32, i32* %j, align 4
+  %arrayElement36 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j35
+  store i32 %temp34, i32* %arrayElement36, align 4
+  %i37 = load i32, i32* %i, align 4
+  %temperate38 = add i32 %i37, 1
+  store i32 %temperate38, i32* %i, align 4
   %j39 = load i32, i32* %j, align 4
-  %arrayElement40 = getelementptr [10000 x i32], [10000 x i32]* @array, i32 0, i32 %j39
-  store i32 %temp38, i32* %arrayElement40, align 4
-  %i41 = load i32, i32* %i, align 4
-  %temperate42 = add i32 %i41, 1
-  %i43 = load i32, i32* %i, align 4
-  %temperate44 = add i32 %i43, 1
-  store i32 %temperate44, i32* %i, align 4
-  %j45 = load i32, i32* %j, align 4
-  %temperate46 = sub i32 %j45, 1
-  %j47 = load i32, i32* %j, align 4
-  %temperate48 = sub i32 %j47, 1
-  store i32 %temperate48, i32* %j, align 4
+  %temperate40 = sub i32 %j39, 1
+  store i32 %temperate40, i32* %j, align 4
   br label %if.merge
 
-if.else:                                          ; preds = %while.after18
+if.else:                                          ; preds = %while.after16
   br label %if.merge
 
 if.merge:                                         ; preds = %if.else, %if.then
   br label %while.loop
 
-if.then52:                                        ; preds = %while.after
-  %left55 = load i32, i32* %2, align 4
-  %j56 = load i32, i32* %j, align 4
-  %callVal = call i32 @quickSort(i32 %left55, i32 %j56)
+if.then44:                                        ; preds = %while.after
+  %left47 = load i32, i32* %2, align 4
+  %j48 = load i32, i32* %j, align 4
+  %callVal = call i32 @quickSort(i32 %left47, i32 %j48)
+  br label %if.merge46
+
+if.else45:                                        ; preds = %while.after
+  br label %if.merge46
+
+if.merge46:                                       ; preds = %if.else45, %if.then44
+  %i49 = load i32, i32* %i, align 4
+  %right50 = load i32, i32* %3, align 4
+  %cmpLT51 = icmp slt i32 %i49, %right50
+  br i1 %cmpLT51, label %if.then52, label %if.else53
+
+if.then52:                                        ; preds = %if.merge46
+  %i55 = load i32, i32* %i, align 4
+  %right56 = load i32, i32* %3, align 4
+  %callVal57 = call i32 @quickSort(i32 %i55, i32 %right56)
   br label %if.merge54
 
-if.else53:                                        ; preds = %while.after
+if.else53:                                        ; preds = %if.merge46
   br label %if.merge54
 
 if.merge54:                                       ; preds = %if.else53, %if.then52
-  %i57 = load i32, i32* %i, align 4
-  %right58 = load i32, i32* %3, align 4
-  %cmpLT59 = icmp slt i32 %i57, %right58
-  br i1 %cmpLT59, label %if.then60, label %if.else61
-
-if.then60:                                        ; preds = %if.merge54
-  %i63 = load i32, i32* %i, align 4
-  %right64 = load i32, i32* %3, align 4
-  %callVal65 = call i32 @quickSort(i32 %i63, i32 %right64)
-  br label %if.merge62
-
-if.else61:                                        ; preds = %if.merge54
-  br label %if.merge62
-
-if.merge62:                                       ; preds = %if.else61, %if.then60
   ret i32 0
 }
 

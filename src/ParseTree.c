@@ -300,6 +300,14 @@ A_exp A_StringExp(A_pos pos, char *s)
 	return p;
 }
 
+A_exp A_TypeCastExp(A_pos pos, A_varType typ, A_exp exp) {
+	A_exp p = (A_exp)checked_malloc(sizeof(*p));
+	p->kind = A_typeCastExp;
+	p->u.cast.castType = typ;
+	p->u.cast.exp = exp;
+	return p;
+}
+
 A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args)
 {
 	A_exp p = (A_exp)checked_malloc(sizeof(*p));

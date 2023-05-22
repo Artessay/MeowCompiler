@@ -220,11 +220,11 @@ struct A_exp_ {
     enum {
         A_varExp, 
         A_ampersandExp, A_starExp,
-        A_nilExp, A_intExp, A_charExp, A_doubleExp, A_stringExp, 
+        A_nilExp, A_typeCastExp,
+        A_intExp, A_charExp, A_doubleExp, A_stringExp, 
         A_callExp,
         A_opExp, 
         A_assignExp,
-        A_recordExp, A_seqExp, 
     } kind;
     
     A_pos pos;
@@ -250,6 +250,10 @@ struct A_exp_ {
             A_exp left;
             A_exp right;
         } op;
+        struct {
+            A_varType castType;
+            A_exp exp;
+        } cast;
         // struct {
         //     S_symbol type;
         //     A_fieldList fields;
@@ -329,6 +333,8 @@ A_exp A_CharExp(A_pos pos, char c);
 A_exp A_DoubleExp(A_pos pos, double d);
 
 A_exp A_StringExp(A_pos pos, char *s);
+
+A_exp A_TypeCastExp(A_pos pos, A_varType typ, A_exp exp);
 
 A_exp A_CallExp(A_pos pos, S_symbol func, A_expList args);
 
