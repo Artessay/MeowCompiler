@@ -8,7 +8,7 @@ char courses[100][300];
 char courseName[100][8];
 char coursePrerequisite[100][300];
 
-char coursePassed[65537];
+int coursePassed[65537];
 
 int hash(char *s) {
     int h = 0;
@@ -20,8 +20,8 @@ int hash(char *s) {
 
 char judge(int courseIndex) {
     int i, h;
-    char ready = 0;
-    char state = 0; // 0: init, 1: and
+    int ready = 0;
+    int state = 0; // 0: init, 1: and
 
     char *p = coursePrerequisite[courseIndex];
     if (*p == 0) {
@@ -167,14 +167,11 @@ int main() {
         printf("  None - Congratulations!\n");
     } else {
         for (int i = 0; i < courseNum; ++i) {
-            // unsigned int h = hash(courseName[i]);
             int h = hash(courseName[i]);
-            if (coursePassed[h]) {
-                continue;
-            }
-// printf("Hi %d %s %d\n", i, courseName[i], (int)coursePassed[h]);
-            if (judge(i)) {
-                printf("  %s\n", courseName[i]);
+            if (coursePassed[h] != 0) {
+                if (judge(i)) {
+                    printf("  %s\n", courseName[i]);
+                }
             }
         }
     }
