@@ -621,6 +621,8 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
     LLVMValueRef value = transExpression(root->u.cast.exp, env);
     if (varType == LLVMDoubleType()) {
         return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
+    } else if (varType == LLVMInt32Type()) {
+        return LLVMBuildIntCast2(env->builder, value, LLVMInt32Type(), 1, "castInt");
     }
     
     puts("[error] unimplemented type cast");

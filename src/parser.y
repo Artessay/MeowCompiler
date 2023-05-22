@@ -176,7 +176,7 @@ Param
 IDENTITY
         : ID { 
                 $$ = S_Symbol($1);  
-                printf("Identity: %s\n", $1);  
+                // printf("Identity: %s\n", $1);  
         }
         ;
 
