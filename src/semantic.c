@@ -152,7 +152,7 @@ static LLVMTypeRef transType(A_varType typ, SEM_context env) {
             }
             break;
         case A_point:
-            break;
+            return LLVMPointerType(transType(typ->u.point, env), 0);
         case A_array:
             break;
     }
@@ -271,6 +271,8 @@ static LLVMTypeRef transValueType(A_var var, LLVMValueRef variable, SEM_context 
 }
 
 static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env) {
+    assert(var != NULL && varType != NULL);
+
     LLVMValueRef expValue = NULL;
     unsigned int elementCount = 0;
 
@@ -309,23 +311,18 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
 }
 
 static LLVMValueRef transVar(A_var var, SEM_context env) {
+    assert(var != NULL);
     LLVMValueRef variable = NULL;
-
+    
     // find local variable
     if (var->kind == A_simpleVar) {
-        // printf("[debug] find local simple variable: %s\n", var->u.simple->name);
+        printf("[debug] find local simple variable: %s\n", var->u.simple->name);
         variable = S_look(tables->variableTable, var->u.simple);
     } else if (var->kind == A_subscriptVar) {
+        printf("[debug] find local subscript variable %s\n", S_name(S_getVarSymbol(var)));
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
         LLVMValueRef index[2];
         index[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-        
-        // LLVMTypeRef varType = NULL; // @TODO : can only solve 2D array
-        // if (var->u.subscript.var->kind == A_simpleVar) {
-        //     varType = LLVMGetElementType(LLVMTypeOf(variable));
-        // } else {
-        //     varType = transValueType(var, variable, env); 
-        // }
         
         for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
             LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
@@ -333,6 +330,12 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
             variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
         }
         
+    } else if (var->kind == A_derefVar) {
+        printf("[debug] find local deref variable: %s", S_name(S_getVarSymbol(var)));
+        variable = S_look(tables->variableTable, S_getVarSymbol(var->u.deref));
+        LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        LLVMDumpType(varType); putchar('\n');
+        variable = LLVMBuildLoad2(env->builder, varType, variable, "deref");
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;
@@ -361,10 +364,11 @@ static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_c
     assert(var != NULL);
     
     S_symbol varName = S_getVarSymbol(var);
-    // printf("var name: %s\n", S_name(varName));
+    printf("var name: %s\n", S_name(varName));
 
     varType = transVarType(var, varType, env);
     assert(varType != NULL);
+    LLVMDumpType(varType); puts("");
 
     LLVMValueRef localVar = NULL;
     if (isGlobal) {
@@ -379,8 +383,16 @@ static void transVarDec(A_varDec root, LLVMTypeRef varType, char isGlobal, SEM_c
     S_enter(tables->variableTable, varName, localVar);
 
     if (root->init != NULL) {
-        LLVMBuildStore(env->builder, transExpression(root->init, env), localVar);
+        printf("[debug] var init: %s\n", S_name(varName));
+        LLVMValueRef initExp = transExpression(root->init, env);
+        LLVMDumpValue(initExp); puts("");
+        LLVMDumpValue(localVar); puts("");
+        assert(env->builder != NULL);
+        LLVMBuildStore(env->builder, initExp, localVar);
+        puts("var init done");
     }
+    
+    puts("var dec done");
 
     return;
 }
@@ -396,6 +408,7 @@ static void transVarDefine(A_varDeclare root, SEM_context env) {
 
         transVarDec(dec, varType, 0, env);
     }
+    puts("var declare done");
 }
 
 static void transStatementList(A_stmtList root, SEM_context env) {
@@ -405,6 +418,7 @@ static void transStatementList(A_stmtList root, SEM_context env) {
 
     A_stmt statement = root->value;
     transStatement(statement, env);
+    puts("statement done");
     transStatementList(root->next, env);
 }
 
@@ -531,7 +545,7 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             // puts("variable expression");
             return transVariableExpression(root, env);
         case A_ampersandExp:
-            // puts("& var");
+            puts("& var");
             return transAmpersandExp(root->u.ampersand, env);
         case A_starExp:
             puts("* var");
@@ -578,17 +592,26 @@ static LLVMValueRef transVariableExpression(A_exp root, SEM_context env) {
 }
 
 static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
+    assert(root != NULL);
+
     LLVMValueRef variable = transVar(root, env);
     LLVMTypeRef variableType = LLVMTypeOf(variable);
     
-    LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
-    return addressOfVariable;
+    // LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
+    LLVMValueRef addressOfVariable = LLVMBuildAlloca(env->builder, variableType, S_name(S_getVarSymbol(root)));
+    LLVMDumpValue(addressOfVariable); putchar('\n');
+    
+    LLVMBuildStore(env->builder, variable, addressOfVariable);
+    return LLVMBuildLoad2(env->builder, variableType, addressOfVariable, S_name(S_getVarSymbol(root)));
 }
 
 static LLVMValueRef transStarExp(A_var root, SEM_context env) {
+    assert(root != NULL);
+
     LLVMValueRef value = transVar(root, env);
     LLVMTypeRef varType = LLVMTypeOf(value);
-    return LLVMBuildLoad2(env->builder, varType, value, S_name(S_getVarSymbol(root)));
+    LLVMValueRef addressOfValue = LLVMBuildLoad2(env->builder, varType, value, S_name(S_getVarSymbol(root)));
+    return LLVMBuildLoad2(env->builder, LLVMTypeOf(addressOfValue), addressOfValue, S_name(S_getVarSymbol(root)));
 }
 
 static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
@@ -747,6 +770,7 @@ static LLVMValueRef transAssignExpression(A_exp root, SEM_context env) {
 
     LLVMValueRef variable = transVar(root->u.assign.var, env);
     assert(variable != NULL);
+    LLVMDumpValue(variable);
     
     return LLVMBuildStore(env->builder, value, variable);
 }

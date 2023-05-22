@@ -26,6 +26,9 @@ all:
 run:
 	./$(TARGET) $(TEST_FILE)
 
+test:
+	make test -C ../test
+
 show:
 	clang -S -emit-llvm -o $(TEST_IR) -O0 $(TEST_FILE)
 	llc $(TEST_IR) -o $(TEST_AS)

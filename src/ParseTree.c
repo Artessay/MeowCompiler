@@ -339,11 +339,13 @@ A_varType A_VarTypeBasic(A_pos pos, enum A_BasicType_ type) {
 	return p;
 }
 
-// A_basicType A_BasicType(enum A_BasicType_ type) {
-// 	A_basicType p = (A_basicType)checked_malloc(sizeof(*p));
-// 	p->kind = type;
-// 	return p;
-// }
+A_varType A_VarTypePoint(A_pos pos, A_varType typ) {
+	A_varType p = (A_varType)checked_malloc(sizeof(*p));
+	p->pos = pos;
+	p->kind = A_point;
+	p->u.point = typ;
+	return p;
+}
 
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name) {
 	A_field p = (A_field)checked_malloc(sizeof(*p));
@@ -406,5 +408,13 @@ A_var A_PointVar(A_pos pos, A_var var) {
 	p->kind = A_pointVar;
 	p->pos = pos;
 	p->u.point = var;
+	return p;
+}
+
+A_var A_DerefVar(A_pos pos, A_var var) {
+	A_var p = (A_var)checked_malloc(sizeof(*p));
+	p->kind = A_derefVar;
+	p->pos = pos;
+	p->u.deref = var;
 	return p;
 }

@@ -87,7 +87,7 @@ void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
 
 %type <varDec> Var_Init
 
-%type <varType> Type_Specifier Basic_Type_Specifier
+%type <varType> Type_Specifier
 
 /* %type <basicType>  */
 
@@ -161,6 +161,8 @@ Var_Def
 Fun_Declaration
         : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL, A_getVarArgFlag()); }
         | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6, A_getVarArgFlag()); }
+        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, A_VarTypePoint(7, $1), $3, $5, NULL, A_getVarArgFlag()); }
+        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, A_VarTypePoint(7, $1), $3, $5, $7, A_getVarArgFlag()); }
         ;
 Params 
         : Param COMMA Params { $$ = A_ArgList($1, $3); }
@@ -174,19 +176,17 @@ Param
 IDENTITY
         : ID { 
                 $$ = S_Symbol($1);  
-                // printf("Identity: %s\n", $1);  
+                printf("Identity: %s\n", $1);  
         }
         ;
 
 Type_Specifier 
-        : Basic_Type_Specifier { $$ = $1; }
-        ;
-Basic_Type_Specifier 
         : TYPE_VOID   { $$ = A_VarTypeBasic(7, A_voidType); }
         | TYPE_INT    { $$ = A_VarTypeBasic(7, A_intType); }
         | TYPE_CHAR   { $$ = A_VarTypeBasic(7, A_charType); }
         | TYPE_STRING { $$ = A_VarTypeBasic(7, A_stringType); }
         | TYPE_DOUBLE { $$ = A_VarTypeBasic(7, A_doubleType); }
+        /* | Type_Specifier MUL { $$ = A_VarTypePoint(7, $1); } */
         ;
 Block 
         : LBRACE Statements RBRACE { $$ = $2; /* puts("Block"); */ }
@@ -264,14 +264,14 @@ Nonempty_Exp_List
 Uni_Exp 
         : NOT Expression { $$ = NULL; puts("TODO: ! NOT"); }
         | BNOT Expression { $$ = NULL; puts("TODO: ~ BNOT"); }
-        | BAND Var_Def { $$ = A_AmpersandExp(7, $2); }
-        | MUL Var_Def { $$ = A_StarExp(7, $2); }
-        | DADD Var_Def {
+        | BAND L_Value { $$ = A_AmpersandExp(7, $2); }
+        /* | MUL L_Value { $$ = A_StarExp(7, $2); } */
+        | DADD L_Value {
                 A_exp var = A_VarExp(7, $2);
                 A_exp exp = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
                 $$ = A_AssignExp(7, $2, exp);
         }
-        | DSUB Var_Def {
+        | DSUB L_Value {
                 A_exp var = A_VarExp(7, $2);
                 A_exp exp = A_OpExp(7, A_minusOp, var, A_IntExp(7, 1));
                 $$ = A_AssignExp(7, $2, exp);
@@ -284,6 +284,7 @@ Call_Exp
 
 L_Value
         : IDENTITY { $$ = A_SimpleVar(7, $1); }
+        | MUL L_Value { $$ = A_DerefVar(7, $2); }
         | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
         /* | L_Value DOT IDENTITY {} */
         ;

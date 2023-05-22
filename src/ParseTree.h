@@ -110,7 +110,8 @@ struct A_varDecList_ {
 
 struct A_var_ {
     enum {
-        A_simpleVar, A_fieldVar, A_subscriptVar, A_pointVar
+        A_simpleVar, A_fieldVar, A_subscriptVar, 
+        A_pointVar, A_derefVar
     } kind;
     A_pos pos;
     A_varType typ;
@@ -125,6 +126,7 @@ struct A_var_ {
             A_exp exp;
         } subscript;
         A_var point;
+        A_var deref;
     } u;
 };
 
@@ -139,7 +141,7 @@ struct A_varType_ {
     A_pos pos;
     union {
         enum A_BasicType_ basic;
-        A_pointType point;
+        A_varType point;
         A_arrayType array;
     } u;
 };
@@ -344,6 +346,8 @@ A_exp A_OpExp(A_pos pos, A_oper oper, A_exp left, A_exp right);
 
 A_varType A_VarTypeBasic(A_pos pos, enum A_BasicType_ type);
 
+A_varType A_VarTypePoint(A_pos pos, A_varType typ);
+
 A_field A_Field(A_pos pos, A_varType typ, S_symbol name);
 
 A_fieldList A_FieldList(A_field value, A_fieldList next);
@@ -359,6 +363,8 @@ A_var A_FieldVar(A_pos pos, A_var var, S_symbol sym);
 A_var A_SubscriptVar(A_pos pos, A_var var, A_exp exp);
 
 A_var A_PointVar(A_pos pos, A_var var);
+
+A_var A_DerefVar(A_pos pos, A_var var);
 
 // get and set
 
