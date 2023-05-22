@@ -33,6 +33,7 @@ S_symbol S_Symbol(char *name) {
 }
 
 char *S_name(S_symbol symbol) {
+    assert(symbol);
     return symbol->name;
 }
 

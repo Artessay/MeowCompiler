@@ -1,5 +1,6 @@
 #include "utility.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 unsigned int hash(char *s) {
@@ -28,7 +29,10 @@ S_symbol S_getVarSymbol(A_var var) {
             return S_getVarSymbol(var->u.subscript.var);
         case A_pointVar:
             return S_getVarSymbol(var->u.point);
+        case A_derefVar:
+            return S_getVarSymbol(var->u.deref);
         default:
+            puts("[error] S_getVarSymbol: unknown var kind");
             return NULL;
     }
 }
