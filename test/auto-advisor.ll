@@ -66,6 +66,7 @@ while.body:                                       ; preds = %while.loop
   br label %while.loop8
 
 while.after:                                      ; preds = %while.loop
+  ret i32 0
 
 while.loop8:                                      ; preds = %while.body9, %while.body
   %index11 = load i32, i32* %index, align 4
@@ -110,7 +111,7 @@ while.body9:                                      ; preds = %while.loop8
 while.after10:                                    ; preds = %while.loop8
   %i41 = load i32, i32* %i, align 4
   %arrayElement42 = getelementptr [8 x i8], [8 x i8]* %precourse, i32 0, i32 %i41
-  store i32 0, i8* %arrayElement42, align 4
+  store i8 48, i8* %arrayElement42, align 1
   %h43 = alloca i32, align 4
   store i32 0, i32* %h43, align 4
   %t = alloca i32, align 4
@@ -130,7 +131,8 @@ while.body45:                                     ; preds = %while.loop44
   %t53 = load i32, i32* %t, align 4
   %arrayElement54 = getelementptr [8 x i8], [8 x i8]* %precourse, i32 0, i32 %t53
   %precourse55 = load i8, i8* %arrayElement54, align 1
-  %temperate56 = add i32 %temperate52, i8 %precourse55
+  %castInt = sext i8 %precourse55 to i32
+  %temperate56 = add i32 %temperate52, %castInt
   store i32 %temperate56, i32* %h43, align 4
   %h57 = load i32, i32* %h43, align 4
   %temperate58 = srem i32 %h57, 65537
@@ -159,125 +161,127 @@ if.then63:                                        ; preds = %while.after46
   br i1 %cmpEQ73, label %if.then74, label %if.else75
 
 if.else64:                                        ; preds = %while.after46
-  %state95 = load i32, i32* %state, align 4
-  %cmpEQ96 = icmp eq i32 %state95, 1
-  br i1 %cmpEQ96, label %if.then97, label %if.else98
+  %state96 = load i32, i32* %state, align 4
+  %cmpEQ97 = icmp eq i32 %state96, 1
+  br i1 %cmpEQ97, label %if.then98, label %if.else99
 
-if.merge65:                                       ; preds = %if.merge99, %if.merge76
+if.merge65:                                       ; preds = %if.merge100, %if.merge76
   br label %while.loop
 
 if.then74:                                        ; preds = %if.then63
   %ready77 = load i32, i32* %ready, align 4
-  br i32 %ready77, label %if.then78, label %if.else79
+  %cmpEQ78 = icmp eq i32 %ready77, 1
+  br i1 %cmpEQ78, label %if.then79, label %if.else80
 
 if.else75:                                        ; preds = %if.then63
-  %index83 = load i32, i32* %index, align 4
-  %arrayElement84 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index83
-  %courseIndex85 = load i32, i32* %1, align 4
-  %arrayElement86 = getelementptr [102 x i8], [102 x i8]* %arrayElement84, i32 0, i32 %courseIndex85
-  %coursePrerequisite87 = load i8, i8* %arrayElement86, align 1
-  %cmpEQ88 = icmp eq i8 %coursePrerequisite87, 44
-  br i1 %cmpEQ88, label %if.then89, label %if.else90
+  %index84 = load i32, i32* %index, align 4
+  %arrayElement85 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index84
+  %courseIndex86 = load i32, i32* %1, align 4
+  %arrayElement87 = getelementptr [102 x i8], [102 x i8]* %arrayElement85, i32 0, i32 %courseIndex86
+  %coursePrerequisite88 = load i8, i8* %arrayElement87, align 1
+  %cmpEQ89 = icmp eq i8 %coursePrerequisite88, 44
+  br i1 %cmpEQ89, label %if.then90, label %if.else91
 
-if.merge76:                                       ; preds = %if.merge91, %if.merge80
+if.merge76:                                       ; preds = %if.merge92, %if.merge81
   br label %if.merge65
 
-if.then78:                                        ; preds = %if.then74
+if.then79:                                        ; preds = %if.then74
   ret i32 1
-  br label %if.merge80
+  br label %if.merge81
 
-if.else79:                                        ; preds = %if.then74
+if.else80:                                        ; preds = %if.then74
   store i32 0, i32* %state, align 4
   store i32 0, i32* %ready, align 4
-  br label %if.merge80
+  br label %if.merge81
 
-if.merge80:                                       ; preds = %if.else79, %if.then78
-  %index81 = load i32, i32* %index, align 4
-  %temperate82 = add i32 %index81, 1
-  store i32 %temperate82, i32* %index, align 4
+if.merge81:                                       ; preds = %if.else80, %if.then79
+  %index82 = load i32, i32* %index, align 4
+  %temperate83 = add i32 %index82, 1
+  store i32 %temperate83, i32* %index, align 4
   br label %if.merge76
 
-if.then89:                                        ; preds = %if.else75
+if.then90:                                        ; preds = %if.else75
   store i32 1, i32* %state, align 4
-  %index92 = load i32, i32* %index, align 4
-  %temperate93 = add i32 %index92, 1
-  store i32 %temperate93, i32* %index, align 4
-  br label %if.merge91
+  %index93 = load i32, i32* %index, align 4
+  %temperate94 = add i32 %index93, 1
+  store i32 %temperate94, i32* %index, align 4
+  br label %if.merge92
 
-if.else90:                                        ; preds = %if.else75
-  %ready94 = load i32, i32* %ready, align 4
-  ret i32 %ready94
-  br label %if.merge91
+if.else91:                                        ; preds = %if.else75
+  %ready95 = load i32, i32* %ready, align 4
+  ret i32 %ready95
+  br label %if.merge92
 
-if.merge91:                                       ; preds = %if.else90, %if.then89
+if.merge92:                                       ; preds = %if.else91, %if.then90
   br label %if.merge76
 
-if.then97:                                        ; preds = %if.else64
-  %ready100 = load i32, i32* %ready, align 4
-  %h101 = load i32, i32* %h43, align 4
-  %arrayElement102 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h101
-  %coursePassed103 = load i32, i32* %arrayElement102, align 4
-  %temperate104 = and i32 %ready100, %coursePassed103
-  store i32 %temperate104, i32* %ready, align 4
-  %index105 = load i32, i32* %index, align 4
-  %arrayElement106 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index105
-  %courseIndex107 = load i32, i32* %1, align 4
-  %arrayElement108 = getelementptr [102 x i8], [102 x i8]* %arrayElement106, i32 0, i32 %courseIndex107
-  %coursePrerequisite109 = load i8, i8* %arrayElement108, align 1
-  %cmpEQ110 = icmp eq i8 %coursePrerequisite109, 59
-  br i1 %cmpEQ110, label %if.then111, label %if.else112
+if.then98:                                        ; preds = %if.else64
+  %ready101 = load i32, i32* %ready, align 4
+  %h102 = load i32, i32* %h43, align 4
+  %arrayElement103 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h102
+  %coursePassed104 = load i32, i32* %arrayElement103, align 4
+  %temperate105 = and i32 %ready101, %coursePassed104
+  store i32 %temperate105, i32* %ready, align 4
+  %index106 = load i32, i32* %index, align 4
+  %arrayElement107 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index106
+  %courseIndex108 = load i32, i32* %1, align 4
+  %arrayElement109 = getelementptr [102 x i8], [102 x i8]* %arrayElement107, i32 0, i32 %courseIndex108
+  %coursePrerequisite110 = load i8, i8* %arrayElement109, align 1
+  %cmpEQ111 = icmp eq i8 %coursePrerequisite110, 59
+  br i1 %cmpEQ111, label %if.then112, label %if.else113
 
-if.else98:                                        ; preds = %if.else64
-  br label %if.merge99
+if.else99:                                        ; preds = %if.else64
+  br label %if.merge100
 
-if.merge99:                                       ; preds = %if.else98, %if.merge113
+if.merge100:                                      ; preds = %if.else99, %if.merge114
   br label %if.merge65
 
-if.then111:                                       ; preds = %if.then97
-  %ready114 = load i32, i32* %ready, align 4
-  br i32 %ready114, label %if.then115, label %if.else116
+if.then112:                                       ; preds = %if.then98
+  %ready115 = load i32, i32* %ready, align 4
+  %cmpEQ116 = icmp eq i32 %ready115, 1
+  br i1 %cmpEQ116, label %if.then117, label %if.else118
 
-if.else112:                                       ; preds = %if.then97
+if.else113:                                       ; preds = %if.then98
+  %index122 = load i32, i32* %index, align 4
+  %arrayElement123 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index122
+  %courseIndex124 = load i32, i32* %1, align 4
+  %arrayElement125 = getelementptr [102 x i8], [102 x i8]* %arrayElement123, i32 0, i32 %courseIndex124
+  %coursePrerequisite126 = load i8, i8* %arrayElement125, align 1
+  %cmpEQ127 = icmp eq i8 %coursePrerequisite126, 44
+  br i1 %cmpEQ127, label %if.then128, label %if.else129
+
+if.merge114:                                      ; preds = %if.merge130, %if.merge119
+  br label %if.merge100
+
+if.then117:                                       ; preds = %if.then112
+  ret i32 1
+  br label %if.merge119
+
+if.else118:                                       ; preds = %if.then112
+  store i32 0, i32* %state, align 4
+  store i32 0, i32* %ready, align 4
+  br label %if.merge119
+
+if.merge119:                                      ; preds = %if.else118, %if.then117
   %index120 = load i32, i32* %index, align 4
-  %arrayElement121 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %index120
-  %courseIndex122 = load i32, i32* %1, align 4
-  %arrayElement123 = getelementptr [102 x i8], [102 x i8]* %arrayElement121, i32 0, i32 %courseIndex122
-  %coursePrerequisite124 = load i8, i8* %arrayElement123, align 1
-  %cmpEQ125 = icmp eq i8 %coursePrerequisite124, 44
-  br i1 %cmpEQ125, label %if.then126, label %if.else127
+  %temperate121 = add i32 %index120, 1
+  store i32 %temperate121, i32* %index, align 4
+  br label %if.merge114
 
-if.merge113:                                      ; preds = %if.merge128, %if.merge117
-  br label %if.merge99
-
-if.then115:                                       ; preds = %if.then111
-  ret i32 1
-  br label %if.merge117
-
-if.else116:                                       ; preds = %if.then111
-  store i32 0, i32* %state, align 4
-  store i32 0, i32* %ready, align 4
-  br label %if.merge117
-
-if.merge117:                                      ; preds = %if.else116, %if.then115
-  %index118 = load i32, i32* %index, align 4
-  %temperate119 = add i32 %index118, 1
-  store i32 %temperate119, i32* %index, align 4
-  br label %if.merge113
-
-if.then126:                                       ; preds = %if.else112
+if.then128:                                       ; preds = %if.else113
   store i32 1, i32* %state, align 4
-  %index129 = load i32, i32* %index, align 4
-  %temperate130 = add i32 %index129, 1
-  store i32 %temperate130, i32* %index, align 4
-  br label %if.merge128
+  %index131 = load i32, i32* %index, align 4
+  %temperate132 = add i32 %index131, 1
+  store i32 %temperate132, i32* %index, align 4
+  br label %if.merge130
 
-if.else127:                                       ; preds = %if.else112
-  %ready131 = load i32, i32* %ready, align 4
-  ret i32 %ready131
-  br label %if.merge128
+if.else129:                                       ; preds = %if.else113
+  %ready133 = load i32, i32* %ready, align 4
+  ret i32 %ready133
+  br label %if.merge130
 
-if.merge128:                                      ; preds = %if.else127, %if.then126
-  br label %if.merge113
+if.merge130:                                      ; preds = %if.else129, %if.then128
+  br label %if.merge114
 }
 
 define i32 @main() {
@@ -315,9 +319,9 @@ while.body:                                       ; preds = %while.loop
 
 while.after:                                      ; preds = %while.loop
   %GPA = alloca double, align 8
-  %totalAttemptedCredit162 = load i32, i32* %totalAttemptedCredit, align 4
-  %cmpEQ163 = icmp eq i32 %totalAttemptedCredit162, 0
-  br i1 %cmpEQ163, label %if.then164, label %if.else165
+  %totalAttemptedCredit163 = load i32, i32* %totalAttemptedCredit, align 4
+  %cmpEQ164 = icmp eq i32 %totalAttemptedCredit163, 0
+  br i1 %cmpEQ164, label %if.then165, label %if.else166
 
 while.loop6:                                      ; preds = %while.body7, %while.body
   %index9 = load i32, i32* %index, align 4
@@ -359,7 +363,7 @@ while.after8:                                     ; preds = %while.loop6
   %arrayElement35 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %i34
   %courseNum36 = load i32, i32* %courseNum, align 4
   %arrayElement37 = getelementptr [102 x i8], [102 x i8]* %arrayElement35, i32 0, i32 %courseNum36
-  store i32 0, i8* %arrayElement37, align 4
+  store i8 48, i8* %arrayElement37, align 1
   %index38 = load i32, i32* %index, align 4
   %temperate39 = add i32 %index38, 1
   store i32 %temperate39, i32* %index, align 4
@@ -370,7 +374,8 @@ while.after8:                                     ; preds = %while.loop6
   %arrayElement43 = getelementptr [102 x i8], [102 x i8]* %arrayElement41, i32 0, i32 %courseNum42
   %courses44 = load i8, i8* %arrayElement43, align 1
   %temperate45 = sub i8 %courses44, 48
-  store i8 %temperate45, i32* %credit, align 1
+  %castInt = sext i8 %temperate45 to i32
+  store i32 %castInt, i32* %credit, align 4
   %index46 = load i32, i32* %index, align 4
   %temperate47 = add i32 %index46, 1
   store i32 %temperate47, i32* %index, align 4
@@ -424,7 +429,7 @@ while.after55:                                    ; preds = %while.loop53
   %arrayElement83 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @coursePrerequisite, i32 0, i32 %i82
   %courseNum84 = load i32, i32* %courseNum, align 4
   %arrayElement85 = getelementptr [102 x i8], [102 x i8]* %arrayElement83, i32 0, i32 %courseNum84
-  store i32 0, i8* %arrayElement85, align 4
+  store i8 48, i8* %arrayElement85, align 1
   %index86 = load i32, i32* %index, align 4
   %temperate87 = add i32 %index86, 1
   store i32 %temperate87, i32* %index, align 4
@@ -537,14 +542,14 @@ if.else128:                                       ; preds = %if.merge117
   br label %if.merge129
 
 if.merge129:                                      ; preds = %if.else128, %while.after135
-  %courseNum155 = load i32, i32* %courseNum, align 4
-  %temperate156 = add i32 %courseNum155, 1
-  store i32 %temperate156, i32* %courseNum, align 4
-  %courseNum157 = load i32, i32* %courseNum, align 4
-  %arrayElement158 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @courses, i32 0, i32 %courseNum157
-  %courses159 = load [102 x i8], [102 x i8]* %arrayElement158, align 1
-  %callVal160 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @string.1, i32 0, i32 0), [102 x i8] %courses159)
-  %callVal161 = call i32 @getchar()
+  %courseNum156 = load i32, i32* %courseNum, align 4
+  %temperate157 = add i32 %courseNum156, 1
+  store i32 %temperate157, i32* %courseNum, align 4
+  %courseNum158 = load i32, i32* %courseNum, align 4
+  %arrayElement159 = getelementptr [300 x [102 x i8]], [300 x [102 x i8]]* @courses, i32 0, i32 %courseNum158
+  %courses160 = load [102 x i8], [102 x i8]* %arrayElement159, align 1
+  %callVal161 = call i32 (i8*, ...) @scanf(i8* getelementptr inbounds ([7 x i8], [7 x i8]* @string.1, i32 0, i32 0), [102 x i8] %courses160)
+  %callVal162 = call i32 @getchar()
   br label %while.loop
 
 while.loop133:                                    ; preds = %while.body134, %if.then127
@@ -564,139 +569,143 @@ while.body134:                                    ; preds = %while.loop133
   %courseNum145 = load i32, i32* %courseNum, align 4
   %arrayElement146 = getelementptr [102 x i8], [102 x i8]* %arrayElement144, i32 0, i32 %courseNum145
   %courseName147 = load i8, i8* %arrayElement146, align 1
-  %temperate148 = add i32 %temperate142, i8 %courseName147
-  store i32 %temperate148, i32* %h, align 4
-  %h149 = load i32, i32* %h, align 4
-  %temperate150 = srem i32 %h149, 65537
-  store i32 %temperate150, i32* %h, align 4
-  %t151 = load i32, i32* %t, align 4
-  %temperate152 = add i32 %t151, 1
-  store i32 %temperate152, i32* %t, align 4
+  %castInt148 = sext i8 %courseName147 to i32
+  %temperate149 = add i32 %temperate142, %castInt148
+  store i32 %temperate149, i32* %h, align 4
+  %h150 = load i32, i32* %h, align 4
+  %temperate151 = srem i32 %h150, 65537
+  store i32 %temperate151, i32* %h, align 4
+  %t152 = load i32, i32* %t, align 4
+  %temperate153 = add i32 %t152, 1
+  store i32 %temperate153, i32* %t, align 4
   br label %while.loop133
 
 while.after135:                                   ; preds = %while.loop133
-  %h153 = load i32, i32* %h, align 4
-  %arrayElement154 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h153
-  store i32 1, i32* %arrayElement154, align 4
+  %h154 = load i32, i32* %h, align 4
+  %arrayElement155 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h154
+  store i32 1, i32* %arrayElement155, align 4
   br label %if.merge129
 
-if.then164:                                       ; preds = %while.after
-  store i32 0, double* %GPA, align 4
-  br label %if.merge166
+if.then165:                                       ; preds = %while.after
+  store double 0.000000e+00, double* %GPA, align 8
+  br label %if.merge167
 
-if.else165:                                       ; preds = %while.after
-  %totalGPA167 = load i32, i32* %totalGPA, align 4
-  %castDouble = sitofp i32 %totalGPA167 to double
-  %totalAttemptedCredit168 = load i32, i32* %totalAttemptedCredit, align 4
-  %castDouble169 = sitofp i32 %totalAttemptedCredit168 to double
-  %fDiv = fdiv double %castDouble, %castDouble169
+if.else166:                                       ; preds = %while.after
+  %totalGPA168 = load i32, i32* %totalGPA, align 4
+  %castDouble = sitofp i32 %totalGPA168 to double
+  %totalAttemptedCredit169 = load i32, i32* %totalAttemptedCredit, align 4
+  %castDouble170 = sitofp i32 %totalAttemptedCredit169 to double
+  %fDiv = fdiv double %castDouble, %castDouble170
   store double %fDiv, double* %GPA, align 8
-  br label %if.merge166
+  br label %if.merge167
 
-if.merge166:                                      ; preds = %if.else165, %if.then164
+if.merge167:                                      ; preds = %if.else166, %if.then165
   %totalRemainCredit = alloca i32, align 4
-  %totalCredit170 = load i32, i32* %totalCredit, align 4
-  %totalCompletedCredit171 = load i32, i32* %totalCompletedCredit, align 4
-  %temperate172 = sub i32 %totalCredit170, %totalCompletedCredit171
-  store i32 %temperate172, i32* %totalRemainCredit, align 4
-  %GPA173 = load double, double* %GPA, align 8
-  %callVal174 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @string.2, i32 0, i32 0), double %GPA173)
-  %totalAttemptedCredit175 = load i32, i32* %totalAttemptedCredit, align 4
-  %callVal176 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @string.3, i32 0, i32 0), i32 %totalAttemptedCredit175)
-  %totalCompletedCredit177 = load i32, i32* %totalCompletedCredit, align 4
-  %callVal178 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @string.4, i32 0, i32 0), i32 %totalCompletedCredit177)
-  %totalRemainCredit179 = load i32, i32* %totalRemainCredit, align 4
-  %callVal180 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([23 x i8], [23 x i8]* @string.5, i32 0, i32 0), i32 %totalRemainCredit179)
-  %callVal181 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @string.6, i32 0, i32 0))
-  %totalRemainCredit182 = load i32, i32* %totalRemainCredit, align 4
-  %cmpEQ183 = icmp eq i32 %totalRemainCredit182, 0
-  br i1 %cmpEQ183, label %if.then184, label %if.else185
+  %totalCredit171 = load i32, i32* %totalCredit, align 4
+  %totalCompletedCredit172 = load i32, i32* %totalCompletedCredit, align 4
+  %temperate173 = sub i32 %totalCredit171, %totalCompletedCredit172
+  store i32 %temperate173, i32* %totalRemainCredit, align 4
+  %GPA174 = load double, double* %GPA, align 8
+  %callVal175 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([11 x i8], [11 x i8]* @string.2, i32 0, i32 0), double %GPA174)
+  %totalAttemptedCredit176 = load i32, i32* %totalAttemptedCredit, align 4
+  %callVal177 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @string.3, i32 0, i32 0), i32 %totalAttemptedCredit176)
+  %totalCompletedCredit178 = load i32, i32* %totalCompletedCredit, align 4
+  %callVal179 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([21 x i8], [21 x i8]* @string.4, i32 0, i32 0), i32 %totalCompletedCredit178)
+  %totalRemainCredit180 = load i32, i32* %totalRemainCredit, align 4
+  %callVal181 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([23 x i8], [23 x i8]* @string.5, i32 0, i32 0), i32 %totalRemainCredit180)
+  %callVal182 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([32 x i8], [32 x i8]* @string.6, i32 0, i32 0))
+  %totalRemainCredit183 = load i32, i32* %totalRemainCredit, align 4
+  %cmpEQ184 = icmp eq i32 %totalRemainCredit183, 0
+  br i1 %cmpEQ184, label %if.then185, label %if.else186
 
-if.then184:                                       ; preds = %if.merge166
-  %callVal187 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([27 x i8], [27 x i8]* @string.7, i32 0, i32 0))
-  br label %if.merge186
+if.then185:                                       ; preds = %if.merge167
+  %callVal188 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([27 x i8], [27 x i8]* @string.7, i32 0, i32 0))
+  br label %if.merge187
 
-if.else185:                                       ; preds = %if.merge166
-  %i188 = alloca i32, align 4
-  store i32 0, i32* %i188, align 4
+if.else186:                                       ; preds = %if.merge167
+  %i189 = alloca i32, align 4
+  store i32 0, i32* %i189, align 4
   br label %for.loop
 
-if.merge186:                                      ; preds = %for.after, %if.then184
+if.merge187:                                      ; preds = %for.after, %if.then185
   ret i32 0
 
-for.loop:                                         ; preds = %if.merge223, %if.else185
-  %i189 = load i32, i32* %i188, align 4
-  %courseNum190 = load i32, i32* %courseNum, align 4
-  %cmpLT = icmp slt i32 %i189, %courseNum190
+for.loop:                                         ; preds = %if.merge221, %if.else186
+  %i190 = load i32, i32* %i189, align 4
+  %courseNum191 = load i32, i32* %courseNum, align 4
+  %cmpLT = icmp slt i32 %i190, %courseNum191
   br i1 %cmpLT, label %for.body, label %for.after
 
 for.body:                                         ; preds = %for.loop
-  %h191 = alloca i32, align 4
-  store i32 0, i32* %h191, align 4
-  %t192 = alloca i32, align 4
-  store i32 0, i32* %t192, align 4
-  br label %while.loop193
+  %h192 = alloca i32, align 4
+  store i32 0, i32* %h192, align 4
+  %t193 = alloca i32, align 4
+  store i32 0, i32* %t193, align 4
+  br label %while.loop194
 
 for.after:                                        ; preds = %for.loop
-  br label %if.merge186
+  br label %if.merge187
 
-while.loop193:                                    ; preds = %while.body194, %for.body
-  %t196 = load i32, i32* %t192, align 4
-  %arrayElement197 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %t196
-  %i198 = load i32, i32* %i188, align 4
-  %arrayElement199 = getelementptr [102 x i8], [102 x i8]* %arrayElement197, i32 0, i32 %i198
-  %courseName200 = load i8, i8* %arrayElement199, align 1
-  %cmpNE201 = icmp ne i8 %courseName200, 48
-  br i1 %cmpNE201, label %while.body194, label %while.after195
+while.loop194:                                    ; preds = %while.body195, %for.body
+  %t197 = load i32, i32* %t193, align 4
+  %arrayElement198 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %t197
+  %i199 = load i32, i32* %i189, align 4
+  %arrayElement200 = getelementptr [102 x i8], [102 x i8]* %arrayElement198, i32 0, i32 %i199
+  %courseName201 = load i8, i8* %arrayElement200, align 1
+  %cmpNE202 = icmp ne i8 %courseName201, 48
+  br i1 %cmpNE202, label %while.body195, label %while.after196
 
-while.body194:                                    ; preds = %while.loop193
-  %h202 = load i32, i32* %h191, align 4
-  %temperate203 = mul i32 %h202, 33
-  %t204 = load i32, i32* %t192, align 4
-  %arrayElement205 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %t204
-  %i206 = load i32, i32* %i188, align 4
-  %arrayElement207 = getelementptr [102 x i8], [102 x i8]* %arrayElement205, i32 0, i32 %i206
-  %courseName208 = load i8, i8* %arrayElement207, align 1
-  %temperate209 = add i32 %temperate203, i8 %courseName208
-  store i32 %temperate209, i32* %h191, align 4
-  %h210 = load i32, i32* %h191, align 4
-  %temperate211 = srem i32 %h210, 65537
-  store i32 %temperate211, i32* %h191, align 4
-  %t212 = load i32, i32* %t192, align 4
-  %temperate213 = add i32 %t212, 1
-  store i32 %temperate213, i32* %t192, align 4
-  br label %while.loop193
+while.body195:                                    ; preds = %while.loop194
+  %h203 = load i32, i32* %h192, align 4
+  %temperate204 = mul i32 %h203, 33
+  %t205 = load i32, i32* %t193, align 4
+  %arrayElement206 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %t205
+  %i207 = load i32, i32* %i189, align 4
+  %arrayElement208 = getelementptr [102 x i8], [102 x i8]* %arrayElement206, i32 0, i32 %i207
+  %courseName209 = load i8, i8* %arrayElement208, align 1
+  %castInt210 = sext i8 %courseName209 to i32
+  %temperate211 = add i32 %temperate204, %castInt210
+  store i32 %temperate211, i32* %h192, align 4
+  %h212 = load i32, i32* %h192, align 4
+  %temperate213 = srem i32 %h212, 65537
+  store i32 %temperate213, i32* %h192, align 4
+  %t214 = load i32, i32* %t193, align 4
+  %temperate215 = add i32 %t214, 1
+  store i32 %temperate215, i32* %t193, align 4
+  br label %while.loop194
 
-while.after195:                                   ; preds = %while.loop193
-  %h214 = load i32, i32* %h191, align 4
-  %arrayElement215 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h214
-  %coursePassed = load i32, i32* %arrayElement215, align 4
-  br i32 %coursePassed, label %if.then216, label %if.else217
+while.after196:                                   ; preds = %while.loop194
+  %h216 = load i32, i32* %h192, align 4
+  %arrayElement217 = getelementptr [65537 x i32], [65537 x i32]* @coursePassed, i32 0, i32 %h216
+  %coursePassed = load i32, i32* %arrayElement217, align 4
+  %cmpEQ218 = icmp eq i32 %coursePassed, 0
+  br i1 %cmpEQ218, label %if.then219, label %if.else220
 
-if.then216:                                       ; preds = %while.after195
-  br label %if.merge218
+if.then219:                                       ; preds = %while.after196
+  %i222 = load i32, i32* %i189, align 4
+  %callVal223 = call i32 @judge(i32 %i222)
+  %cmpEQ224 = icmp eq i32 %callVal223, 1
+  br i1 %cmpEQ224, label %if.then225, label %if.else226
 
-if.else217:                                       ; preds = %while.after195
-  br label %if.merge218
+if.else220:                                       ; preds = %while.after196
+  br label %if.merge221
 
-if.merge218:                                      ; preds = %if.else217, %if.then216
-  %i219 = load i32, i32* %i188, align 4
-  %callVal220 = call i32 @judge(i32 %i219)
-  br i32 %callVal220, label %if.then221, label %if.else222
-
-if.then221:                                       ; preds = %if.merge218
-  %i224 = load i32, i32* %i188, align 4
-  %arrayElement225 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %i224
-  %courseName226 = load [102 x i8], [102 x i8]* %arrayElement225, align 1
-  %callVal227 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @string.8, i32 0, i32 0), [102 x i8] %courseName226)
-  br label %if.merge223
-
-if.else222:                                       ; preds = %if.merge218
-  br label %if.merge223
-
-if.merge223:                                      ; preds = %if.else222, %if.then221
-  %i228 = load i32, i32* %i188, align 4
-  %temperate229 = add i32 %i228, 1
-  store i32 %temperate229, i32* %i188, align 4
+if.merge221:                                      ; preds = %if.else220, %if.merge227
+  %i232 = load i32, i32* %i189, align 4
+  %temperate233 = add i32 %i232, 1
+  store i32 %temperate233, i32* %i189, align 4
   br label %for.loop
+
+if.then225:                                       ; preds = %if.then219
+  %i228 = load i32, i32* %i189, align 4
+  %arrayElement229 = getelementptr [8 x [102 x i8]], [8 x [102 x i8]]* @courseName, i32 0, i32 %i228
+  %courseName230 = load [102 x i8], [102 x i8]* %arrayElement229, align 1
+  %callVal231 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @string.8, i32 0, i32 0), [102 x i8] %courseName230)
+  br label %if.merge227
+
+if.else226:                                       ; preds = %if.then219
+  br label %if.merge227
+
+if.merge227:                                      ; preds = %if.else226, %if.then225
+  br label %if.merge221
 }
