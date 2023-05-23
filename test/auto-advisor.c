@@ -2,9 +2,9 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-char courses[102][300];
-char courseName[102][8];
-char coursePrerequisite[102][300];
+char courses[302][302];
+char courseName[302][302];
+char coursePrerequisite[302][302];
 
 int coursePassed[65537];
 
@@ -85,7 +85,13 @@ int judge(int courseIndex) {
                 return ready;
             }
         } else if (state == 1) {
-            ready &= coursePassed[h];
+            // ready &= coursePassed[h];
+            if (ready == 1 && coursePassed[h] == 1) {
+                ready = 1;
+            } else {
+                ready = 0;
+            }
+
             if (coursePrerequisite[courseIndex][index] == (char)59) {
                 if (ready == 1) {
                     return 1;
@@ -109,6 +115,10 @@ int judge(int courseIndex) {
 int main() {
     int courseNum = 0;
 
+    // for (int i = 0; i < 65537; ++i) {
+    //     coursePassed[i] = 0;
+    // }
+
     int totalCredit = 0;
     int totalGPA = 0;
     int totalAttemptedCredit = 0;
@@ -121,6 +131,7 @@ int main() {
         courses[courseNum][ii] = buffer[ii];
         ++ii;
     }
+    courses[courseNum][ii] = (char)0;
 
     while (len != 0) {
         // printLine();
@@ -168,7 +179,7 @@ int main() {
         else if(gradeChar == 68){
             grade = 1;
         }
-        else if(gradeChar == 69){
+        else if(gradeChar == 70){
             grade = 0;
         }
         if (grade >= 0) {
@@ -188,7 +199,7 @@ int main() {
                 h = h % 65537;
                 ++t;
             }
-
+// printf("course passed %d\n", h);
             coursePassed[h] = 1;
         }
 
@@ -212,6 +223,15 @@ int main() {
     }
     int totalRemainCredit = totalCredit - totalCompletedCredit;
 
+// int ct = 0;
+// for (int i = 0; i < 65537; ++i) {
+//     if (coursePassed[i] == 1) {
+//         printf("course passed %d\n", i);
+//         ++ct;
+//     }
+// }
+// printf("count %d\n", ct);
+
     printf("GPA: %.1f\n", GPA);
     printf("Hours Attempted: %d\n", totalAttemptedCredit);
     printf("Hours Completed: %d\n", totalCompletedCredit);
@@ -230,8 +250,10 @@ int main() {
                 h = h % 65537;
                 ++t;
             }
+            // printf("i = %d, h = %d\n", i, h);
 
-            if (coursePassed[h] == 0) {
+            if (coursePassed[h] != 1) {
+                // printf("judge = %d\n", judge(i));
                 if (judge(i) == 1) {
                     printf("  ");
                     int ii = 0;

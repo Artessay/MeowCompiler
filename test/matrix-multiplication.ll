@@ -8,7 +8,7 @@ source_filename = "matrix-multiplication"
 @string.1 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 @string.2 = private unnamed_addr constant [5 x i8] c"%d%d\00", align 1
 @string.3 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
-@string.4 = private unnamed_addr constant [26 x i8] c"Incompatible Dimensions \0A\00", align 1
+@string.4 = private unnamed_addr constant [25 x i8] c"Incompatible Dimensions\0A\00", align 1
 @string.5 = private unnamed_addr constant [5 x i8] c"%10d\00", align 1
 @string.6 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
 
@@ -126,7 +126,7 @@ for.after36:                                      ; preds = %for.loop34
   br label %for.loop27
 
 if.then:                                          ; preds = %for.after29
-  %callVal52 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([26 x i8], [26 x i8]* @string.4, i32 0, i32 0))
+  %callVal52 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @string.4, i32 0, i32 0))
   ret i32 0
   br label %if.merge
 
