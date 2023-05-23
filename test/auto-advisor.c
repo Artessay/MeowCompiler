@@ -115,10 +115,6 @@ int judge(int courseIndex) {
 int main() {
     int courseNum = 0;
 
-    // for (int i = 0; i < 65537; ++i) {
-    //     coursePassed[i] = 0;
-    // }
-
     int totalCredit = 0;
     int totalGPA = 0;
     int totalAttemptedCredit = 0;
@@ -199,7 +195,7 @@ int main() {
                 h = h % 65537;
                 ++t;
             }
-// printf("course passed %d\n", h);
+            // printf("course passed %d\n", h);
             coursePassed[h] = 1;
         }
 
@@ -223,14 +219,14 @@ int main() {
     }
     int totalRemainCredit = totalCredit - totalCompletedCredit;
 
-// int ct = 0;
-// for (int i = 0; i < 65537; ++i) {
-//     if (coursePassed[i] == 1) {
-//         printf("course passed %d\n", i);
-//         ++ct;
-//     }
-// }
-// printf("count %d\n", ct);
+    // int ct = 0;
+    // for (int i = 0; i < 65537; ++i) {
+    //     if (coursePassed[i] == 1) {
+    //         printf("course passed %d\n", i);
+    //         ++ct;
+    //     }
+    // }
+    // printf("count %d\n", ct);
 
     printf("GPA: %.1f\n", GPA);
     printf("Hours Attempted: %d\n", totalAttemptedCredit);
@@ -267,6 +263,6 @@ int main() {
             }
         }
     }
-
+// printf("let's see\n");
     return 0;
 }
