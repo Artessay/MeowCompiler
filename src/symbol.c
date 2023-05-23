@@ -1,5 +1,4 @@
 #include "symbol.h"
-#include "bucket.h"
 #include "table.h"
 #include "utility.h"
 

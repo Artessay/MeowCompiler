@@ -97,10 +97,6 @@ LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
     // create LLVMBuilderRef Object
     LLVMBuilderRef builder = LLVMCreateBuilder();
 
-    // LLVMContextSetOpaquePointers(LLVMGetGlobalContext(), 0);
-
-    // LLVMContextSetOpaquePointers(context, 0);
-
     SEM_context env = SEM_Context(module, context, builder, NULL);
 
     tables = SEM_Table();
@@ -310,9 +306,24 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
     return varType;
 }
 
+static void transArrayVar(A_var p, LLVMValueRef *variable, LLVMTypeRef *varType, LLVMValueRef *index, SEM_context env) {
+    if (p->kind == A_simpleVar) {
+        *varType = LLVMTypeOf(*variable);
+        return;
+    }
+
+    transArrayVar(p->u.subscript.var, variable, varType, index, env);
+
+    *varType = LLVMGetElementType(*varType);
+    index[1] = transExpression(p->u.subscript.exp, env);
+    *variable = LLVMBuildGEP2(env->builder, *varType, *variable, index, 2, "arrayElement");
+}
+
 static LLVMValueRef transVar(A_var var, SEM_context env) {
     assert(var != NULL);
     LLVMValueRef variable = NULL;
+
+    
     
     // find local variable
     // printf("var kind: %d\n", var->kind);
@@ -324,12 +335,16 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         variable = S_look(tables->variableTable, S_getVarSymbol(var->u.subscript.var));
         LLVMValueRef index[2];
         index[0] = LLVMConstInt(LLVMInt32Type(), 0, 0);
-        
-        for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
-            LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
-            index[1] = transExpression(p->u.subscript.exp, env);
-            variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
-        }
+                
+        LLVMTypeRef varType = NULL;
+
+        transArrayVar(var, &variable, &varType, index, env);
+
+        // for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
+        //     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
+        //     index[1] = transExpression(p->u.subscript.exp, env);
+        //     variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
+        // }
         
     } else if (var->kind == A_derefVar) {
         // printf("[debug] find local deref variable: %s\n", S_name(S_getVarSymbol(var)));
@@ -544,10 +559,10 @@ static LLVMValueRef transExpression(A_exp root, SEM_context env) {
             // puts("variable expression");
             return transVariableExpression(root, env);
         case A_ampersandExp:
-            puts("& var");
+            // puts("& var");
             return transAmpersandExp(root->u.ampersand, env);
         case A_starExp:
-            puts("* var");
+            // puts("* var");
             return transStarExp(root->u.star, env);
         case A_typeCastExp:
             return transTypeCast(root, env);
@@ -619,10 +634,43 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
 
     LLVMTypeRef varType = transType(root->u.cast.castType, env);
     LLVMValueRef value = transExpression(root->u.cast.exp, env);
+    
+    LLVMValueRef indices[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)};
+    
     if (varType == LLVMDoubleType()) {
         return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
     } else if (varType == LLVMInt32Type()) {
+        // return LLVMBuildBitCast(env->builder, value, LLVMInt32Type(), "castInt");
         return LLVMBuildIntCast2(env->builder, value, LLVMInt32Type(), 1, "castInt");
+    } else if (varType == LLVMInt8Type()) {
+        return LLVMBuildIntCast2(env->builder, value, LLVMInt8Type(), 1, "castChar");
+    }
+    /** point cast */
+    else if (varType == LLVMPointerType(LLVMInt8Type(), 0)) {
+        // puts("cast char");
+        // LLVMDumpValue(value); putchar('\n');
+        // LLVMValueRef ret = LLVMBuildGEP2(env->builder, LLVMGetElementType(LLVMTypeOf(value)), value, indices, 2, "castChar");
+        // LLVMDumpValue(ret); putchar('\n');
+        // return ret;
+        // return value;
+        // return LLVMConstBitCast(value, LLVMPointerType(LLVMInt8Type(), 0));
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMInt8Type(), 0), "castChar");
+    } else if (varType == LLVMPointerType(LLVMInt32Type(), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMInt32Type(), 0), "castInt");
+    } else if (varType == LLVMPointerType(LLVMDoubleType(), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMDoubleType(), 0), "castDouble");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMInt8Type(), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMInt8Type(), 0), 0), "castString");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMInt32Type(), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMInt32Type(), 0), 0), "castString");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMDoubleType(), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMDoubleType(), 0), 0), "castString");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMInt8Type(), 0), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMInt8Type(), 0), 0), 0), "castString");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMInt32Type(), 0), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMInt32Type(), 0), 0), 0), "castString");
+    } else if (varType == LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMDoubleType(), 0), 0), 0)) {
+        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMPointerType(LLVMPointerType(LLVMDoubleType(), 0), 0), 0), "castString");
     }
     
     puts("[error] unimplemented type cast");
@@ -711,7 +759,7 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
             return LLVMBuildXor(env->builder, lhs, rhs, "temperate");
             
         case A_andOp: 
-            return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildAnd(env->builder, lhs, rhs, "temperate");
             
         case A_orOp:
             return LLVMBuildOr(env->builder, lhs, rhs, "temperate");

@@ -52,7 +52,7 @@ int main(int argc, const char *argv[]) {
     puts("[front] end translate to IR\n");
 
     puts("[backend] start translate IR to Assembly code" );
-    AS_emit(module, module_name);
+    AS_emits(module, module_name);
     puts("[backend] end translate IR to Assembly code\n" );
     
     return 0;
