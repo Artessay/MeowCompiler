@@ -8,7 +8,7 @@ source_filename = "matrix-multiplication"
 @string.1 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
 @string.2 = private unnamed_addr constant [5 x i8] c"%d%d\00", align 1
 @string.3 = private unnamed_addr constant [3 x i8] c"%d\00", align 1
-@string.4 = private unnamed_addr constant [25 x i8] c"Incompatible Dimensions\0A\00", align 1
+@string.4 = private unnamed_addr constant [26 x i8] c"Incompatible Dimensions \0A\00", align 1
 @string.5 = private unnamed_addr constant [5 x i8] c"%10d\00", align 1
 @string.6 = private unnamed_addr constant [2 x i8] c"\0A\00", align 1
 
@@ -63,10 +63,10 @@ for.loop7:                                        ; preds = %for.body8, %for.bod
   br i1 %cmpLT12, label %for.body8, label %for.after9
 
 for.body8:                                        ; preds = %for.loop7
-  %j13 = load i32, i32* %j, align 4
-  %arrayElement = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @a, i32 0, i32 %j13
-  %i14 = load i32, i32* %i, align 4
-  %arrayElement15 = getelementptr [25 x i32], [25 x i32]* %arrayElement, i32 0, i32 %i14
+  %i13 = load i32, i32* %i, align 4
+  %arrayElement = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @a, i32 0, i32 %i13
+  %j14 = load i32, i32* %j, align 4
+  %arrayElement15 = getelementptr [25 x i32], [25 x i32]* %arrayElement, i32 0, i32 %j14
   %a = alloca i32*, align 8
   store i32* %arrayElement15, i32** %a, align 8
   %a16 = load i32*, i32** %a, align 8
@@ -106,10 +106,10 @@ for.loop34:                                       ; preds = %for.body35, %for.bo
   br i1 %cmpLT39, label %for.body35, label %for.after36
 
 for.body35:                                       ; preds = %for.loop34
-  %j40 = load i32, i32* %j33, align 4
-  %arrayElement41 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @b, i32 0, i32 %j40
-  %i42 = load i32, i32* %i26, align 4
-  %arrayElement43 = getelementptr [25 x i32], [25 x i32]* %arrayElement41, i32 0, i32 %i42
+  %i40 = load i32, i32* %i26, align 4
+  %arrayElement41 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @b, i32 0, i32 %i40
+  %j42 = load i32, i32* %j33, align 4
+  %arrayElement43 = getelementptr [25 x i32], [25 x i32]* %arrayElement41, i32 0, i32 %j42
   %b = alloca i32*, align 8
   store i32* %arrayElement43, i32** %b, align 8
   %b44 = load i32*, i32** %b, align 8
@@ -126,7 +126,7 @@ for.after36:                                      ; preds = %for.loop34
   br label %for.loop27
 
 if.then:                                          ; preds = %for.after29
-  %callVal52 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([25 x i8], [25 x i8]* @string.4, i32 0, i32 0))
+  %callVal52 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([26 x i8], [26 x i8]* @string.4, i32 0, i32 0))
   ret i32 0
   br label %if.merge
 
@@ -161,10 +161,10 @@ for.loop61:                                       ; preds = %for.after73, %for.b
   br i1 %cmpLT66, label %for.body62, label %for.after63
 
 for.body62:                                       ; preds = %for.loop61
-  %j67 = load i32, i32* %j60, align 4
-  %arrayElement68 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %j67
-  %i69 = load i32, i32* %i53, align 4
-  %arrayElement70 = getelementptr [25 x i32], [25 x i32]* %arrayElement68, i32 0, i32 %i69
+  %i67 = load i32, i32* %i53, align 4
+  %arrayElement68 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %i67
+  %j69 = load i32, i32* %j60, align 4
+  %arrayElement70 = getelementptr [25 x i32], [25 x i32]* %arrayElement68, i32 0, i32 %j69
   store i32 0, i32* %arrayElement70, align 4
   %k = alloca i32, align 4
   store i32 0, i32* %k, align 4
@@ -183,27 +183,27 @@ for.loop71:                                       ; preds = %for.body72, %for.bo
   br i1 %cmpLT76, label %for.body72, label %for.after73
 
 for.body72:                                       ; preds = %for.loop71
-  %j77 = load i32, i32* %j60, align 4
-  %arrayElement78 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %j77
-  %i79 = load i32, i32* %i53, align 4
-  %arrayElement80 = getelementptr [25 x i32], [25 x i32]* %arrayElement78, i32 0, i32 %i79
+  %i77 = load i32, i32* %i53, align 4
+  %arrayElement78 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %i77
+  %j79 = load i32, i32* %j60, align 4
+  %arrayElement80 = getelementptr [25 x i32], [25 x i32]* %arrayElement78, i32 0, i32 %j79
   %c = load i32, i32* %arrayElement80, align 4
-  %k81 = load i32, i32* %k, align 4
-  %arrayElement82 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @a, i32 0, i32 %k81
-  %i83 = load i32, i32* %i53, align 4
-  %arrayElement84 = getelementptr [25 x i32], [25 x i32]* %arrayElement82, i32 0, i32 %i83
+  %i81 = load i32, i32* %i53, align 4
+  %arrayElement82 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @a, i32 0, i32 %i81
+  %k83 = load i32, i32* %k, align 4
+  %arrayElement84 = getelementptr [25 x i32], [25 x i32]* %arrayElement82, i32 0, i32 %k83
   %a85 = load i32, i32* %arrayElement84, align 4
-  %j86 = load i32, i32* %j60, align 4
-  %arrayElement87 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @b, i32 0, i32 %j86
-  %k88 = load i32, i32* %k, align 4
-  %arrayElement89 = getelementptr [25 x i32], [25 x i32]* %arrayElement87, i32 0, i32 %k88
+  %k86 = load i32, i32* %k, align 4
+  %arrayElement87 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @b, i32 0, i32 %k86
+  %j88 = load i32, i32* %j60, align 4
+  %arrayElement89 = getelementptr [25 x i32], [25 x i32]* %arrayElement87, i32 0, i32 %j88
   %b90 = load i32, i32* %arrayElement89, align 4
   %temperate91 = mul i32 %a85, %b90
   %temperate92 = add i32 %c, %temperate91
-  %j93 = load i32, i32* %j60, align 4
-  %arrayElement94 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %j93
-  %i95 = load i32, i32* %i53, align 4
-  %arrayElement96 = getelementptr [25 x i32], [25 x i32]* %arrayElement94, i32 0, i32 %i95
+  %i93 = load i32, i32* %i53, align 4
+  %arrayElement94 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %i93
+  %j95 = load i32, i32* %j60, align 4
+  %arrayElement96 = getelementptr [25 x i32], [25 x i32]* %arrayElement94, i32 0, i32 %j95
   store i32 %temperate92, i32* %arrayElement96, align 4
   %k97 = load i32, i32* %k, align 4
   %temperate98 = add i32 %k97, 1
@@ -237,10 +237,10 @@ for.loop111:                                      ; preds = %for.body112, %for.b
   br i1 %cmpLT116, label %for.body112, label %for.after113
 
 for.body112:                                      ; preds = %for.loop111
-  %j117 = load i32, i32* %j110, align 4
-  %arrayElement118 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %j117
-  %i119 = load i32, i32* %i103, align 4
-  %arrayElement120 = getelementptr [25 x i32], [25 x i32]* %arrayElement118, i32 0, i32 %i119
+  %i117 = load i32, i32* %i103, align 4
+  %arrayElement118 = getelementptr [25 x [25 x i32]], [25 x [25 x i32]]* @c, i32 0, i32 %i117
+  %j119 = load i32, i32* %j110, align 4
+  %arrayElement120 = getelementptr [25 x i32], [25 x i32]* %arrayElement118, i32 0, i32 %j119
   %c121 = load i32, i32* %arrayElement120, align 4
   %callVal122 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8], [5 x i8]* @string.5, i32 0, i32 0), i32 %c121)
   %j123 = load i32, i32* %j110, align 4

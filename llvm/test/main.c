@@ -28,25 +28,26 @@ int main() {
     LLVMValueRef printfFunction = LLVMGetNamedFunction(module, "printf");
     LLVMValueRef formatString = LLVMBuildGlobalStringPtr(builder, "%s\n", "format_string");
     LLVMValueRef printfArgs[] = { formatString, pointer };
-    LLVMBuildCall(builder, printfFunction, printfArgs, 2, "");
+    LLVMBuildCall2(builder, LLVMTypeOf(printfFunction), printfFunction, printfArgs, 2, "");
 
     // 返回0
     LLVMBuildRet(builder, LLVMConstInt(LLVMInt32TypeInContext(context), 0, 0));
 
-    // 创建执行引擎
-    LLVMExecutionEngineRef engine;
-    char* error = NULL;
-    LLVMCreateExecutionEngineForModule(&engine, module, &error);
+    LLVMDumpModule(module);
+    // // 创建执行引擎
+    // LLVMExecutionEngineRef engine;
+    // char* error = NULL;
+    // LLVMCreateExecutionEngineForModule(&engine, module, &error);
 
-    // 运行main函数
-    int (*mainFunctionPtr)() = (int (*)())LLVMGetFunctionAddress(engine, "main");
-    int result = mainFunctionPtr();
+    // // 运行main函数
+    // int (*mainFunctionPtr)() = (int (*)())LLVMGetFunctionAddress(engine, "main");
+    // int result = mainFunctionPtr();
 
     // 清理资源
-    LLVMDisposeExecutionEngine(engine);
+    // LLVMDisposeExecutionEngine(engine);
     LLVMDisposeBuilder(builder);
     LLVMDisposeModule(module);
     LLVMContextDispose(context);
 
-    return result;
+    return 0;
 }
