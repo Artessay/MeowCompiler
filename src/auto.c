@@ -17,12 +17,11 @@ char buffer[302];
 int readLine() {
     int i = 0;
     buffer[i] = (char)getchar();
-    while (buffer[i] != '\n') {
-        printf("c = %c\n", buffer[i]);
+    while (buffer[i] != (char)10) {
         ++i;
         buffer[i] = (char)getchar();
     }
-    buffer[i] = '\0';
+    buffer[i] = (char)0;
     return i;
 }
 
@@ -32,7 +31,7 @@ int printLine() {
         putchar((int)buffer[i]);
         ++i;
     }
-    putchar((int)'\n');
+    putchar(10);
     return i;
 }
 
@@ -43,27 +42,27 @@ int judge(int courseIndex) {
 
     // char *p = coursePrerequisite[courseIndex];
     int index = 0;
-    if (coursePrerequisite[courseIndex][index] == '\0') {
+    if (coursePrerequisite[courseIndex][index] == (char)0) {
         return 1;
     }
 
-    while (coursePrerequisite[courseIndex][index] != '\0') {
+    while (coursePrerequisite[courseIndex][index] != (char)0) {
         char precourse[8];
         i = 0;
-        while (coursePrerequisite[courseIndex][index] != '\0'
-            && coursePrerequisite[courseIndex][index] != ',' 
-            && coursePrerequisite[courseIndex][index] != ';') {
+        while (coursePrerequisite[courseIndex][index] != (char)0
+            && coursePrerequisite[courseIndex][index] != (char)44 
+            && coursePrerequisite[courseIndex][index] != (char)59) {
             // precourse[i++] = *(p++);
             precourse[i] = coursePrerequisite[courseIndex][index];
             ++i;
             ++index;
         }
-        precourse[i] = '\0';
+        precourse[i] = (char)0;
 
         // hash
         int h = 0;
         int t = 0;
-        while (precourse[t] != '\0') {
+        while (precourse[t] != (char)0) {
             h = h * 33 + (int)precourse[t];
             h = h % 65537;
             ++t;
@@ -71,7 +70,7 @@ int judge(int courseIndex) {
 
         if (state == 0) {
             ready = coursePassed[h];
-            if (coursePrerequisite[courseIndex][index] == ';') {
+            if (coursePrerequisite[courseIndex][index] == (char)59) {
                 if (ready == 1) {
                     return 1;
                 } else {
@@ -79,7 +78,7 @@ int judge(int courseIndex) {
                     ready = 0;
                 }
                 ++index;
-            } else if (coursePrerequisite[courseIndex][index] == ',') {
+            } else if (coursePrerequisite[courseIndex][index] == (char)44) {
                 state = 1;
                 ++index;
             } else {
@@ -87,7 +86,7 @@ int judge(int courseIndex) {
             }
         } else if (state == 1) {
             ready &= coursePassed[h];
-            if (coursePrerequisite[courseIndex][index] == ';') {
+            if (coursePrerequisite[courseIndex][index] == (char)59) {
                 if (ready == 1) {
                     return 1;
                 } else {
@@ -95,7 +94,7 @@ int judge(int courseIndex) {
                     ready = 0;
                 }
                 ++index;
-            } else if (coursePrerequisite[courseIndex][index] == ',') {
+            } else if (coursePrerequisite[courseIndex][index] == (char)44) {
                 state = 1;
                 ++index;
             } else {
@@ -116,59 +115,62 @@ int main() {
     int totalCompletedCredit = 0;
 
     // scanf("%[^\n]s", courses[courseNum]); getchar();
-    readLine();
+    int len = readLine();
     int ii = 0;
-    while (buffer[ii] != '\0') {
+    while (buffer[ii] != (char)0) {
         courses[courseNum][ii] = buffer[ii];
         ++ii;
     }
 
-    while (ii != 0) {
-printLine();
+    while (len != 0) {
+        // printLine();
         // char *course = courses[courseNum];
         int i, index = 0;
 
         // course name
         i = 0;
-        while (courses[courseNum][index] != '|' && courses[courseNum][index] != '\0') {
-            courseName[courseNum][i] = courses[courseNum][index];
+        printf("what? %d\n", (int)buffer[index]);
+        while ((int)buffer[index] != 124 && (int)buffer[index] != 0) {
+            courseName[courseNum][i] = buffer[index];
             ++i;
             ++index;
         }
-        courseName[courseNum][i] = '\0';
+        courseName[courseNum][i] = (char)0;
         ++index;
+        printf("index = %d\n", index);
 
         // course credit
-        int credit = (int)(courses[courseNum][index] - '0');
+        int credit = (int)(buffer[index] - (char)48);
+        printf("credit %d\n", credit);
         ++index;
         totalCredit += credit;
         ++index;
 
         // prerequisite course
         i = 0;
-        while (courses[courseNum][index] != '|' && courses[courseNum][index] != '\0') {
-            coursePrerequisite[courseNum][i] = courses[courseNum][index];
+        while (buffer[index] != (char)124 && buffer[index] != (char)0) {
+            coursePrerequisite[courseNum][i] = buffer[index];
             ++i; ++index;
         }
-        coursePrerequisite[courseNum][i] = '\0';
+        coursePrerequisite[courseNum][i] = (char)0;
         ++index;
 
         // grade
-        char gradeChar = courses[courseNum][index];
+        int gradeChar = (int)buffer[index];
         int grade = -1;
-        if (gradeChar == 'A'){
+        if (gradeChar == 65){
             grade = 4;
         }
-        else if(gradeChar == 'B'){
+        else if(gradeChar == 66){
             grade = 3;
         }
-        else if(gradeChar == 'C'){
+        else if(gradeChar == 67){
             grade = 2;
         }
-        else if(gradeChar == 'D'){
+        else if(gradeChar == 68){
             grade = 1;
         }
-        else if(gradeChar == 'F'){
+        else if(gradeChar == 69){
             grade = 0;
         }
         if (grade >= 0) {
@@ -183,7 +185,7 @@ printLine();
             // hash
             int h = 0;
             int t = 0;
-            while (courseName[courseNum][t] != '\0') {
+            while (courseName[courseNum][t] != (char)0) {
                 h = h * 33 + (int)courseName[courseNum][t];
                 h = h % 65537;
                 ++t;
@@ -195,9 +197,9 @@ printLine();
         ++courseNum;
         // scanf("%[^\n]s", courses[courseNum]); getchar();
 
-        readLine();
+        len = readLine();
         ii = 0;
-        while (buffer[ii] != '\0') {
+        while (buffer[ii] != (char)0) {
             courses[courseNum][ii] = buffer[ii];
             ++ii;
         }
@@ -222,13 +224,10 @@ printLine();
         printf("  None - Congratulations!\n");
     } else {
         for (int i = 0; i < courseNum; ++i) {
-            // unsigned int h = hash(courseName[i]);
-            // int h = hash(courseName[i]);
-
             // hash
             int h = 0;
             int t = 0;
-            while (courseName[i][t] != '\0') {
+            while (courseName[i][t] != (char)0) {
                 h = h * 33 + (int)courseName[i][t];
                 h = h % 65537;
                 ++t;
@@ -238,13 +237,12 @@ printLine();
                 if (judge(i) == 1) {
                     printf("  ");
                     int ii = 0;
-                    while (courseName[i][ii] != '\0') {
+                    while (courseName[i][ii] != (char)0) {
                         buffer[ii] = courseName[i][ii];
                         ++ii;
                     }
-                    buffer[ii] = '\0';
+                    buffer[ii] = (char)0;
                     printLine();
-                    // printf("  %s\n", courseName[i]);
                 }
             }
         }

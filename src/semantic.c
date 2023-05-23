@@ -640,6 +640,7 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
     if (varType == LLVMDoubleType()) {
         return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
     } else if (varType == LLVMInt32Type()) {
+        // return LLVMBuildBitCast(env->builder, value, LLVMInt32Type(), "castInt");
         return LLVMBuildIntCast2(env->builder, value, LLVMInt32Type(), 1, "castInt");
     } else if (varType == LLVMInt8Type()) {
         return LLVMBuildIntCast2(env->builder, value, LLVMInt8Type(), 1, "castChar");
@@ -758,7 +759,7 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
             return LLVMBuildXor(env->builder, lhs, rhs, "temperate");
             
         case A_andOp: 
-            return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildAnd(env->builder, lhs, rhs, "temperate");
             
         case A_orOp:
             return LLVMBuildOr(env->builder, lhs, rhs, "temperate");
