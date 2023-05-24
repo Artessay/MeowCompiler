@@ -279,16 +279,26 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
 
         case A_subscriptVar:
             // puts("[debug] transVarType: subscript var");
-
-            varType = transVarType(var->u.subscript.var, varType, env);
-            expValue = transExpression(var->u.subscript.exp, env);
-            if (LLVMIsAConstantInt(expValue)) {
-                elementCount = LLVMConstIntGetZExtValue(expValue);
-                varType = LLVMArrayType(varType, elementCount);
-            } else {
-                puts("[error] subscript is not a constant int");
-                return NULL;
+            for (A_var p = var; p->kind == A_subscriptVar; p = p->u.subscript.var) {
+                expValue = transExpression(p->u.subscript.exp, env);
+                if (LLVMIsAConstantInt(expValue)) {
+                    elementCount = LLVMConstIntGetZExtValue(expValue);
+                    varType = LLVMArrayType(varType, elementCount);
+                } else {
+                    puts("[error] subscript is not a constant int");
+                    return NULL;
+                }
             }
+
+            // varType = transVarType(var->u.subscript.var, varType, env);
+            // expValue = transExpression(var->u.subscript.exp, env);
+            // if (LLVMIsAConstantInt(expValue)) {
+            //     elementCount = LLVMConstIntGetZExtValue(expValue);
+            //     varType = LLVMArrayType(varType, elementCount);
+            // } else {
+            //     puts("[error] subscript is not a constant int");
+            //     return NULL;
+            // }
             break;
 
         case A_pointVar:
@@ -322,9 +332,7 @@ static void transArrayVar(A_var p, LLVMValueRef *variable, LLVMTypeRef *varType,
 static LLVMValueRef transVar(A_var var, SEM_context env) {
     assert(var != NULL);
     LLVMValueRef variable = NULL;
-
-    
-    
+        
     // find local variable
     // printf("var kind: %d\n", var->kind);
     if (var->kind == A_simpleVar) {
@@ -353,10 +361,6 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
 
         // LLVMDumpType(varType); putchar('\n');
         variable = LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(var)));
-        
-        // varType = LLVMGetElementType(varType);
-        // LLVMDumpType(varType); putchar('\n');
-        // LLVMBuildLoad2(env->builder, varType, variable, "deref");
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;

@@ -40,10 +40,6 @@ int main(int argc, const char *argv[]) {
     yyparse();
     puts("[front] end parsing\n");
 
-    // puts(module_name);
-    // puts(source_filename);
-    // puts(output_filename);
-
     A_topClauseList root = A_getParseTreeRoot();
     assert(root != NULL);
 
