@@ -2,9 +2,9 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-char courses[302][302];
-char courseName[302][302];
-char coursePrerequisite[302][302];
+char courses[102][302];
+char courseName[102][302];
+char coursePrerequisite[102][302];
 
 int coursePassed[65537];
 
