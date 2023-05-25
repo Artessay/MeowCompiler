@@ -82,7 +82,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
 
-LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
+LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name, char* ir_filename) {
     // initial LLVM
     LLVMInitializeCore(LLVMGetGlobalPassRegistry());
     LLVMInitializeNativeTarget();
@@ -110,12 +110,7 @@ LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
     // LLVMDumpModule(module);
 
     // output to file
-    char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
-    strcpy(output_filename, module_name);
-    strcat(output_filename, ".ll");
-
-    LLVMPrintModuleToFile(module, output_filename, NULL);
-    free(output_filename);
+    LLVMPrintModuleToFile(module, ir_filename, NULL);
 
     // dispose LLVM context
     LLVMContextDispose(context);
@@ -279,15 +274,15 @@ static LLVMTypeRef transVarType(A_var var, LLVMTypeRef varType, SEM_context env)
 
         case A_subscriptVar:
             // puts("[debug] transVarType: subscript var");
-
-            varType = transVarType(var->u.subscript.var, varType, env);
-            expValue = transExpression(var->u.subscript.exp, env);
-            if (LLVMIsAConstantInt(expValue)) {
-                elementCount = LLVMConstIntGetZExtValue(expValue);
-                varType = LLVMArrayType(varType, elementCount);
-            } else {
-                puts("[error] subscript is not a constant int");
-                return NULL;
+            for (A_var p = var; p->kind == A_subscriptVar; p = p->u.subscript.var) {
+                expValue = transExpression(p->u.subscript.exp, env);
+                if (LLVMIsAConstantInt(expValue)) {
+                    elementCount = LLVMConstIntGetZExtValue(expValue);
+                    varType = LLVMArrayType(varType, elementCount);
+                } else {
+                    puts("[error] subscript is not a constant int");
+                    return NULL;
+                }
             }
             break;
 
@@ -322,9 +317,7 @@ static void transArrayVar(A_var p, LLVMValueRef *variable, LLVMTypeRef *varType,
 static LLVMValueRef transVar(A_var var, SEM_context env) {
     assert(var != NULL);
     LLVMValueRef variable = NULL;
-
-    
-    
+        
     // find local variable
     // printf("var kind: %d\n", var->kind);
     if (var->kind == A_simpleVar) {
@@ -339,12 +332,6 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
         LLVMTypeRef varType = NULL;
 
         transArrayVar(var, &variable, &varType, index, env);
-
-        // for (A_var p = var; p->kind != A_simpleVar; p = p->u.subscript.var) {
-        //     LLVMTypeRef varType = LLVMGetElementType(LLVMTypeOf(variable));
-        //     index[1] = transExpression(p->u.subscript.exp, env);
-        //     variable = LLVMBuildGEP2(env->builder, varType, variable, index, 2, "arrayElement");
-        // }
         
     } else if (var->kind == A_derefVar) {
         // printf("[debug] find local deref variable: %s\n", S_name(S_getVarSymbol(var)));
@@ -353,10 +340,6 @@ static LLVMValueRef transVar(A_var var, SEM_context env) {
 
         // LLVMDumpType(varType); putchar('\n');
         variable = LLVMBuildLoad2(env->builder, varType, variable, S_name(S_getVarSymbol(var)));
-        
-        // varType = LLVMGetElementType(varType);
-        // LLVMDumpType(varType); putchar('\n');
-        // LLVMBuildLoad2(env->builder, varType, variable, "deref");
     } else {
         puts("[error] unimplemented variable expression");
         variable = NULL;
@@ -635,26 +618,28 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
     LLVMTypeRef varType = transType(root->u.cast.castType, env);
     LLVMValueRef value = transExpression(root->u.cast.exp, env);
     
-    LLVMValueRef indices[2] = {LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)};
+    LLVMValueRef indices[MAX_FUNCTION_PARAMS] = {LLVMConstInt(LLVMInt32Type(), 0, 0), LLVMConstInt(LLVMInt32Type(), 0, 0)};
     
     if (varType == LLVMDoubleType()) {
         return LLVMBuildSIToFP(env->builder, value, LLVMDoubleType(), "castDouble");
     } else if (varType == LLVMInt32Type()) {
-        // return LLVMBuildBitCast(env->builder, value, LLVMInt32Type(), "castInt");
         return LLVMBuildIntCast2(env->builder, value, LLVMInt32Type(), 1, "castInt");
     } else if (varType == LLVMInt8Type()) {
         return LLVMBuildIntCast2(env->builder, value, LLVMInt8Type(), 1, "castChar");
     }
     /** point cast */
     else if (varType == LLVMPointerType(LLVMInt8Type(), 0)) {
-        // puts("cast char");
-        // LLVMDumpValue(value); putchar('\n');
-        // LLVMValueRef ret = LLVMBuildGEP2(env->builder, LLVMGetElementType(LLVMTypeOf(value)), value, indices, 2, "castChar");
-        // LLVMDumpValue(ret); putchar('\n');
-        // return ret;
-        // return value;
-        // return LLVMConstBitCast(value, LLVMPointerType(LLVMInt8Type(), 0));
-        return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMInt8Type(), 0), "castChar");
+        if (root->u.cast.exp->kind == A_varExp ) {
+            // && root->u.cast.exp->u.var->kind == A_subscriptVar) {
+            int i = 1;
+            for (A_var p = root->u.cast.exp->u.var; p->kind == A_subscriptVar; p = p->u.subscript.var) {
+                indices[i++] = transExpression(p->u.subscript.exp, env);
+            }
+            indices[i] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+            return LLVMBuildGEP2(env->builder, LLVMPointerType(LLVMInt8Type(), 0), value, indices, i, "castString");
+        } else {
+            return LLVMBuildBitCast(env->builder, value, LLVMPointerType(LLVMInt8Type(), 0), "castString");
+        }
     } else if (varType == LLVMPointerType(LLVMInt32Type(), 0)) {
         return LLVMBuildIntToPtr(env->builder, value, LLVMPointerType(LLVMInt32Type(), 0), "castInt");
     } else if (varType == LLVMPointerType(LLVMDoubleType(), 0)) {

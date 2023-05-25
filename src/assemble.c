@@ -9,36 +9,24 @@
 #include "utility.h"
 
 
-void AS_emits(LLVMModuleRef module, char *module_name) {
-    char *input_filename = (char *)checked_malloc(strlen(module_name) + 4);
-    strcpy(input_filename, module_name);
-    strcat(input_filename, ".ll");
-
-    char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
-    strcpy(output_filename, module_name);
-    strcat(output_filename, ".o");
-
-    // 构建命令字符串
+void AS_emits(LLVMModuleRef module, char *ir_filename, char *asm_filename) {
+    // construct command
     const char* llcCommandFormat = "llc -filetype=obj %s -o %s";
-    int commandBufferSize = snprintf(NULL, 0, llcCommandFormat, input_filename, output_filename);
+    int commandBufferSize = snprintf(NULL, 0, llcCommandFormat, ir_filename, asm_filename);
     char* commandBuffer = (char*)malloc(commandBufferSize + 1);
-    snprintf(commandBuffer, commandBufferSize + 1, llcCommandFormat, input_filename, output_filename);
+    snprintf(commandBuffer, commandBufferSize + 1, llcCommandFormat, ir_filename, asm_filename);
 
-    // 执行命令
+    // execute command
     int result = system(commandBuffer);
     if (result != 0) {
         printf("llc command failed.\n");
     }
 
-    // 释放资源
+    // release resource
     free(commandBuffer);
-    
-    // LLVMTargetMachineEmitToFile(targetMachine, module, output_filename, LLVMObjectFile, NULL);
-    
-    free(output_filename);
 }
 
-void AS_emit(LLVMModuleRef module, char *module_name) {
+void AS_emit(LLVMModuleRef module, char *ir_filename) {
     LLVMInitializeAllTargetInfos();
     LLVMInitializeAllTargets();
     LLVMInitializeAllTargetMCs();
@@ -54,8 +42,8 @@ void AS_emit(LLVMModuleRef module, char *module_name) {
     LLVMCodeModel codeModel = LLVMCodeModelDefault;
     LLVMTargetMachineRef targetMachine = LLVMCreateTargetMachine(target, targetTriple, "", "", optLevel, relocMode, codeModel);
     
-    char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
-    strcpy(output_filename, module_name);
+    char *output_filename = (char *)checked_malloc(strlen(ir_filename) + 4);
+    strcpy(output_filename, ir_filename);
     strcat(output_filename, ".o");
 
     LLVMTargetMachineEmitToFile(targetMachine, module, output_filename, LLVMObjectFile, NULL);

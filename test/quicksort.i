@@ -2,9 +2,8 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-#define MaxN 10000
 
-int array[MaxN];
+int array[10000];
 
 int quickSort(int left, int right) {
     int i = left, j = right;

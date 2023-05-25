@@ -2,17 +2,13 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-#define MaxCourse 102
-#define MaxInput 302
 
-#define HASH_MAGIC 33
-#define HASH_SIZE 65537
 
-char courses[MaxCourse][MaxInput];
-char courseName[MaxCourse][MaxInput];
-char coursePrerequisite[MaxCourse][MaxInput];
+char courses[102][302];
+char courseName[102][302];
+char coursePrerequisite[102][302];
 
-int coursePassed[HASH_SIZE];
+int coursePassed[65537];
 
 int getchar();
 
@@ -69,7 +65,7 @@ int judge(int courseIndex) {
         int h = 0;
         int t = 0;
         while (precourse[t] != (char)0) {
-            h = h * HASH_MAGIC + (int)precourse[t];
+            h = h * 33 + (int)precourse[t];
             h = h % 65537;
             ++t;
         }
@@ -197,7 +193,7 @@ int main() {
             int h = 0;
             int t = 0;
             while (courseName[courseNum][t] != (char)0) {
-                h = h * HASH_MAGIC + (int)courseName[courseNum][t];
+                h = h * 33 + (int)courseName[courseNum][t];
                 h = h % 65537;
                 ++t;
             }
@@ -248,7 +244,7 @@ int main() {
             int h = 0;
             int t = 0;
             while (courseName[i][t] != (char)0) {
-                h = h * HASH_MAGIC + (int)courseName[i][t];
+                h = h * 33 + (int)courseName[i][t];
                 h = h % 65537;
                 ++t;
             }

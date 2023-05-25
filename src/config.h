@@ -3,6 +3,10 @@
 
 #define MAX_FUNCTION_PARAMS 16
 
-#define MAX_FILE_NAME 255
+#define MAX_FILE_LENGTH 256
+
+#define MAX_LINE_LENGTH 1024
+
+#define MAX_MACRO_NAME_LENGTH 128
 
 #endif
