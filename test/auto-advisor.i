@@ -2,6 +2,8 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
+
+
 char courses[102][302];
 char courseName[102][302];
 char coursePrerequisite[102][302];

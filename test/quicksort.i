@@ -2,6 +2,7 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
+
 int array[10000];
 
 int quickSort(int left, int right) {

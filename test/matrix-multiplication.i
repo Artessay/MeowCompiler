@@ -2,6 +2,7 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
+
 int a[25][25], b[25][25], c[25][25];
 
 int main() {
