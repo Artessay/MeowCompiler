@@ -9,7 +9,7 @@
 #include "utility.h"
 
 
-void AS_emits(LLVMModuleRef module, char *ir_filename, char *asm_filename) {
+void AS_emits(char *ir_filename, char *asm_filename) {
     // construct command
     const char* llcCommandFormat = "llc -filetype=obj %s -o %s";
     int commandBufferSize = snprintf(NULL, 0, llcCommandFormat, ir_filename, asm_filename);
@@ -20,6 +20,23 @@ void AS_emits(LLVMModuleRef module, char *ir_filename, char *asm_filename) {
     int result = system(commandBuffer);
     if (result != 0) {
         printf("llc command failed.\n");
+    }
+
+    // release resource
+    free(commandBuffer);
+}
+
+void AS_assemble(char *asm_filename, char *executable_filename) {
+    // construct command
+    const char* clangCommandFormat = "clang %s -o %s";
+    int commandBufferSize = snprintf(NULL, 0, clangCommandFormat, asm_filename, executable_filename);
+    char* commandBuffer = (char*)malloc(commandBufferSize + 1);
+    snprintf(commandBuffer, commandBufferSize + 1, clangCommandFormat, asm_filename, executable_filename);
+
+    // execute command
+    int result = system(commandBuffer);
+    if (result != 0) {
+        printf("clang command failed.\n");
     }
 
     // release resource

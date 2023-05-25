@@ -38,7 +38,7 @@ emit:
 	clang -S -emit-llvm -o testAns.ll -O0 $(TEST_FILE)
 
 clean:
-	-rm -f *.exe
+	-rm -f *.out *.ll *.i  *.o
 	-rm $(LEXER_CPP)
 	-rm $(PARSER_HPP)
 	-rm $(PARSER_CPP)
