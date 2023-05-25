@@ -165,9 +165,9 @@ static void transProgram(A_topClauseList root, SEM_context env) {
 
 static void transTopClause(A_topClause root, SEM_context env) {
     switch (root->kind) {
-        case A_Preprocess:
-            puts("TODO: preprocess");
-            break;
+        // case A_Preprocess:
+        //     puts("TODO: preprocess");
+        //     break;
         case A_FunctionDeclare:
             transFunctionDeclare(root->u.function, env);
             break;

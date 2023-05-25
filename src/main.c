@@ -17,6 +17,7 @@ int main(int argc, const char *argv[]) {
     char pp_filename[MAX_FILE_LENGTH];
     char ir_filename[MAX_FILE_LENGTH];
     char asm_filename[MAX_FILE_LENGTH];
+    char exe_filename[MAX_FILE_LENGTH];
 
     // argument process
     if (argc >= 2) {
@@ -46,6 +47,9 @@ int main(int argc, const char *argv[]) {
     strncpy(asm_filename, module_name, MAX_FILE_LENGTH);
     strcat(asm_filename, ".o");
 
+    strncpy(exe_filename, module_name, MAX_FILE_LENGTH);
+    strcat(exe_filename, ".out");
+
     // preprocessing
     puts("[preprocess] start preprocessing");
     PP_preprocess(source_filename, pp_filename);
@@ -69,7 +73,8 @@ int main(int argc, const char *argv[]) {
     puts("[front] end translate to IR\n");
 
     puts("[backend] start translate IR to Assembly code" );
-    AS_emits(module, ir_filename, asm_filename);
+    AS_emits(ir_filename, asm_filename);
+    AS_assemble(asm_filename, exe_filename);
     puts("[backend] end translate IR to Assembly code\n" );
     
     return 0;
