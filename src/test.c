@@ -1,13 +1,16 @@
-int scanf(char *__format, ...);
+int add(int a, int b) {
+    return a + b;
+}
 
-int printf(char *__format, ...);
+#define N 25
 
-#define MaxN 102
-
-char courses[MaxN][MaxN];
+#include <stdio.h>
 
 int main() {
-    courses[3][4] = 'a';
+    int a[N];
+    a[0] = 4;
+    a[1] = add(1, 2);
 
-    return (int)courses[3][4];
+
+    return a[1];
 }

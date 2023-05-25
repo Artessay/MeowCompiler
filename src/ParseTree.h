@@ -70,7 +70,7 @@ struct A_topClauseList_ {
 
 struct A_topClause_ {
     enum {
-        A_Preprocess, A_FunctionDeclare, A_GlobalVarDefine
+        A_FunctionDeclare, A_GlobalVarDefine
     } kind;
     A_pos pos;
     union {
