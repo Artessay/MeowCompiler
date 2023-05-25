@@ -52,18 +52,20 @@ int main(int argc, const char *argv[]) {
     puts("[preprocess] end preprocessing\n");
 
     // parsing
+    puts("[front] start parsing");
+
     yyin = fopen(pp_filename, "r");
     assert(yyin != NULL);
     
-    puts("[front] start parsing");
     yyparse();
-    puts("[front] end parsing\n");
 
     A_topClauseList root = A_getParseTreeRoot();
     assert(root != NULL);
+    
+    puts("[front] end parsing\n");
 
     puts("[front] start translate to IR");
-    LLVMModuleRef module = SEM_transProgram(root, module_name);
+    LLVMModuleRef module = SEM_transProgram(root, module_name, ir_filename);
     puts("[front] end translate to IR\n");
 
     puts("[backend] start translate IR to Assembly code" );

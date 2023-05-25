@@ -7,9 +7,7 @@ int printf(char *__format, ...);
 char courses[MaxN][MaxN];
 
 int main() {
-    // char *p = (char *)courses[3];
-    // scanf("%s", p);
-    // printf("%s\n", p);
+    courses[3][4] = 'a';
 
-    return 0;
+    return (int)courses[3][4];
 }

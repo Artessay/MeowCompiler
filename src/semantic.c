@@ -82,7 +82,7 @@ static LLVMValueRef transCallExpression(A_exp root, SEM_context env);
 static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env);
 static LLVMValueRef transAssignExpression(A_exp root, SEM_context env);
 
-LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
+LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name, char* ir_filename) {
     // initial LLVM
     LLVMInitializeCore(LLVMGetGlobalPassRegistry());
     LLVMInitializeNativeTarget();
@@ -110,12 +110,7 @@ LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name) {
     // LLVMDumpModule(module);
 
     // output to file
-    char *output_filename = (char *)checked_malloc(strlen(module_name) + 4);
-    strcpy(output_filename, module_name);
-    strcat(output_filename, ".ll");
-
-    LLVMPrintModuleToFile(module, output_filename, NULL);
-    free(output_filename);
+    LLVMPrintModuleToFile(module, ir_filename, NULL);
 
     // dispose LLVM context
     LLVMContextDispose(context);

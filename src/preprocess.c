@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "preprocess.h"
 
 typedef struct {
     char name[MAX_MACRO_NAME_LENGTH];
@@ -96,15 +97,5 @@ void PP_preprocess(const char* input_filename, const char* output_filename) {
     fclose(input_file);
     fclose(output_file);
 
-    printf("[preprocess] Preprocessing completed successfully.\n");
-}
-
-int main() {
-    char *input_filename = "test.c";
-    char *output_filename = "test.i";
-
-    // 预处理源代码
-    preprocess(input_filename, output_filename);
-
-    return 0;
+    // printf("[preprocess] Preprocessing completed successfully.\n");
 }

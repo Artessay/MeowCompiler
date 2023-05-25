@@ -5,6 +5,6 @@
 
 #include <llvm-c/Types.h>
 
-LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name);
+LLVMModuleRef SEM_transProgram(A_topClauseList program, char *module_name, char* ir_filename);
 
 #endif
