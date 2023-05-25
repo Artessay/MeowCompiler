@@ -3,7 +3,7 @@
 
 #include <llvm-c/Types.h>
 
-void AS_emit(LLVMModuleRef module, char *module_name);
-void AS_emits(LLVMModuleRef module, char *module_name);
+void AS_emit(LLVMModuleRef module, char *ir_filename);
+void AS_emits(LLVMModuleRef module, char *ir_filename, char *asm_filename);
 
 #endif

@@ -2,9 +2,8 @@ int scanf(char *__format, ...);
 
 int printf(char *__format, ...);
 
-#define MaxN 102
 
-char courses[MaxN][MaxN];
+char courses[102][102];
 
 int main() {
     // char *p = (char *)courses[3];
