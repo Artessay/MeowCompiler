@@ -12,16 +12,20 @@ all: $(TARGET)
 	./tester/matrix/matrix-$(PLATFORM)-amd64 ./matrix-multiplication.out
 	./tester/advisor/advisor-$(PLATFORM)-amd64 ./auto-advisor.out
 
-%.out : %.o
-	$(CC) $< -o $@ -no-pie
 
-%.o : %.c $(COMPILER)
+%.out : %.c $(COMPILER)
 	$(COMPILER) $<
 
 $(COMPILER):
 	make -C ../src
 
+
+# %.out : %.o
+# 	$(CC) $< -o $@ -no-pie
+
+# %.o : %.c $(COMPILER)
+# 	$(COMPILER) $<
+
+
 clean:
-	-rm -f *.o *.i *.ll
-	-rm -f *.exe
-	-rm -f *.out
+	-rm -f *.i *.ll *.o *.out
