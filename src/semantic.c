@@ -168,9 +168,6 @@ static void transProgram(A_topClauseList root, SEM_context env) {
 
 static void transTopClause(A_topClause root, SEM_context env) {
     switch (root->kind) {
-        // case A_Preprocess:
-        //     puts("TODO: preprocess");
-        //     break;
         case A_FunctionDeclare:
             transFunctionDeclare(root->u.function, env);
             break;
@@ -408,7 +405,6 @@ static void transVarDefine(A_varDeclare root, SEM_context env) {
 
         transVarDec(dec, varType, 0, env);
     }
-    // puts("var declare done");
 }
 
 static void transStatementList(A_stmtList root, SEM_context env) {
@@ -418,7 +414,7 @@ static void transStatementList(A_stmtList root, SEM_context env) {
 
     A_stmt statement = root->value;
     transStatement(statement, env);
-    // puts("statement done");
+    
     transStatementList(root->next, env);
 }
 
@@ -633,7 +629,6 @@ static LLVMValueRef transAmpersandExp(A_var root, SEM_context env) {
     LLVMValueRef variable = transVar(root, env);
     LLVMTypeRef variableType = LLVMTypeOf(variable);
     
-    // LLVMValueRef addressOfVariable = LLVMBuildBitCast(env->builder, variable, LLVMPointerType(variableType, 0), S_name(S_getVarSymbol(root)));
     LLVMValueRef addressOfVariable = LLVMBuildAlloca(env->builder, variableType, S_name(S_getVarSymbol(root)));
     // LLVMDumpValue(addressOfVariable); putchar('\n');
     
@@ -668,14 +663,16 @@ static LLVMValueRef transTypeCast(A_exp root, SEM_context env) {
         return LLVMBuildIntCast2(env->builder, value, LLVMInt8Type(), 1, "castChar");
     }
     /** point cast */
+    /** @TODO : not completed yet */
     else if (varType == LLVMPointerType(LLVMInt8Type(), 0)) {
         if (root->u.cast.exp->kind == A_varExp ) {
-            // && root->u.cast.exp->u.var->kind == A_subscriptVar) {
+            
             int i = 1;
             for (A_var p = root->u.cast.exp->u.var; p->kind == A_subscriptVar; p = p->u.subscript.var) {
                 indices[i++] = transExpression(p->u.subscript.exp, env);
             }
             indices[i] = LLVMConstInt(LLVMInt32Type(), 0, 0);
+
             return LLVMBuildGEP2(env->builder, LLVMPointerType(LLVMInt8Type(), 0), value, indices, i, "castString");
         } else {
             return LLVMBuildBitCast(env->builder, value, LLVMPointerType(LLVMInt8Type(), 0), "castString");
@@ -747,13 +744,13 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
 
     switch (root->u.op.oper) {
         case A_plusOp:
-            return LLVMBuildAdd(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildAdd(env->builder, lhs, rhs, "add");
 
         case A_minusOp:
-            return LLVMBuildSub(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildSub(env->builder, lhs, rhs, "sub");
             
         case A_timesOp:
-            return LLVMBuildMul(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildMul(env->builder, lhs, rhs, "times");
             
         case A_divideOp:
             if (lhsType == LLVMDoubleType() || rhsType == LLVMDoubleType()) {
@@ -763,7 +760,7 @@ static LLVMValueRef transBinaryExpression(A_exp root, SEM_context env) {
             }            
             
         case A_modOp:
-            return LLVMBuildSRem(env->builder, lhs, rhs, "temperate");
+            return LLVMBuildSRem(env->builder, lhs, rhs, "mod");
             
         case A_shlOp: 
             return LLVMBuildShl(env->builder, lhs, rhs, "temperate");

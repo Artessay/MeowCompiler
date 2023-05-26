@@ -91,7 +91,6 @@ int judge(int courseIndex) {
                 return ready;
             }
         } else if (state == 1) {
-            // ready &= coursePassed[h];
             if (ready == 1 && coursePassed[h] == 1) {
                 ready = 1;
             } else {
@@ -136,8 +135,6 @@ int main() {
     courses[courseNum][ii] = (char)0;
 
     while (len != 0) {
-        // printLine();
-        // char *course = courses[courseNum];
         int i, index = 0;
 
         // course name
@@ -152,7 +149,7 @@ int main() {
 
         // course credit
         int credit = (int)(buffer[index] - (char)48);
-        // printf("credit %d\n", credit);
+        
         ++index;
         totalCredit += credit;
         ++index;
@@ -191,7 +188,6 @@ int main() {
             
         if (grade > 0) {
             totalCompletedCredit += credit;
-            // int h = hash(courseName[courseNum]);
 
             // hash
             int h = 0;
@@ -225,15 +221,6 @@ int main() {
     }
     int totalRemainCredit = totalCredit - totalCompletedCredit;
 
-    // int ct = 0;
-    // for (int i = 0; i < 65537; ++i) {
-    //     if (coursePassed[i] == 1) {
-    //         printf("course passed %d\n", i);
-    //         ++ct;
-    //     }
-    // }
-    // printf("count %d\n", ct);
-
     printf("GPA: %.1f\n", GPA);
     printf("Hours Attempted: %d\n", totalAttemptedCredit);
     printf("Hours Completed: %d\n", totalCompletedCredit);
@@ -252,7 +239,6 @@ int main() {
                 h = h % 65537;
                 ++t;
             }
-            // printf("i = %d, h = %d\n", i, h);
 
             if (coursePassed[h] == 1) {
                 continue;
@@ -270,6 +256,6 @@ int main() {
             }
         }
     }
-// printf("let's see\n");
+    
     return 0;
 }
