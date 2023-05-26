@@ -254,18 +254,19 @@ int main() {
             }
             // printf("i = %d, h = %d\n", i, h);
 
-            if (coursePassed[h] != 1) {
-                // printf("judge = %d\n", judge(i));
-                if (judge(i) == 1) {
-                    printf("  ");
-                    int ii = 0;
-                    while (courseName[i][ii] != (char)0) {
-                        buffer[ii] = courseName[i][ii];
-                        ++ii;
-                    }
-                    buffer[ii] = (char)0;
-                    printLine();
+            if (coursePassed[h] == 1) {
+                continue;
+            }
+
+            if (judge(i) == 1) {
+                printf("  ");
+                int ii = 0;
+                while (courseName[i][ii] != (char)0) {
+                    buffer[ii] = courseName[i][ii];
+                    ++ii;
                 }
+                buffer[ii] = (char)0;
+                printLine();
             }
         }
     }
