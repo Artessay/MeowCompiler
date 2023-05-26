@@ -38,7 +38,10 @@ struct SEM_table_ {
     S_table functionTable;
 };
 
-SEM_table tables = NULL;
+static SEM_table tables = NULL;
+
+static LLVMBasicBlockRef SEM_loopBegin = NULL;
+static LLVMBasicBlockRef SEM_loopAfter = NULL;
 
 SEM_table SEM_Table() {
     SEM_table p = (SEM_table)checked_malloc(sizeof(*p));
@@ -448,7 +451,13 @@ static void transFor(A_for root, SEM_context env) {
 
     LLVMBasicBlockRef loopBlock = LLVMAppendBasicBlock(env->currentFunction, "for.loop");
     LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "for.body");
+    LLVMBasicBlockRef stepBlock = LLVMAppendBasicBlock(env->currentFunction, "for.step");
     LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "for.after");
+
+    LLVMBasicBlockRef lastLoopBegin = SEM_loopBegin;
+    LLVMBasicBlockRef lastLoopAfter = SEM_loopAfter;
+    SEM_loopBegin = stepBlock;
+    SEM_loopAfter = afterBlock;
 
     LLVMBuildBr(env->builder, loopBlock);
 
@@ -458,10 +467,16 @@ static void transFor(A_for root, SEM_context env) {
 
     LLVMPositionBuilderAtEnd(env->builder, bodyBlock);
     transStatement(root->body, env);
+    LLVMBuildBr(env->builder, stepBlock);
+
+    LLVMPositionBuilderAtEnd(env->builder, stepBlock);
     transExpression(root->step, env);
     LLVMBuildBr(env->builder, loopBlock);
 
     LLVMPositionBuilderAtEnd(env->builder, afterBlock);
+
+    SEM_loopBegin = lastLoopBegin;
+    SEM_loopAfter = lastLoopAfter;
 
     SEM_leaveScope(tables);
 }
@@ -473,6 +488,11 @@ static void transWhile(A_while root, SEM_context env) {
     LLVMBasicBlockRef bodyBlock = LLVMAppendBasicBlock(env->currentFunction, "while.body");
     LLVMBasicBlockRef afterBlock = LLVMAppendBasicBlock(env->currentFunction, "while.after");
 
+    LLVMBasicBlockRef lastLoopBegin = SEM_loopBegin;
+    LLVMBasicBlockRef lastLoopAfter = SEM_loopAfter;
+    SEM_loopBegin = loopBlock;
+    SEM_loopAfter = afterBlock;
+
     LLVMBuildBr(env->builder, loopBlock);
 
     LLVMPositionBuilderAtEnd(env->builder, loopBlock);
@@ -484,6 +504,9 @@ static void transWhile(A_while root, SEM_context env) {
     LLVMBuildBr(env->builder, loopBlock);
 
     LLVMPositionBuilderAtEnd(env->builder, afterBlock);
+
+    SEM_loopBegin = lastLoopBegin;
+    SEM_loopAfter = lastLoopAfter;
 }
 
 static void transStatement(A_stmt root, SEM_context env) {
@@ -511,11 +534,28 @@ static void transStatement(A_stmt root, SEM_context env) {
         case A_ifStmt:
             transSelection(&(root->u.iff), env);
             break;
+
         case A_forStmt:
             transFor(&(root->u.forr), env);
             break;
         case A_whileStmt:
             transWhile(&(root->u.whilee), env);
+            break;
+        case A_continueStmt:
+            // puts("continue");
+            if (SEM_loopBegin == NULL) {
+                printf("[error] continue statement not in loop\n");
+                exit(1);
+            }
+            LLVMBuildBr(env->builder, SEM_loopBegin);
+            break;
+        case A_breakStmt:
+            // puts("break");
+            if (SEM_loopAfter == NULL) {
+                printf("[error] break statement not in loop\n");
+                exit(1);
+            }
+            LLVMBuildBr(env->builder, SEM_loopAfter);
             break;
         
         case A_returnStmt:
