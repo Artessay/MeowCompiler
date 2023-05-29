@@ -11,7 +11,7 @@
 
 void AS_emits(char *ir_filename, char *asm_filename) {
     // construct command
-    const char* llcCommandFormat = "llc -filetype=obj %s -o %s";
+    const char* llcCommandFormat = "llc %s -o %s";
     int commandBufferSize = snprintf(NULL, 0, llcCommandFormat, ir_filename, asm_filename);
     char* commandBuffer = (char*)malloc(commandBufferSize + 1);
     snprintf(commandBuffer, commandBufferSize + 1, llcCommandFormat, ir_filename, asm_filename);

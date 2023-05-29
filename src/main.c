@@ -45,7 +45,7 @@ int main(int argc, const char *argv[]) {
     strcat(ir_filename, ".ll");
 
     strncpy(asm_filename, module_name, MAX_FILE_LENGTH);
-    strcat(asm_filename, ".o");
+    strcat(asm_filename, ".s");
 
     strncpy(exe_filename, module_name, MAX_FILE_LENGTH);
     strcat(exe_filename, ".out");

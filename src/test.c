@@ -1,20 +1,9 @@
-#define N 8
-
-int printf(char *__format, ...);
-
 int main() {
-    int sum = 0;
+    // int a = 1, b = 2;
 
-    for (int i = 0; i < N; ++i) {
-        printf("%d %d\n", i, sum);
+    // int sum = a + b;
 
-        if (i % 2 == 1) {
-            continue;
-        }
-
-        sum += i;
-    }
-
+    int sum = 1 + 2;
 
     return sum;
 }
