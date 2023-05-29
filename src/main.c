@@ -73,8 +73,8 @@ int main(int argc, const char *argv[]) {
     puts("[front] end translate to IR\n");
 
     puts("[backend] start translate IR to Assembly code" );
-    AS_emits(ir_filename, asm_filename);
-    AS_assemble(asm_filename, exe_filename);
+    AS_assemble(ir_filename, asm_filename);
+    AS_emits(asm_filename, exe_filename);
     puts("[backend] end translate IR to Assembly code\n" );
     
     return 0;

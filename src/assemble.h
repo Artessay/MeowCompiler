@@ -3,10 +3,8 @@
 
 #include <llvm-c/Types.h>
 
-void AS_emit(LLVMModuleRef module, char *ir_filename);
+void AS_assemble(char *ir_filename, char *asm_filename);
 
-void AS_emits(char *ir_filename, char *asm_filename);
-
-void AS_assemble(char *asm_filename, char *executable_filename);
+void AS_emits(char *asm_filename, char *executable_filename);
 
 #endif
