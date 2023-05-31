@@ -1,4 +1,5 @@
 *.i
 *.ll
+*.s
 *.o
 !meow.out
