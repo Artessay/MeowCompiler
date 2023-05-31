@@ -1,14 +1,17 @@
 %{
-#include <stdio.h>
-#include <string.h>
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
 
-#include "ParseTree.h"
-// #include "parser.h"
+    #include "ParseTree.h"
+    #include "ErrorMessage.h"
 
-extern int yylex();
+    extern int yylex();
 
-void yyerror(char *str){ fprintf(stderr,"error: %s\n",str); }
-        
+    void yyerror(char *str) { 
+        EM_error(EM_tokPos, "%s", str);
+        exit(0);
+    }
 %}
 
 %union {
@@ -142,27 +145,27 @@ Top_Clause
         ;
 
 Var_Declaration
-        : Type_Specifier Var_List { $$ = A_VarDeclaration(7, $1, $2); }
+        : Type_Specifier Var_List { $$ = A_VarDeclaration(EM_tokPos, $1, $2); }
         ;
 Var_List 
         : Var_Init COMMA Var_List { $$ = A_VarDecList($1, $3); }
         | Var_Init { $$ = A_VarDecList($1, NULL); } 
         ;
 Var_Init 
-        : Var_Def { $$ = A_VarDec(7, $1, NULL); }
-        | Var_Def ASSIGN Expression { $$ = A_VarDec(7, $1, $3); }
+        : Var_Def { $$ = A_VarDec(EM_tokPos, $1, NULL); }
+        | Var_Def ASSIGN Expression { $$ = A_VarDec(EM_tokPos, $1, $3); }
         ;
 Var_Def
-        : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
-        | MUL Var_Def { $$ = A_PointVar(7, $2); }
-        | IDENTITY { $$ = A_SimpleVar(7, $1); } 
+        : Var_Def LBRACK Expression RBRACK { $$ = A_SubscriptVar(EM_tokPos, $1, $3); }
+        | MUL Var_Def { $$ = A_PointVar(EM_tokPos, $2); }
+        | IDENTITY { $$ = A_SimpleVar(EM_tokPos, $1); } 
         ;
 
 Fun_Declaration
-        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, $1, $2, $4, NULL, A_getVarArgFlag()); }
-        | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, $1, $2, $4, $6, A_getVarArgFlag()); }
-        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(7, A_VarTypePoint(7, $1), $3, $5, NULL, A_getVarArgFlag()); }
-        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(7, A_VarTypePoint(7, $1), $3, $5, $7, A_getVarArgFlag()); }
+        : Type_Specifier IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(EM_tokPos, $1, $2, $4, NULL, A_getVarArgFlag()); }
+        | Type_Specifier IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(EM_tokPos, $1, $2, $4, $6, A_getVarArgFlag()); }
+        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN SEMICOLON { $$ = A_FuncDeclaration(EM_tokPos, A_VarTypePoint(EM_tokPos, $1), $3, $5, NULL, A_getVarArgFlag()); }
+        | Type_Specifier MUL IDENTITY LPAREN Params RPAREN Block { $$ = A_FuncDeclaration(EM_tokPos, A_VarTypePoint(EM_tokPos, $1), $3, $5, $7, A_getVarArgFlag()); }
         ;
 Params 
         : Param COMMA Params { $$ = A_ArgList($1, $3); }
@@ -170,7 +173,7 @@ Params
         | /* empty */ { $$ = A_ArgList(NULL, NULL); }
         ;
 Param 
-        : Type_Specifier Var_Def { $$ = A_Arg(7, $1, $2); }
+        : Type_Specifier Var_Def { $$ = A_Arg(EM_tokPos, $1, $2); }
         | DOT DOT DOT  { $$ = NULL; A_setVarArgFlag(); }
         ;
 IDENTITY
@@ -181,12 +184,12 @@ IDENTITY
         ;
 
 Type_Specifier 
-        : TYPE_VOID   { $$ = A_VarTypeBasic(7, A_voidType); }
-        | TYPE_INT    { $$ = A_VarTypeBasic(7, A_intType); }
-        | TYPE_CHAR   { $$ = A_VarTypeBasic(7, A_charType); }
-        | TYPE_STRING { $$ = A_VarTypeBasic(7, A_stringType); }
-        | TYPE_DOUBLE { $$ = A_VarTypeBasic(7, A_doubleType); }
-        /* | Type_Specifier MUL { $$ = A_VarTypePoint(7, $1); } */
+        : TYPE_VOID   { $$ = A_VarTypeBasic(EM_tokPos, A_voidType); }
+        | TYPE_INT    { $$ = A_VarTypeBasic(EM_tokPos, A_intType); }
+        | TYPE_CHAR   { $$ = A_VarTypeBasic(EM_tokPos, A_charType); }
+        | TYPE_STRING { $$ = A_VarTypeBasic(EM_tokPos, A_stringType); }
+        | TYPE_DOUBLE { $$ = A_VarTypeBasic(EM_tokPos, A_doubleType); }
+        /* | Type_Specifier MUL { $$ = A_VarTypePoint(EM_tokPos, $1); } */
         ;
 Block 
         : LBRACE Statements RBRACE { $$ = $2; /* puts("Block"); */ }
@@ -198,60 +201,60 @@ Statements
 Statement 
         : Exp_Stmt { $$ = $1; }
         | Var_Declaration SEMICOLON { $$ = A_VarDecStmt($1); }
-        | Block { $$ = A_CompoundStmt(7, $1); }
+        | Block { $$ = A_CompoundStmt(EM_tokPos, $1); }
         | Selection_Stmt { $$ = $1; }
         | Iteration_Stmt { $$ = $1; }
         | Return_Stmt { $$ = $1; }
-        | BREAK SEMICOLON { $$ = A_BreakStmt(7); }
-        | CONTINUE SEMICOLON { $$ = A_ContinueStmt(7); }
+        | BREAK SEMICOLON { $$ = A_BreakStmt(EM_tokPos); }
+        | CONTINUE SEMICOLON { $$ = A_ContinueStmt(EM_tokPos); }
         | Expression DADD { $$ = NULL; puts("TODO: RUOP"); }
         | Expression DSUB { $$ = NULL; puts("TODO: RUOP"); }
         ;
 
 Exp_Stmt 
-        : Expression SEMICOLON { $$ = A_ExprStmt(7, $1); }   
+        : Expression SEMICOLON { $$ = A_ExprStmt(EM_tokPos, $1); }   
         ;
 Selection_Stmt 
-        : IF LPAREN Expression RPAREN Statement Else_Stmt { $$ = A_IfStmt(7, $3, $5, $6); }
+        : IF LPAREN Expression RPAREN Statement Else_Stmt { $$ = A_IfStmt(EM_tokPos, $3, $5, $6); }
         ;
 Else_Stmt 
         : ELSE Statement { $$ = $2; }
         | /* empty */ { $$ = NULL; }
         ;
 Iteration_Stmt 
-        : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_VarDecStmt($3), $5, $7, $9); }
-        | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(7, A_ExprStmt(7, $3), $5, $7, $9); }
-        | WHILE LPAREN Expression RPAREN Statement { $$ = A_WhileStmt(7, $3, $5); }
+        : FOR LPAREN Var_Declaration SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(EM_tokPos, A_VarDecStmt($3), $5, $7, $9); }
+        | FOR LPAREN Expression SEMICOLON Expression SEMICOLON Expression RPAREN Statement { $$ = A_ForStmt(EM_tokPos, A_ExprStmt(EM_tokPos, $3), $5, $7, $9); }
+        | WHILE LPAREN Expression RPAREN Statement { $$ = A_WhileStmt(EM_tokPos, $3, $5); }
         ;
 Return_Stmt 
-        : RETURN SEMICOLON { $$ = A_ReturnStmt(7, NULL); }
-        | RETURN Expression SEMICOLON { $$ = A_ReturnStmt(7, $2); }
+        : RETURN SEMICOLON { $$ = A_ReturnStmt(EM_tokPos, NULL); }
+        | RETURN Expression SEMICOLON { $$ = A_ReturnStmt(EM_tokPos, $2); }
         ;
 
 Expression 
-        : L_Value ASSIGN Expression { $$ = A_AssignExp(7, $1, $3); }
-        | L_Value ADDAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_plusOp, A_VarExp(7, $1), $3)); }
-        | L_Value SUBAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_minusOp, A_VarExp(7, $1), $3)); }
-        | L_Value MULAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_timesOp, A_VarExp(7, $1), $3)); }
-        | L_Value DIVAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_divideOp, A_VarExp(7, $1), $3)); }
-        | L_Value MODAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_modOp, A_VarExp(7, $1), $3)); }
-        | L_Value SHLAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_shlOp, A_VarExp(7, $1), $3)); }
-        | L_Value SHRAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_shrOp, A_VarExp(7, $1), $3)); }
-        | L_Value BANDAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bAndOp, A_VarExp(7, $1), $3)); }
-        | L_Value BORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bOrOp, A_VarExp(7, $1), $3)); }
-        | L_Value BXORAS Expression { $$ = A_AssignExp(7, $1, A_OpExp(7, A_bXorOp, A_VarExp(7, $1), $3)); }
-        | L_Value { $$ = A_VarExp(7, $1); }
+        : L_Value ASSIGN Expression { $$ = A_AssignExp(EM_tokPos, $1, $3); }
+        | L_Value ADDAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_plusOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value SUBAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_minusOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value MULAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_timesOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value DIVAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_divideOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value MODAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_modOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value SHLAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_shlOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value SHRAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_shrOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value BANDAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_bAndOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value BORAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_bOrOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value BXORAS Expression { $$ = A_AssignExp(EM_tokPos, $1, A_OpExp(EM_tokPos, A_bXorOp, A_VarExp(EM_tokPos, $1), $3)); }
+        | L_Value { $$ = A_VarExp(EM_tokPos, $1); }
         | Uni_Exp { $$ = $1; }
-        | LPAREN Type_Specifier RPAREN Expression { $$ = A_TypeCastExp(7, $2, $4); }
-        | LPAREN Type_Specifier MUL RPAREN Expression { $$ = A_TypeCastExp(7, A_VarTypePoint(7, $2), $5); }
+        | LPAREN Type_Specifier RPAREN Expression { $$ = A_TypeCastExp(EM_tokPos, $2, $4); }
+        | LPAREN Type_Specifier MUL RPAREN Expression { $$ = A_TypeCastExp(EM_tokPos, A_VarTypePoint(EM_tokPos, $2), $5); }
         | Call_Exp { $$ = $1; }
         | Binary_Exp { $$ = $1; }
         | LPAREN Expression RPAREN { $$ = $2; }
-        | NIL { $$ = A_NilExp(7); }
-        | INT { $$ = A_IntExp(7, $1); }
-        | CHAR { $$ = A_CharExp(7, $1); }
-        | DOUBLE { $$ = A_DoubleExp(7, $1); }
-        | STRING { $$ = A_StringExp(7, $1); }
+        | NIL { $$ = A_NilExp(EM_tokPos); }
+        | INT { $$ = A_IntExp(EM_tokPos, $1); }
+        | CHAR { $$ = A_CharExp(EM_tokPos, $1); }
+        | DOUBLE { $$ = A_DoubleExp(EM_tokPos, $1); }
+        | STRING { $$ = A_StringExp(EM_tokPos, $1); }
         ;
 Expression_List
         : /* empty */ { $$ = NULL; }
@@ -265,51 +268,51 @@ Nonempty_Exp_List
 Uni_Exp 
         : NOT Expression { $$ = NULL; puts("TODO: ! NOT"); }
         | BNOT Expression { $$ = NULL; puts("TODO: ~ BNOT"); }
-        | BAND L_Value { $$ = A_AmpersandExp(7, $2); }
-        /* | MUL L_Value { $$ = A_StarExp(7, $2); } */
+        | BAND L_Value { $$ = A_AmpersandExp(EM_tokPos, $2); }
+        /* | MUL L_Value { $$ = A_StarExp(EM_tokPos, $2); } */
         | DADD L_Value {
-                A_exp var = A_VarExp(7, $2);
-                A_exp exp = A_OpExp(7, A_plusOp, var, A_IntExp(7, 1));
-                $$ = A_AssignExp(7, $2, exp);
+                A_exp var = A_VarExp(EM_tokPos, $2);
+                A_exp exp = A_OpExp(EM_tokPos, A_plusOp, var, A_IntExp(EM_tokPos, 1));
+                $$ = A_AssignExp(EM_tokPos, $2, exp);
         }
         | DSUB L_Value {
-                A_exp var = A_VarExp(7, $2);
-                A_exp exp = A_OpExp(7, A_minusOp, var, A_IntExp(7, 1));
-                $$ = A_AssignExp(7, $2, exp);
+                A_exp var = A_VarExp(EM_tokPos, $2);
+                A_exp exp = A_OpExp(EM_tokPos, A_minusOp, var, A_IntExp(EM_tokPos, 1));
+                $$ = A_AssignExp(EM_tokPos, $2, exp);
         }
         ;
 
 Call_Exp 
-        : IDENTITY LPAREN Expression_List RPAREN { $$ = A_CallExp(7, $1, $3); }
+        : IDENTITY LPAREN Expression_List RPAREN { $$ = A_CallExp(EM_tokPos, $1, $3); }
         ;
 
 L_Value
-        : IDENTITY { $$ = A_SimpleVar(7, $1); }
-        | MUL L_Value { $$ = A_DerefVar(7, $2); }
-        | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(7, $1, $3); }
+        : IDENTITY { $$ = A_SimpleVar(EM_tokPos, $1); }
+        | MUL L_Value { $$ = A_DerefVar(EM_tokPos, $2); }
+        | L_Value LBRACK Expression RBRACK { $$ = A_SubscriptVar(EM_tokPos, $1, $3); }
         /* | L_Value DOT IDENTITY {} */
         ;
 Binary_Exp 
-        : Expression ADD  Expression { $$ = A_OpExp(7, A_plusOp,   $1, $3); }
-        | Expression SUB  Expression { $$ = A_OpExp(7, A_minusOp,  $1, $3); }
-        | Expression MUL  Expression { $$ = A_OpExp(7, A_timesOp,  $1, $3); }
-        | Expression DIV  Expression { $$ = A_OpExp(7, A_divideOp, $1, $3); }
-        | Expression MOD  Expression { $$ = A_OpExp(7, A_modOp,    $1, $3); }
-        | Expression EQ   Expression { $$ = A_OpExp(7, A_eqOp,     $1, $3); }
-        | Expression NEQ  Expression { $$ = A_OpExp(7, A_neqOp,    $1, $3); }
-        | Expression LT   Expression { $$ = A_OpExp(7, A_ltOp,     $1, $3); }
-        | Expression LE   Expression { $$ = A_OpExp(7, A_leOp,     $1, $3); }
-        | Expression GT   Expression { $$ = A_OpExp(7, A_gtOp,     $1, $3); }
-        | Expression GE   Expression { $$ = A_OpExp(7, A_geOp,     $1, $3); }
-        | Expression SHL  Expression { $$ = A_OpExp(7, A_shlOp,    $1, $3); }
-        | Expression SHR  Expression { $$ = A_OpExp(7, A_shrOp,    $1, $3); }
-        | Expression BAND Expression { $$ = A_OpExp(7, A_bAndOp,   $1, $3); }
-        | Expression BOR  Expression { $$ = A_OpExp(7, A_bOrOp,    $1, $3); }
-        | Expression BXOR Expression { $$ = A_OpExp(7, A_bXorOp,   $1, $3); }
-        /* | Expression BNOT Expression { $$ = A_OpExp(7, A_bNotOp,   $1, $3); } */
-        /* | Expression NOT  Expression { $$ = A_OpExp(7, A_notOp,    $1, $3); } */
-        | Expression AND  Expression { $$ = A_OpExp(7, A_andOp,    $1, $3); }
-        | Expression OR   Expression { $$ = A_OpExp(7, A_orOp,     $1, $3); }
+        : Expression ADD  Expression { $$ = A_OpExp(EM_tokPos, A_plusOp,   $1, $3); }
+        | Expression SUB  Expression { $$ = A_OpExp(EM_tokPos, A_minusOp,  $1, $3); }
+        | Expression MUL  Expression { $$ = A_OpExp(EM_tokPos, A_timesOp,  $1, $3); }
+        | Expression DIV  Expression { $$ = A_OpExp(EM_tokPos, A_divideOp, $1, $3); }
+        | Expression MOD  Expression { $$ = A_OpExp(EM_tokPos, A_modOp,    $1, $3); }
+        | Expression EQ   Expression { $$ = A_OpExp(EM_tokPos, A_eqOp,     $1, $3); }
+        | Expression NEQ  Expression { $$ = A_OpExp(EM_tokPos, A_neqOp,    $1, $3); }
+        | Expression LT   Expression { $$ = A_OpExp(EM_tokPos, A_ltOp,     $1, $3); }
+        | Expression LE   Expression { $$ = A_OpExp(EM_tokPos, A_leOp,     $1, $3); }
+        | Expression GT   Expression { $$ = A_OpExp(EM_tokPos, A_gtOp,     $1, $3); }
+        | Expression GE   Expression { $$ = A_OpExp(EM_tokPos, A_geOp,     $1, $3); }
+        | Expression SHL  Expression { $$ = A_OpExp(EM_tokPos, A_shlOp,    $1, $3); }
+        | Expression SHR  Expression { $$ = A_OpExp(EM_tokPos, A_shrOp,    $1, $3); }
+        | Expression BAND Expression { $$ = A_OpExp(EM_tokPos, A_bAndOp,   $1, $3); }
+        | Expression BOR  Expression { $$ = A_OpExp(EM_tokPos, A_bOrOp,    $1, $3); }
+        | Expression BXOR Expression { $$ = A_OpExp(EM_tokPos, A_bXorOp,   $1, $3); }
+        /* | Expression BNOT Expression { $$ = A_OpExp(EM_tokPos, A_bNotOp,   $1, $3); } */
+        /* | Expression NOT  Expression { $$ = A_OpExp(EM_tokPos, A_notOp,    $1, $3); } */
+        | Expression AND  Expression { $$ = A_OpExp(EM_tokPos, A_andOp,    $1, $3); }
+        | Expression OR   Expression { $$ = A_OpExp(EM_tokPos, A_orOp,     $1, $3); }
         ;
 
 %%
