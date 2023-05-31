@@ -5,7 +5,7 @@ YACC 	= bison
 CFLAGS  = `llvm-config --cflags --ldflags --libs`
 
 SRC		= main.c \
-		  assemble.c ErrorMessage.c ParseTree.c preprocess.c semantic.c symbol.c table.c utility.c
+		  assemble.c ErrorMessage.c list.c ParseTree.c preprocess.c semantic.c symbol.c table.c utility.c
 
 LEXER_CPP = lexer.c
 PARSER_CPP = parser.c
